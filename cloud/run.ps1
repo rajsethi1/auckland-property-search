@@ -1,4 +1,4 @@
-<#
+﻿<#
   The daily cloud run (GitHub Actions, Windows PowerShell 5.1):
     1. pull the hunt's state (seen listings, site-check cache, market data, last report) from Hostinger by FTP
        — on the very first run, from this repo's seed-state folder instead;
@@ -24,21 +24,29 @@ if (-not $hostName) { throw 'FTP_HOST does not contain a host name or IP address
 $ftp = "ftp://$hostName"; $cred = "$($env:FTP_USER):$($env:FTP_PASS)"
 $stateDir = if ($env:FTP_STATE_DIR) { $env:FTP_STATE_DIR.Trim('/') } else { 'hunt-state' }
 # Check the FTP login before the long hunt, so a bad host or password fails in seconds, not after 25 minutes.
-& curl.exe -s --ssl -l -u $cred "$ftp/" -o NUL
+# Encrypted FTP (FTPS). Hostinger's certificate names its server, not the IP, so if it can't be verified (curl 60)
+# keep the encryption but skip the name check.
+$tls = @('--ssl-reqd')
+& curl.exe -s @tls -l -u $cred "$ftp/" -o NUL
+if ($LASTEXITCODE -eq 60) {
+    "FTPS certificate doesn't match '$hostName': connecting encrypted without the certificate name check"
+    $tls = @('--ssl-reqd', '--insecure')
+    & curl.exe -s @tls -l -u $cred "$ftp/" -o NUL
+}
 if ($LASTEXITCODE) { throw "Can't log in to FTP (curl error $($LASTEXITCODE); 6/7 = host unreachable, 67 = wrong username or password)" }
 # Hostinger FTP logins open either above public_html or inside it: use public_html when the login can see it.
 $siteDir = if ($env:FTP_SITE_DIR) { $env:FTP_SITE_DIR.Trim('/') } else {
-    & curl.exe -s --ssl -l -u $cred "$ftp/public_html/" -o NUL
+    & curl.exe -s @tls -l -u $cred "$ftp/public_html/" -o NUL
     if ($LASTEXITCODE -eq 0) { 'public_html' } else { '.' }
 }
 "FTP: website folder '$siteDir', state folder '$stateDir'"
 
-# curl.exe ships with Windows; --ssl uses FTPS when the server offers it.
+# curl.exe ships with Windows; @tls uses FTPS when the server offers it.
 # FtpGet is fully silent (-s): a missing file is normal on the first run, and stderr text would stop the script under 'Stop'.
 function FtpGet($remote, $local) {
     $remote = $remote -replace '^\./', ''
     if (Test-Path $local) { Remove-Item $local }
-    & curl.exe -s --ssl --create-dirs -u $cred -o $local "$ftp/$remote"
+    & curl.exe -s @tls --create-dirs -u $cred -o $local "$ftp/$remote"
     ($LASTEXITCODE -eq 0) -and (Test-Path $local)
 }
 function FtpPut($local, $remote, [switch]$Atomic) {
@@ -46,8 +54,8 @@ function FtpPut($local, $remote, [switch]$Atomic) {
     if ($Atomic) {
         # Upload under a temporary name, then rename, so visitors never load a half-written file.
         $name = Split-Path $remote -Leaf
-        & curl.exe -sS --ssl --ftp-create-dirs -u $cred -T $local "$ftp/$remote.new" -Q "-RNFR $name.new" -Q "-RNTO $name"
-    } else { & curl.exe -sS --ssl --ftp-create-dirs -u $cred -T $local "$ftp/$remote" }
+        & curl.exe -sS @tls --ftp-create-dirs -u $cred -T $local "$ftp/$remote.new" -Q "-RNFR $name.new" -Q "-RNTO $name"
+    } else { & curl.exe -sS @tls --ftp-create-dirs -u $cred -T $local "$ftp/$remote" }
     if ($LASTEXITCODE) { throw "FTP upload failed ($LASTEXITCODE): $remote" }
 }
 
@@ -111,7 +119,7 @@ foreach ($f in $stateFiles) { FtpPut (Join-Path $root $f) "$stateDir/$f" }
 FtpPut "$root\manifest.txt" "$stateDir/manifest.txt"
 Set-Content "$root\deny.htaccess" "Require all denied" -Encoding ascii
 FtpPut "$root\deny.htaccess" "$stateDir/.htaccess"
-if ($oldReport -and $oldReport -ne $rep) { & curl.exe -s --ssl -u $cred "$ftp/" -Q "DELE $stateDir/$oldReport" -o NUL }
+if ($oldReport -and $oldReport -ne $rep) { & curl.exe -s @tls -u $cred "$ftp/" -Q "DELE $stateDir/$oldReport" -o NUL }
 "State saved: $($stateFiles.Count) files"
 
 # ---- 5. Email (optional) ----
