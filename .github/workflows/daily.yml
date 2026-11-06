@@ -1,0 +1,38 @@
+name: Daily property hunt
+
+on:
+  schedule:
+    # 17:00 UTC = 6am NZ daylight time (5am in winter). GitHub can start scheduled runs a little late.
+    - cron: "0 17 * * *"
+  workflow_dispatch:
+    inputs:
+      weekly:
+        description: "Also refresh sale/CV ratios and sold results (normally Sundays)"
+        type: boolean
+        default: false
+
+# Never run two hunts at once; a manual run waits for a scheduled one.
+concurrency:
+  group: property-hunt
+  cancel-in-progress: false
+
+jobs:
+  hunt:
+    runs-on: windows-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the hunt and update the website
+        shell: powershell
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
+          FTP_SITE_DIR: ${{ vars.FTP_SITE_DIR }}
+          FTP_STATE_DIR: ${{ vars.FTP_STATE_DIR }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          WEEKLY: ${{ github.event.inputs.weekly }}
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File cloud\run.ps1
