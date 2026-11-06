@@ -53,12 +53,14 @@ function FtpGet($remote, $local) {
 # --ftp-skip-pasv-ip sends data to the address we logged in to, not whatever internal address the server reports.
 function FtpPut($local, $remote, [switch]$Atomic) {
     $remote = $remote -replace '^\./', ''
+    # Hostinger's FTP won't overwrite an existing file (426), so the old copy is deleted first.
+    # A leading * makes curl carry on when that delete fails because there's nothing to delete.
     for ($try = 1; $try -le 4; $try++) {
         if ($Atomic) {
-            # Upload under a temporary name, then rename, so visitors never load a half-written file.
+            # Upload under a temporary name, then swap it in, so visitors never load a half-written file.
             $name = Split-Path $remote -Leaf
-            & curl.exe -sS @tls --ftp-skip-pasv-ip --ftp-create-dirs -u $cred -T $local "$ftp/$remote.new" -Q "-RNFR $name.new" -Q "-RNTO $name"
-        } else { & curl.exe -sS @tls --ftp-skip-pasv-ip --ftp-create-dirs -u $cred -T $local "$ftp/$remote" }
+            & curl.exe -sS @tls --ftp-skip-pasv-ip --ftp-create-dirs -u $cred -Q "*DELE $remote.new" -T $local "$ftp/$remote.new" -Q "-*DELE $name" -Q "-RNFR $name.new" -Q "-RNTO $name"
+        } else { & curl.exe -sS @tls --ftp-skip-pasv-ip --ftp-create-dirs -u $cred -Q "*DELE $remote" -T $local "$ftp/$remote" }
         if (-not $LASTEXITCODE) { return }
         "  upload of $remote failed (curl $LASTEXITCODE), try $try of 4"
         Start-Sleep -Seconds (5 * $try)
