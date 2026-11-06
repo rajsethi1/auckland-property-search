@@ -131,7 +131,7 @@ foreach ($p in $run.shortlist) {
     elseif ($p.estimate -and $p.estimate.mid) { $price = [double]$p.estimate.mid; $basis = 'estimate' }
     elseif ($cvLikely) { $price = $cvLikely; $basis = 'recent sales vs CV' }
     else { $price = [double]$p.cv; $basis = 'CV' }
-    $fit = if ($price -le $IdealHigh) { 'Ideal range' } elseif ($price -le $MaxPrice) { 'In budget' }
+    $fit = if (-not $price) { 'Price unknown' } elseif ($price -le $IdealHigh) { 'Ideal range' } elseif ($price -le $MaxPrice) { 'In budget' }
            elseif ($lowCase -and $lowCase -le $MaxPrice) { 'Possible: below CV' }
            elseif ($price -le $MaxPrice * (1 + $StretchPct)) { 'Stretch: slightly over' } else { 'Over budget' }
     $p | Add-Member -NotePropertyName pricing -NotePropertyValue ([ordered]@{
