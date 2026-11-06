@@ -245,7 +245,8 @@ WriteJson "$root\sold-outcomes.json" ([ordered]@{ last_checked = $Date; sold = $
 foreach ($g in $gone) { Log ("Off the market: {0} ({1}){2}" -f $g.address, $g.status, $(if ($g.sale_price) { ", sold $($g.sale_price.ToString('N0')) = $([math]::Round(100 * $g.sale_vs_cv))% of CV" + $(if ($g.sale_vs_expected) { ", $([math]::Round(100 * ($g.sale_vs_expected - 1)))% vs our expected" }) } else { ', sale price not yet published' })) }
 
 # ---------- 7. Build, render, email ----------
-$all = @($carried) + @($newItems)
+# One entry per listing: a site both carried over and re-screened keeps its fresh copy.
+$all = @(@($carried) + @($newItems) | Group-Object { "$($_.id)" } | ForEach-Object { $_.Group[-1] })
 foreach ($p in $all) { $p | Add-Member starred ($starred -contains "$($p.id)") -Force }
 $needs = @($all | Where-Object { -not $_.slope -and -not $slopes[$_.id] } | ForEach-Object { [ordered]@{ id = $_.id; lat = $_.lat; lon = $_.lon } })
 foreach ($p in $all) { if (-not $p.slope -and $slopes[$p.id]) { $p | Add-Member slope $slopes[$p.id] -Force } }
