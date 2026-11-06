@@ -79,10 +79,18 @@ if (FtpGet "$stateDir/manifest.txt" "$root\manifest.txt") {
 }
 
 # ---- 2. Saved lists -> shortlist.json ----
+# Each user has their own lists; the hunt tracks what the admins have saved (and any pre-login shared lists).
 $ids = @()
 if (FtpGet "$siteDir/api/data/lists.json" "$root\lists.json") {
     $store = [IO.File]::ReadAllText("$root\lists.json", $utf8) | ConvertFrom-Json
-    if ($store.shortlist) { $ids = @($store.shortlist.PSObject.Properties.Name) }
+    if ($store.shortlist) { $ids += @($store.shortlist.PSObject.Properties.Name) }
+    $admins = @()
+    if (FtpGet "$siteDir/api/data/users.json" "$root\users.json") {
+        $users = ([IO.File]::ReadAllText("$root\users.json", $utf8) | ConvertFrom-Json).users
+        if ($users) { $admins = @($users.PSObject.Properties | Where-Object { $_.Value.admin } | ForEach-Object { $_.Name }) }
+    }
+    foreach ($a in $admins) { $sl = $store.users.$a.shortlist; if ($sl) { $ids += @($sl.PSObject.Properties.Name) } }
+    $ids = @($ids | Sort-Object -Unique)
 }
 [IO.File]::WriteAllText("$root\shortlist.json", (ConvertTo-Json @($ids) -Compress), $utf8)
 "Saved sites: $($ids.Count)"
@@ -103,9 +111,13 @@ if (-not (Test-Path "$root\reports\data.json")) { throw 'No data.json was produc
 
 # ---- 4. Website, then state ----
 $site = Join-Path $repo 'site'
-foreach ($f in 'index.html', 'zone-codes.json', 'robots.txt', 'api/lists.php', 'api/data/.htaccess') { FtpPut (Join-Path $site $f) "$siteDir/$f" }
+$pages = 'index.html', 'app.js', 'zone-codes.json', 'robots.txt', 'api/data/.htaccess', 'api/common.php', 'api/auth.php', 'api/admin.php', 'api/lists.php', 'api/data.php'
+foreach ($f in $pages) { FtpPut (Join-Path $site $f) "$siteDir/$f" }
 FtpPut "$root\reports\suburbs.json" "$siteDir/suburbs.json"
-FtpPut "$root\reports\data.json" "$siteDir/data.json" -Atomic
+# The sites go in the closed api/data folder; api/data.php serves them to signed-in users only.
+FtpPut "$root\reports\data.json" "$siteDir/api/data/data.json" -Atomic
+# Remove the public copy older versions uploaded (no error if it's already gone).
+& curl.exe -s @tls -u $cred "$ftp/" -Q "DELE $(("$siteDir/data.json") -replace '^\./', '')" -o NUL
 "Website updated"
 
 # Keep only today's report in the state, written compact (the indented form is ~4x bigger).
