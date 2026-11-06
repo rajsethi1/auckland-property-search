@@ -650,7 +650,15 @@ async function start() {
       fetch("suburbs.json").then(r => r.ok ? r.json() : {}).catch(() => ({})),
       fetch("zone-codes.json").then(r => r.ok ? r.json() : {}).catch(() => ({}))
     ]);
-    S.data = d; S.sites = (d.shortlist || []).filter(p => p && p.id); S.byId = new Map(S.sites.map(p => [String(p.id), p]));
+    // One card per property: the same listing (or the same address listed twice) keeps its best-scoring copy.
+    const seen = new Set();
+    S.sites = (d.shortlist || []).filter(p => p && p.id).sort((a, b) => (b.score || 0) - (a.score || 0)).filter(p => {
+      const keys = ["id:" + p.id, "addr:" + String(p.address || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() + "|" + Math.round(p.land_m2 || 0)];
+      if (keys.some(key => seen.has(key))) return false;
+      keys.forEach(key => seen.add(key)); return true;
+    });
+    // byId keeps every listing, so a saved or linked duplicate still opens its page.
+    S.data = d; S.byId = new Map((d.shortlist || []).filter(p => p && p.id).map(p => [String(p.id), p]));
     S.subs = subs || {}; S.zones = zones || {}; S.subDistrict.clear();
     Object.entries(S.subs).forEach(([dname, list]) => list.forEach(s => S.subDistrict.set(norm(s), dname)));
     route(); loadStore();
