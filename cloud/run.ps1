@@ -16,8 +16,16 @@ $env:HUNT_ROOT = $root
 New-Item -ItemType Directory -Force "$root\reports" | Out-Null
 $utf8 = New-Object Text.UTF8Encoding($false)
 foreach ($v in 'FTP_HOST', 'FTP_USER', 'FTP_PASS') { if (-not [Environment]::GetEnvironmentVariable($v)) { throw "Missing secret $v" } }
-$ftp = 'ftp://' + ($env:FTP_HOST.Trim() -replace '^[a-z]+://', '' -replace '/.*$', ''); $cred = "$($env:FTP_USER):$($env:FTP_PASS)"
+# Pull a bare host name or IP (optionally :port) out of FTP_HOST, whatever else was pasted with it.
+$hostRaw = $env:FTP_HOST -replace '[a-z]+://', ''
+$hostName = [regex]::Match($hostRaw, '[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+(:\d+)?').Value
+"FTP_HOST shape: '$($hostRaw -replace '[0-9]', '9' -replace '[A-Za-z]', 'a' -replace "`r|`n", '<newline>')' -> using a $($hostName.Length)-character host"
+if (-not $hostName) { throw 'FTP_HOST does not contain a host name or IP address' }
+$ftp = "ftp://$hostName"; $cred = "$($env:FTP_USER):$($env:FTP_PASS)"
 $stateDir = if ($env:FTP_STATE_DIR) { $env:FTP_STATE_DIR.Trim('/') } else { 'hunt-state' }
+# Check the FTP login before the long hunt, so a bad host or password fails in seconds, not after 25 minutes.
+& curl.exe -s --ssl -l -u $cred "$ftp/" -o NUL
+if ($LASTEXITCODE) { throw "Can't log in to FTP (curl error $($LASTEXITCODE); 6/7 = host unreachable, 67 = wrong username or password)" }
 # Hostinger FTP logins open either above public_html or inside it: use public_html when the login can see it.
 $siteDir = if ($env:FTP_SITE_DIR) { $env:FTP_SITE_DIR.Trim('/') } else {
     & curl.exe -s --ssl -l -u $cred "$ftp/public_html/" -o NUL
