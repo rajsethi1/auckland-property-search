@@ -16,7 +16,7 @@ $env:HUNT_ROOT = $root
 New-Item -ItemType Directory -Force "$root\reports" | Out-Null
 $utf8 = New-Object Text.UTF8Encoding($false)
 foreach ($v in 'FTP_HOST', 'FTP_USER', 'FTP_PASS') { if (-not [Environment]::GetEnvironmentVariable($v)) { throw "Missing secret $v" } }
-$ftp = "ftp://$($env:FTP_HOST.Trim().TrimEnd('/'))"; $cred = "$($env:FTP_USER):$($env:FTP_PASS)"
+$ftp = 'ftp://' + ($env:FTP_HOST.Trim() -replace '^[a-z]+://', '' -replace '/.*$', ''); $cred = "$($env:FTP_USER):$($env:FTP_PASS)"
 $stateDir = if ($env:FTP_STATE_DIR) { $env:FTP_STATE_DIR.Trim('/') } else { 'hunt-state' }
 # Hostinger FTP logins open either above public_html or inside it: use public_html when the login can see it.
 $siteDir = if ($env:FTP_SITE_DIR) { $env:FTP_SITE_DIR.Trim('/') } else {
@@ -28,11 +28,13 @@ $siteDir = if ($env:FTP_SITE_DIR) { $env:FTP_SITE_DIR.Trim('/') } else {
 # curl.exe ships with Windows; --ssl uses FTPS when the server offers it.
 # FtpGet is fully silent (-s): a missing file is normal on the first run, and stderr text would stop the script under 'Stop'.
 function FtpGet($remote, $local) {
+    $remote = $remote -replace '^\./', ''
     if (Test-Path $local) { Remove-Item $local }
     & curl.exe -s --ssl --create-dirs -u $cred -o $local "$ftp/$remote"
     ($LASTEXITCODE -eq 0) -and (Test-Path $local)
 }
 function FtpPut($local, $remote, [switch]$Atomic) {
+    $remote = $remote -replace '^\./', ''
     if ($Atomic) {
         # Upload under a temporary name, then rename, so visitors never load a half-written file.
         $name = Split-Path $remote -Leaf
