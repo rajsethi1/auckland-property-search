@@ -17,12 +17,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # 1. The hunt runs on Windows (the scripts are Windows PowerShell) and stages everything to upload.
   hunt:
     runs-on: windows-latest
     timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
-      - name: Run the hunt and update the website
+      - name: Run the hunt
         shell: powershell
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
@@ -36,3 +37,30 @@ jobs:
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           WEEKLY: ${{ github.event.inputs.weekly }}
         run: powershell -NoProfile -ExecutionPolicy Bypass -File cloud\run.ps1
+      - name: Hand the files to the upload job
+        uses: actions/upload-artifact@v4
+        with:
+          name: outbox
+          path: ${{ runner.temp }}/outbox
+          retention-days: 3
+
+  # 2. Upload from Linux with lftp: Windows' TLS makes Hostinger abort encrypted FTP uploads (426).
+  upload:
+    needs: hunt
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: outbox
+          path: outbox
+      - name: Upload the website and state to Hostinger
+        env:
+          FTP_USER: ${{ secrets.FTP_USER }}
+          LFTP_PASSWORD: ${{ secrets.FTP_PASS }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+          cd outbox
+          # Encrypted FTP is required; the certificate names Hostinger's server, not the IP, so its name isn't checked.
+          lftp -c "set cmd:fail-exit yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate no; set net:max-retries 4; set net:reconnect-interval-base 5; set net:timeout 30; open --env-password -u \"$FTP_USER\" \"ftp://$(cat host.txt)\"; source upload.lftp"
+          echo "Website updated and state saved"
