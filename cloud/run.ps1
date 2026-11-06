@@ -49,14 +49,21 @@ function FtpGet($remote, $local) {
     & curl.exe -s @tls --create-dirs -u $cred -o $local "$ftp/$remote"
     ($LASTEXITCODE -eq 0) -and (Test-Path $local)
 }
+# Hostinger sometimes drops an encrypted transfer (FTP 426 / curl 18), so each upload gets up to 4 tries.
+# --ftp-skip-pasv-ip sends data to the address we logged in to, not whatever internal address the server reports.
 function FtpPut($local, $remote, [switch]$Atomic) {
     $remote = $remote -replace '^\./', ''
-    if ($Atomic) {
-        # Upload under a temporary name, then rename, so visitors never load a half-written file.
-        $name = Split-Path $remote -Leaf
-        & curl.exe -sS @tls --ftp-create-dirs -u $cred -T $local "$ftp/$remote.new" -Q "-RNFR $name.new" -Q "-RNTO $name"
-    } else { & curl.exe -sS @tls --ftp-create-dirs -u $cred -T $local "$ftp/$remote" }
-    if ($LASTEXITCODE) { throw "FTP upload failed ($LASTEXITCODE): $remote" }
+    for ($try = 1; $try -le 4; $try++) {
+        if ($Atomic) {
+            # Upload under a temporary name, then rename, so visitors never load a half-written file.
+            $name = Split-Path $remote -Leaf
+            & curl.exe -sS @tls --ftp-skip-pasv-ip --ftp-create-dirs -u $cred -T $local "$ftp/$remote.new" -Q "-RNFR $name.new" -Q "-RNTO $name"
+        } else { & curl.exe -sS @tls --ftp-skip-pasv-ip --ftp-create-dirs -u $cred -T $local "$ftp/$remote" }
+        if (-not $LASTEXITCODE) { return }
+        "  upload of $remote failed (curl $LASTEXITCODE), try $try of 4"
+        Start-Sleep -Seconds (5 * $try)
+    }
+    throw "FTP upload failed ($LASTEXITCODE): $remote"
 }
 
 # NZ date, so a 6am run is named for the NZ day.
