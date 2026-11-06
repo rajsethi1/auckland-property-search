@@ -4,7 +4,8 @@
        — on the very first run, from this repo's seed-state folder instead;
     2. turn the site's saved lists into shortlist.json, so saved sites are tracked like starred ones;
     3. run scripts\run-daily.ps1 (search, screen, site checks, report, email body);
-    4. upload the website (page + today's data.json) and the new state back to Hostinger;
+    4. stage the website (page + today's data.json) and the new state in an outbox, with an lftp script
+       that the workflow's Linux job runs to upload them to Hostinger;
     5. email the short summary when SMTP settings are present.
   Settings come from the workflow's secrets/variables: FTP_HOST, FTP_USER, FTP_PASS, FTP_SITE_DIR (default public_html),
   FTP_STATE_DIR (default hunt-state), SITE_URL, SMTP_HOST, SMTP_USER, SMTP_PASS. WEEKLY=true forces the weekly refresh.
@@ -49,24 +50,22 @@ function FtpGet($remote, $local) {
     & curl.exe -s @tls --create-dirs -u $cred -o $local "$ftp/$remote"
     ($LASTEXITCODE -eq 0) -and (Test-Path $local)
 }
-# Hostinger sometimes drops an encrypted transfer (FTP 426 / curl 18), so each upload gets up to 4 tries.
-# --ftp-skip-pasv-ip sends data to the address we logged in to, not whatever internal address the server reports.
+# Uploads are staged in an outbox with an lftp script; the workflow's Linux job sends them.
+# (Windows' own TLS ends encrypted FTP uploads in a way Hostinger rejects with 426, so uploads can't be done from here.)
+$outbox = Join-Path $env:RUNNER_TEMP 'outbox'
+New-Item -ItemType Directory -Force "$outbox\files" | Out-Null
+$lftp = New-Object Collections.Generic.List[string]; $madeDirs = @{}; $staged = 0
 function FtpPut($local, $remote, [switch]$Atomic) {
     $remote = $remote -replace '^\./', ''
-    # Hostinger's FTP won't overwrite an existing file (426), so the old copy is deleted first.
-    # A leading * makes curl carry on when that delete fails because there's nothing to delete.
-    for ($try = 1; $try -le 4; $try++) {
-        if ($Atomic) {
-            # Upload under a temporary name, then swap it in, so visitors never load a half-written file.
-            $name = Split-Path $remote -Leaf
-            & curl.exe -sS @tls --ftp-skip-pasv-ip --ftp-create-dirs -u $cred -Q "*DELE $remote.new" -T $local "$ftp/$remote.new" -Q "-*DELE $name" -Q "-RNFR $name.new" -Q "-RNTO $name"
-        } else { & curl.exe -sS @tls --ftp-skip-pasv-ip --ftp-create-dirs -u $cred -Q "*DELE $remote" -T $local "$ftp/$remote" }
-        if (-not $LASTEXITCODE) { return }
-        "  upload of $remote failed (curl $LASTEXITCODE), try $try of 4"
-        Start-Sleep -Seconds (5 * $try)
-    }
-    throw "FTP upload failed ($LASTEXITCODE): $remote"
+    $script:staged++; $f = "files/$($script:staged)"   # numbered names: no quoting trouble in the lftp script
+    Copy-Item $local (Join-Path $outbox $f)
+    $dir = if ($remote -match '/') { $remote -replace '/[^/]*$', '' } else { '' }
+    if ($dir -and -not $madeDirs.ContainsKey($dir)) { $madeDirs[$dir] = 1; $lftp.Add("mkdir -p -f `"$dir`"") }
+    # Atomic: upload beside it, then swap in, so visitors never load a half-written file.
+    if ($Atomic) { $lftp.Add("put `"$f`" -o `"$remote.new`""); $lftp.Add("rm -f `"$remote`""); $lftp.Add("mv `"$remote.new`" `"$remote`"") }
+    else { $lftp.Add("put `"$f`" -o `"$remote`"") }
 }
+function FtpDel($remote) { $lftp.Add("rm -f `"$($remote -replace '^\./', '')`"") }
 
 # NZ date, so a 6am run is named for the NZ day.
 $nz = [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId([DateTime]::UtcNow, 'New Zealand Standard Time')
@@ -126,8 +125,8 @@ FtpPut "$root\reports\suburbs.json" "$siteDir/suburbs.json"
 # The sites go in the closed api/data folder; api/data.php serves them to signed-in users only.
 FtpPut "$root\reports\data.json" "$siteDir/api/data/data.json" -Atomic
 # Remove the public copy older versions uploaded (no error if it's already gone).
-& curl.exe -s @tls -u $cred "$ftp/" -Q "DELE $(("$siteDir/data.json") -replace '^\./', '')" -o NUL
-"Website updated"
+FtpDel "$siteDir/data.json"
+"Website files staged"
 
 # Keep only today's report in the state, written compact (the indented form is ~4x bigger).
 $rep = "reports/$Date.json"
@@ -140,8 +139,13 @@ foreach ($f in $stateFiles) { FtpPut (Join-Path $root $f) "$stateDir/$f" }
 FtpPut "$root\manifest.txt" "$stateDir/manifest.txt"
 Set-Content "$root\deny.htaccess" "Require all denied" -Encoding ascii
 FtpPut "$root\deny.htaccess" "$stateDir/.htaccess"
-if ($oldReport -and $oldReport -ne $rep) { & curl.exe -s @tls -u $cred "$ftp/" -Q "DELE $stateDir/$oldReport" -o NUL }
-"State saved: $($stateFiles.Count) files"
+if ($oldReport -and $oldReport -ne $rep) { FtpDel "$stateDir/$oldReport" }
+# The manifest goes last, so a broken upload never points the next run at files that aren't there.
+$i = $lftp.FindIndex([Predicate[string]] { param($x) $x -like '*manifest.txt"' })
+if ($i -ge 0) { $m = $lftp[$i]; $lftp.RemoveAt($i); $lftp.Add($m) }
+[IO.File]::WriteAllText("$outbox\upload.lftp", (($lftp -join "`n") + "`n"), $utf8)
+[IO.File]::WriteAllText("$outbox\host.txt", $hostName, $utf8)
+"State staged: $($stateFiles.Count) files; $($lftp.Count) upload steps for the Linux job"
 
 # ---- 5. Email (optional) ----
 $mail = "$root\reports\email-$Date.html"
