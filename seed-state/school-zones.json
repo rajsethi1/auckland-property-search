@@ -1,0 +1,228 @@
+{
+    "updated":  "2026-11-01",
+    "schools":  {
+                    "37":  {
+                               "name":  "Westlake Boys\u0027 High School",
+                               "ncea_l3_pct":  86,
+                               "suburbs":  [
+                                               "campbells-bay",
+                                               "castor-bay",
+                                               "forrest-hill",
+                                               "glenfield",
+                                               "hauraki-gulf-tikapa-moana",
+                                               "hillcrest",
+                                               "lake-pupuke",
+                                               "mairangi-bay",
+                                               "milford",
+                                               "northcote",
+                                               "rosedale",
+                                               "sunnynook",
+                                               "takapuna",
+                                               "thorne-bay",
+                                               "totara-vale",
+                                               "wairau-valley",
+                                               "windsor-park"
+                                           ]
+                           },
+                    "41":  {
+                               "name":  "Macleans College",
+                               "ncea_l3_pct":  85.7,
+                               "suburbs":  [
+                                               "bucklands-beach",
+                                               "cockle-bay",
+                                               "eastern-beach",
+                                               "half-moon-bay",
+                                               "hauraki-gulf-tikapa-moana",
+                                               "howick",
+                                               "mellons-bay"
+                                           ]
+                           },
+                    "38":  {
+                               "name":  "Westlake Girls\u0027 High School",
+                               "ncea_l3_pct":  85.6,
+                               "suburbs":  [
+                                               "campbells-bay",
+                                               "castor-bay",
+                                               "forrest-hill",
+                                               "glenfield",
+                                               "hauraki",
+                                               "hauraki-gulf-tikapa-moana",
+                                               "hillcrest",
+                                               "lake-pupuke",
+                                               "mairangi-bay",
+                                               "milford",
+                                               "northcote",
+                                               "rosedale",
+                                               "shoal-bay",
+                                               "sunnynook",
+                                               "takapuna",
+                                               "thorne-bay",
+                                               "totara-vale",
+                                               "unsworth-heights",
+                                               "wairau-valley",
+                                               "windsor-park"
+                                           ]
+                           },
+                    "53":  {
+                               "name":  "Auckland Girls\u0027 Grammar School",
+                               "ncea_l3_pct":  81.9,
+                               "suburbs":  [
+                                               "auckland-central",
+                                               "coxs-bay",
+                                               "eden-terrace",
+                                               "freemans-bay",
+                                               "grafton",
+                                               "grey-lynn",
+                                               "herne-bay",
+                                               "home-bay",
+                                               "kingsland",
+                                               "morningside",
+                                               "mount-albert",
+                                               "mount-eden",
+                                               "mount-roskill",
+                                               "newmarket",
+                                               "parnell",
+                                               "ponsonby",
+                                               "saint-marys-bay",
+                                               "sandringham",
+                                               "three-kings",
+                                               "viaduct-basin",
+                                               "waitemata-harbour",
+                                               "western-springs",
+                                               "westhaven",
+                                               "westmere"
+                                           ]
+                           },
+                    "28":  {
+                               "name":  "Rangitoto College",
+                               "ncea_l3_pct":  81.6,
+                               "suburbs":  [
+                                               "albany",
+                                               "browns-bay",
+                                               "campbells-bay",
+                                               "fairview-heights",
+                                               "forrest-hill",
+                                               "hauraki-gulf-tikapa-moana",
+                                               "mairangi-bay",
+                                               "murrays-bay",
+                                               "oteha",
+                                               "pinehill",
+                                               "rosedale",
+                                               "rothesay-bay",
+                                               "sunnynook",
+                                               "windsor-park"
+                                           ]
+                           },
+                    "64":  {
+                               "name":  "Epsom Girls\u0027 Grammar School",
+                               "ncea_l3_pct":  81.5,
+                               "suburbs":  [
+                                               "auckland-central",
+                                               "epsom",
+                                               "grafton",
+                                               "greenlane",
+                                               "hobson-bay",
+                                               "judges-bay",
+                                               "mechanics-bay",
+                                               "mount-eden",
+                                               "newmarket",
+                                               "one-tree-hill",
+                                               "orakei-basin",
+                                               "parnell",
+                                               "remuera",
+                                               "three-kings",
+                                               "waitemata-harbour"
+                                           ]
+                           },
+                    "36":  {
+                               "name":  "Takapuna Grammar School",
+                               "ncea_l3_pct":  81.2,
+                               "suburbs":  [
+                                               "bayswater",
+                                               "belmont",
+                                               "castor-bay",
+                                               "devonport",
+                                               "hauraki",
+                                               "hauraki-gulf-tikapa-moana",
+                                               "lake-pupuke",
+                                               "milford",
+                                               "narrow-neck",
+                                               "ngataringa-bay",
+                                               "northcote",
+                                               "shoal-bay",
+                                               "stanley-bay",
+                                               "stanley-point",
+                                               "takapuna",
+                                               "thorne-bay",
+                                               "torpedo-bay",
+                                               "wairau-valley",
+                                               "waitemata-harbour"
+                                           ]
+                           },
+                    "54":  {
+                               "name":  "Auckland Grammar School",
+                               "ncea_l3_pct":  79.7,
+                               "suburbs":  [
+                                               "auckland-central",
+                                               "eden-terrace",
+                                               "epsom",
+                                               "grafton",
+                                               "greenlane",
+                                               "hobson-bay",
+                                               "judges-bay",
+                                               "kingsland",
+                                               "mechanics-bay",
+                                               "mount-eden",
+                                               "newmarket",
+                                               "one-tree-hill",
+                                               "parnell",
+                                               "remuera",
+                                               "waitemata-harbour"
+                                           ]
+                           },
+                    "65":  {
+                               "name":  "Glendowie College",
+                               "ncea_l3_pct":  78.6,
+                               "suburbs":  [
+                                               "glendowie",
+                                               "glen-innes",
+                                               "hauraki-gulf-tikapa-moana",
+                                               "karaka-bay",
+                                               "kohimarama",
+                                               "ladies-bay",
+                                               "remuera",
+                                               "saint-heliers",
+                                               "saint-heliers-bay",
+                                               "saint-johns",
+                                               "st-johns",
+                                               "stonefields",
+                                               "wai-o-taiki-bay"
+                                           ]
+                           },
+                    "49":  {
+                               "name":  "Selwyn College",
+                               "ncea_l3_pct":  77.7,
+                               "suburbs":  [
+                                               "ellerslie",
+                                               "glen-innes",
+                                               "hauraki-gulf-tikapa-moana",
+                                               "hobson-bay",
+                                               "kohimarama",
+                                               "meadowbank",
+                                               "mission-bay",
+                                               "mount-wellington",
+                                               "okahu-bay",
+                                               "orakei",
+                                               "orakei-basin",
+                                               "panmure",
+                                               "parnell",
+                                               "remuera",
+                                               "saint-heliers",
+                                               "saint-johns",
+                                               "st-johns",
+                                               "stonefields",
+                                               "waitemata-harbour"
+                                           ]
+                           }
+                }
+}

@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Auckland Property Search</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column of site cards, ranked by score; summary strip on top, rejects folded at the bottom. */
+:root {
+  --bg: #f3f5f4;
+  --surface: #ffffff;
+  --ink: #17211f;
+  --muted: #5b6965;
+  --line: #d9e0de;
+  --accent: #1d5e6e;          /* harbour teal */
+  --accent-soft: #e1eef0;
+  --good: #23764a; --good-soft: #e2f2e8;
+  --warn: #9a6200; --warn-soft: #fbf0d9;
+  --bad: #b03a2e; --bad-soft: #f8e4e1;
+  --quiet: #6e7a77; --quiet-soft: #e9edec;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-data: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111816; --surface: #18211f; --ink: #e6eeec; --muted: #9aaaa6; --line: #2a3734;
+  --accent: #6fb9c9; --accent-soft: #1b3237;
+  --good: #6cc895; --good-soft: #1a3326; --warn: #e5b153; --warn-soft: #3a2d14;
+  --bad: #ef8a7e; --bad-soft: #3b201d; --quiet: #9aaaa6; --quiet-soft: #242f2c; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #111816; --surface: #18211f; --ink: #e6eeec; --muted: #9aaaa6; --line: #2a3734;
+  --accent: #6fb9c9; --accent-soft: #1b3237;
+  --good: #6cc895; --good-soft: #1a3326; --warn: #e5b153; --warn-soft: #3a2d14;
+  --bad: #ef8a7e; --bad-soft: #3b201d; --quiet: #9aaaa6; --quiet-soft: #242f2c; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px }
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 28px }
+a { color: var(--accent) }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.15 }
+h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; letter-spacing: -0.01em }
+h2 { font-size: 20px; font-weight: 700 }
+.eyebrow { font: 500 12px/1 var(--f-data); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+.num { font-family: var(--f-data); font-variant-numeric: tabular-nums }
+
+header { display: grid; gap: 10px }
+header p { margin: 0; color: var(--muted); max-width: 65ch }
+.strip { display: flex; flex-wrap: wrap; gap: 8px 22px; padding-top: 6px; border-top: 1px solid var(--line) }
+.strip div { display: grid }
+.strip b { font: 500 22px/1.2 var(--f-data); font-variant-numeric: tabular-nums }
+.strip span { font-size: 12px; color: var(--muted) }
+.sources { font-size: 13px; color: var(--muted) }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.controls button { font: 500 13px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: 999px; padding: 6px 12px; cursor: pointer }
+.controls button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface) }
+.controls .sp { flex: 1 }
+.filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 12px; align-items: end }
+.filters label { display: grid; gap: 3px; font-size: 12px; color: var(--muted); min-width: 0 }
+.filters select { font: 500 13px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 6px 8px; width: 100%; min-width: 0 }
+.subsel { position: relative; display: grid; gap: 3px; font-size: 12px; color: var(--muted); min-width: 0 }
+.subsel summary { list-style: none; font: 500 13px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 6px 8px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.subsel summary::-webkit-details-marker { display: none }
+.subsel summary::after { content: " \25BE"; color: var(--muted) }
+.subsel .pop { position: absolute; z-index: 5; top: 100%; left: 0; margin-top: 4px; width: max(100%, 240px); max-width: calc(100vw - 32px); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.15); display: grid; gap: 6px }
+.subsel input[type=search] { font: 13px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 6px 8px; width: 100%; box-sizing: border-box }
+.search input { width: 100%; box-sizing: border-box; font: 500 15px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 10px 12px }
+.search input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px }
+.savemenu { position: absolute; z-index: 10; width: 260px; max-width: calc(100vw - 32px); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.18); display: grid; gap: 6px; font-size: 13px }
+.savemenu label, .lists-panel .row { display: flex; gap: 8px; align-items: center }
+.savemenu small, .lists-panel small { margin-left: auto; color: var(--muted) }
+.savemenu form, .lists-panel form { display: flex; gap: 6px; margin-top: 4px }
+.savemenu input[type=text], .lists-panel input[type=text] { flex: 1; min-width: 0; font: 13px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 5px 8px }
+.savemenu button, .lists-panel button { font: 500 12px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--accent); border-radius: 6px; padding: 4px 8px; cursor: pointer; white-space: nowrap }
+.lists-panel { display: grid; gap: 8px; margin-top: 10px; font-size: 13.5px }
+.lists-panel .row small { margin-left: 0 }
+.lists-panel button.danger { color: var(--bad) }
+.more-btn { justify-self: center; font: 600 13px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--accent); border-radius: 999px; padding: 8px 16px; cursor: pointer }
+.subsel .opts { max-height: 340px; overflow-y: auto; display: grid; gap: 2px; align-content: start }
+.subsel .gh { display: flex; gap: 6px; align-items: center; padding: 4px 2px; border-top: 1px solid var(--line) }
+.subsel .grp:first-child .gh { border-top: 0 }
+.subsel .gh button { border: 0; background: none; padding: 0; font: 600 13px var(--f-body); color: var(--ink); cursor: pointer; text-align: left }
+.subsel .gh button span { color: var(--muted) }
+.subsel .gs { display: grid; gap: 1px; padding: 0 0 4px 22px }
+.subsel .opts label { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink); padding: 3px 2px; cursor: pointer }
+.subsel .opts label.zero { color: var(--muted) }
+.subsel .opts small { margin-left: auto; color: var(--muted) }
+.subsel .acts { display: flex; gap: 12px; font-size: 12px }
+.subsel .acts button { border: 0; background: none; color: var(--accent); cursor: pointer; padding: 0; font: inherit }
+.filters .reset { font: 500 13px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--accent); border-radius: 6px; padding: 6px 10px; cursor: pointer }
+.count { font-size: 13px; color: var(--muted); margin: 0 }
+
+.list { display: grid; gap: 14px }
+.site { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0 }
+.top { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start }
+.top h3 { font-size: 19px; font-weight: 700 }
+.top h3 a { color: var(--ink); text-decoration: none } .top h3 a:hover { text-decoration: underline }
+.sub { color: var(--muted); font-size: 13px; margin-top: 3px }
+.score { text-align: right; display: grid; justify-items: end; gap: 4px }
+.score b { font: 500 28px/1 var(--f-data) }
+.pill { font: 600 11px/1 var(--f-body); letter-spacing: .04em; text-transform: uppercase; padding: 5px 8px; border-radius: 4px; white-space: nowrap }
+.l-strong { background: var(--good-soft); color: var(--good) }
+.l-look { background: var(--warn-soft); color: var(--warn) }
+.l-marginal { background: var(--quiet-soft); color: var(--quiet) }
+.s-new { background: var(--accent-soft); color: var(--accent) }
+.s-price_change { background: var(--warn-soft); color: var(--warn) }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px 16px; margin: 0 }
+.facts div { min-width: 0 } .facts dt { font-size: 12px; color: var(--muted) } .facts dd { margin: 0; font-weight: 600; overflow-wrap: anywhere }
+.facts .wide { grid-column: 1 / -1 }
+.star { font: 600 12px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 4px 10px; cursor: pointer; white-space: nowrap }
+.star.on { background: var(--warn-soft); color: var(--warn); border-color: var(--warn) }
+span.star { cursor: default }
+.l-bad { background: var(--bad-soft); color: var(--bad) }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.btn { display: inline-block; font: 600 13px var(--f-body); padding: 7px 12px; border-radius: 6px; background: var(--accent); color: var(--surface); text-decoration: none }
+.btn:hover { filter: brightness(1.1) }
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px }
+.panel { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; align-content: start; min-width: 0 }
+.panel h4 { margin: 0; font: 600 13px var(--f-body); color: var(--muted); display: flex; gap: 8px; align-items: center }
+.panel .big { display: grid } .panel .big b { font: 500 24px/1.1 var(--f-data) } .panel .big span { font-size: 12px; color: var(--muted) }
+.mini { margin: 0; display: grid; gap: 4px }
+.mini div { display: flex; justify-content: space-between; gap: 10px; font-size: 13px } .mini dt { color: var(--muted) } .mini dd { margin: 0; text-align: right }
+.drivers { margin: 2px 0 0; padding-left: 18px; font-size: 12.5px } .drivers li + li { margin-top: 2px }
+.muted { margin: 0; font-size: 12.5px; color: var(--muted) }
+.pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 16px; padding: 12px; border: 1px solid var(--line); border-radius: 8px }
+.pricing div { display: grid; gap: 2px; align-content: start; justify-items: start; min-width: 0 }
+.pricing span { font-size: 12px; color: var(--muted) }
+.pricing b { font: 500 18px/1.2 var(--f-data); font-variant-numeric: tabular-nums }
+.pricing small { font-size: 11.5px; color: var(--muted) }
+.pricing .pill { font-size: 11px; color: inherit }
+.pricing .pill.l-strong { color: var(--good) } .pricing .pill.l-look { color: var(--warn) } .pricing .pill.s-new { color: var(--accent) } .pricing .pill.l-marginal { color: var(--quiet) }
+table.sch { font-size: 13px } table.sch td, table.sch th { padding: 5px 8px }
+.angle { margin: 0; padding: 10px 12px; background: var(--accent-soft); border-radius: 6px; font-weight: 500 }
+.angle span { font: 500 11px var(--f-data); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 2px }
+.why { margin: 0; max-width: 70ch }
+.flags { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; list-style: none }
+.flags li { font-size: 12.5px; padding: 3px 8px; border-radius: 4px; background: var(--bad-soft); color: var(--bad) }
+details.more summary { cursor: pointer; font-weight: 600; font-size: 13px; color: var(--accent) }
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; margin: 10px 0 0 }
+.nums div { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed var(--line); padding-bottom: 4px }
+.nums dt { color: var(--muted); font-size: 13px } .nums dd { margin: 0 }
+.qs { margin: 10px 0 0; padding-left: 20px } .qs li + li { margin-top: 3px }
+
+.fold { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px }
+.fold summary { cursor: pointer; font-family: var(--f-display); font-weight: 700; font-size: 17px }
+.tbl { overflow-x: auto; margin-top: 10px }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top }
+th { font-weight: 600; color: var(--muted); font-size: 12px }
+.empty { padding: 28px 18px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 10px }
+footer { font-size: 12.5px; color: var(--muted); max-width: 70ch }
+footer ul { padding-left: 18px; margin: 6px 0 }
+@media (max-width: 520px) { .top { grid-template-columns: 1fr } .score { justify-items: start; text-align: left; grid-auto-flow: column; align-items: center } }
+@media (prefers-reduced-motion: no-preference) { .site { transition: border-color .15s } .site:hover { border-color: var(--accent) } }
+/* Map: every site matching the filters, plus switchable council layers. */
+.mapbox { display: grid; gap: 6px }
+#map { position: relative; z-index: 0; height: min(62vh, 580px); border: 1px solid var(--line); border-radius: 10px; background: var(--quiet-soft) }
+.maphint { margin: 0; font-size: 12.5px; color: var(--muted) }
+.zoomnote { background: var(--surface); color: var(--ink); padding: 4px 8px; border-radius: 6px; font: 500 12px var(--f-body); box-shadow: 0 1px 4px rgba(0,0,0,.25) }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--ink) }
+.leaflet-popup-content { margin: 12px 14px; font: 13px/1.45 var(--f-body) }
+.pop-site b.addr { display: block; font: 700 14px var(--f-display); margin-bottom: 2px }
+.pop-site .row { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--muted); margin: 4px 0 8px }
+.pop-site .acts { display: flex; gap: 6px; flex-wrap: wrap }
+.pop-site button, .site .mapbtn { font: 600 12px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--accent); border-radius: 6px; padding: 4px 9px; cursor: pointer }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted) }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow" id="date">Auckland · development sites</span>
+    <h1>Auckland Property Search</h1>
+    <p id="summary"></p>
+    <div class="strip" id="strip"></div>
+    <div class="sources" id="sources"></div>
+  </header>
+
+  <section aria-label="Shortlist" style="display:grid;gap:14px">
+    <div class="search"><input type="search" id="q" placeholder="Search an address or suburb" aria-label="Search an address or suburb" autocomplete="off"></div>
+    <div class="controls" role="group" aria-label="Filter shortlist">
+      <button type="button" id="f-all" data-f="all" aria-pressed="true">All</button>
+      <button type="button" id="f-starred" data-f="starred" aria-pressed="false">★ Saved</button>
+      <button type="button" id="f-strong" data-f="Strong" aria-pressed="false">Strong</button>
+      <button type="button" id="f-look" data-f="Worth a look" aria-pressed="false">Worth a look</button>
+      <button type="button" id="f-stretch" data-f="Stretch" aria-pressed="false">Slightly over budget</button>
+      <button type="button" id="f-train" data-f="train" aria-pressed="false">Near a train station</button>
+      <button type="button" id="f-new" data-f="new" aria-pressed="false">New today</button>
+      <button type="button" id="f-top" data-f="topzone" aria-pressed="false">Top-10 school zone</button>
+      <span class="sp"></span>
+      <button type="button" id="sort" aria-pressed="false">Sort: score</button>
+    </div>
+    <div class="filters" role="group" aria-label="More filters">
+      <div class="subsel">Suburbs<details id="x-subs"><summary id="x-subs-sum">All suburbs</summary>
+        <div class="pop"><input type="search" id="x-subs-q" placeholder="Find a suburb" aria-label="Find a suburb">
+          <div class="acts"><button type="button" id="x-subs-all">Select shown</button><button type="button" id="x-subs-none">Clear</button></div>
+          <div class="opts" id="x-subs-opts" role="group" aria-label="Suburbs"></div></div></details></div>
+      <label>Your rules<select id="x-rules"><option value="">Meets your rules</option><option value="all">Show everything</option><option value="fail">Breaks a rule</option></select></label>
+      <label>Zone<select id="x-zone"><option value="">Any zone</option></select></label>
+      <label>Title<select id="x-title"><option value="">Any title</option></select></label>
+      <label>Saved list<select id="x-list"><option value="">Any (no filter)</option><option value="any">★ On any list</option></select></label>
+      <label>Price from<select id="x-pmin"><option value="">Any</option></select></label>
+      <label>Price up to<select id="x-pmax"><option value="">Any</option></select></label>
+      <label>Land position<select id="x-pos"><option value="">Any</option><option value="front">Road front</option><option value="corner">Corner site</option><option value="rear">Rear site</option><option value="battle">Battle-axe</option></select></label>
+      <label>State housing nearby<select id="x-sh"><option value="">Any</option><option>Low</option><option>Medium</option><option>High</option><option value="LM">Low or Medium</option></select></label>
+      <label>Primary school<select id="x-pri"><option value="">Any</option><option>High</option><option>Medium</option><option>Low</option><option value="HM">High or Medium</option></select></label>
+      <label>Intermediate school<select id="x-int"><option value="">Any</option><option>High</option><option>Medium</option><option>Low</option><option value="HM">High or Medium</option></select></label>
+      <label>Secondary school<select id="x-sec"><option value="">Any</option><option>High</option><option>Medium</option><option>Low</option><option value="HM">High or Medium</option></select></label>
+      <label>In zone for<select id="x-school"><option value="">Any school</option></select></label>
+      <label>Flood<select id="x-flood"><option value="">Any</option><option value="none">No flood overlay</option><option value="yes">Flood overlay</option></select></label>
+      <label>HV power lines<select id="x-power"><option value="">Any</option><option value="none">None nearby</option><option value="near">Near or over site</option></select></label>
+      <label>Top-10 school zone<select id="x-top"><option value="">Any (no filter)</option><option value="all">All top-10 zones</option></select></label>
+      <button type="button" class="reset" id="x-reset">Clear filters</button>
+    </div>
+    <p class="muted" id="zoneinfo" hidden></p>
+    <div class="mapbox">
+      <div id="map" role="region" aria-label="Map of the sites that match your filters"></div>
+      <div class="legend"><span><i style="background:#23764a"></i>Strong</span><span><i style="background:#c88a00"></i>Worth a look</span><span><i style="background:#1d5e6e"></i>Over budget</span><span><i style="background:#6e7a77"></i>Marginal</span><span><i style="background:#b9bfbd"></i>Outside your rules</span><span>Bigger dot = saved</span></div>
+      <p class="maphint">The map shows every site that matches your filters, not just the cards below. Click a dot for details. Use the layers button (top right) for flood, zoning and other council overlays; they draw once you zoom in to suburb level.</p>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="list" id="list"></div>
+    <details class="fold" id="lists-wrap"><summary>Saved lists</summary><div id="lists-panel" class="lists-panel"></div></details>
+    <div class="savemenu" id="savemenu" role="dialog" aria-label="Save to a list" hidden></div>
+  </section>
+
+  <details class="fold" id="rej-wrap"><summary id="rej-title">Screened out</summary><div class="tbl"><table><thead><tr><th>Address</th><th>Reason</th></tr></thead><tbody id="rej"></tbody></table></div></details>
+  <details class="fold" id="sch-wrap"><summary id="sch-title">Outside your school zones</summary>
+    <p style="margin:8px 0 0;color:var(--muted);font-size:13px">These passed everything else, but the secondary school's NCEA Level 3 results are 10+ points below the Auckland average. Tell me if you're happy with one of these schools and I'll include it next run.</p>
+    <div class="tbl"><table><thead><tr><th>Address</th><th>Secondary school zone</th></tr></thead><tbody id="sch"></tbody></table></div></details>
+
+  <footer>
+    <ul id="notes"></ul>
+    <p>Figures are rough screening estimates from listing data, council GIS and the assumptions in your profile. Zoning shown is the operative Unitary Plan zone; flood checks test the whole title boundary against the council's flood layers. Confirm title, LIM, zoning and flood overlays before any offer, and take finance and purchase decisions with your broker, lawyer and adviser.</p>
+    <p>Listings link to realestate.co.nz. Zoning, flood and overlay data © Auckland Council; title boundaries © LINZ (both CC BY 4.0). Map © OpenStreetMap contributors; aerial imagery © Esri.</p>
+  </footer>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
+<script>
+// The day's data is published beside the page as data.json (keeps the page small).
+let DATA = /*__DATA__*/null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const money = n => n ? "$" + Math.round(n).toLocaleString("en-NZ") : "—";
+const k = n => n ? (n >= 1e6 ? "$" + (n / 1e6).toFixed(2) + "m" : "$" + Math.round(n / 1000) + "k") : "—";
+const labelCls = l => l === "Strong" ? "l-strong" : l === "Worth a look" ? "l-look" : l === "Stretch" ? "s-new" : "l-marginal";
+const bandCls = b => b === "High" ? "l-strong" : b === "Medium" ? "l-look" : b === "Low" ? "l-bad" : "l-marginal";
+const pct = v => v == null ? "—" : (v > 0 ? "+" : "") + v + "%";
+const dist = m => m == null ? "—" : m >= 1000 ? (m / 1000).toFixed(1) + " km" : Math.round(m) + " m";
+const safeUrl = u => /^https?:\/\//.test(u || "") ? u : "#";
+
+let filter = "all", sortBy = "score";
+// Shared shortlist (db capability): one doc per starred listing at shortlist/<listing id>.
+// Claude reads this collection each morning to pin these sites and run feasibility studies on request.
+let starred = new Set(), shortlistDb = null, canStar = false;
+// Named lists: lists/<listId> = {name, at}; each shortlist doc carries lists: [listIds] (no field = the original "main" list).
+// A site on no list has no shortlist doc, so "starred" still means "on any list" for the morning run.
+let saved = new Map(), lists = [], shown = 100, lastSig = "";
+const listsOf = id => saved.get(String(id)) || [];
+const allLists = () => lists.length ? lists : [{ id: "main", name: "Shortlist" }];
+const listName = id => (allLists().find(l => l.id === id) || { name: "Shortlist" }).name;
+try { filter = localStorage.getItem("hunt-filter") || "all"; } catch (e) {}
+
+const fitCls = f => /Ideal/.test(f) ? "l-strong" : /In budget/.test(f) ? "l-look" : /Possible|Stretch/.test(f) ? "s-new" : "l-marginal";
+function locPanel(p) {
+  const t = p.transport; if (!t) return "";
+  return `<div class="panel"><h4>Location</h4><dl class="mini">
+    <div><dt>To CBD (Britomart)</dt><dd class="num">${t.cbd_km != null ? t.cbd_km + " km" : "—"}</dd></div>
+    <div><dt>Nearest train station</dt><dd>${t.train ? esc(t.train.name) + " · " + dist(t.train.distance_m) : "—"}</dd></div>
+    <div><dt>Nearest bus stop</dt><dd>${t.bus && t.bus.distance_m != null ? dist(t.bus.distance_m) : "None within 800 m"}</dd></div>
+    ${p.motorway && p.motorway.on_ramp ? `<div><dt>Motorway on-ramp</dt><dd class="num">${p.motorway.on_ramp.distance_km} km</dd></div><div><dt>Motorway off-ramp</dt><dd class="num">${p.motorway.off_ramp ? p.motorway.off_ramp.distance_km + " km" : "—"}</dd></div>` : ""}
+  </dl></div>`;
+}
+function growthPanel(p) {
+  const g = p.growth; if (!g) return "";
+  return `<div class="panel"><h4>Future growth</h4>
+    <div class="big"><b class="num">${pct(g.outlook_5y_pct)}</b><span>indicative over 5 years (range ${pct(g.outlook_low_pct)} to ${pct(g.outlook_high_pct)})</span></div>
+    <dl class="mini">
+      <div><dt>Suburb, last 12 months</dt><dd class="num">${pct(g.suburb_12m_pct)}</dd></div>
+      <div><dt>Suburb, 10 years</dt><dd class="num">${pct(g.suburb_10y_pct)}</dd></div>
+      <div><dt>From 2021 peak</dt><dd class="num">${pct(g.suburb_from_peak_pct)}</dd></div>
+    </dl>
+    ${(g.drivers || []).length ? `<ul class="drivers">${g.drivers.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p class="muted">No major infrastructure project identified for this area.</p>`}
+  </div>`;
+}
+function landPanel(p) {
+  const l = p.land, c = p.construction; if ((!l || typeof l !== "object") && !c) return "";
+  const lr = l && typeof l === "object" ? `
+    <div><dt>Shape</dt><dd>${esc(l.shape)}${l.width_m ? ` · ${l.width_m} × ${l.depth_m} m` : ""}</dd></div>
+    <div><dt>Position</dt><dd>${esc(l.position)}</dd></div>
+    <div><dt>Road frontage</dt><dd class="num">${l.frontage_m ? l.frontage_m + " m" : "None"}</dd></div>
+    ${l.path_frontage_m ? `<div><dt>Beside walkway / path</dt><dd>${l.path_frontage_m} m · ${esc(l.path_names)} (not a road frontage)</dd></div>` : ""}
+    ${l.access_width_m != null ? `<div><dt>Driveway / access width</dt><dd class="num">${l.access_width_m} m</dd></div>` : ""}` : "";
+  const ci = c ? `<div><dt>Cladding · roof</dt><dd>${esc((c.cladding || []).join(", ") || "Not stated")} · ${esc((c.roof || []).join(", ") || "Not stated")}</dd></div>` : "";
+  const rule = l && l.driveway_rule ? `<p class="muted">${esc(l.driveway_rule)}${l.access_note ? " (" + esc(l.access_note) + ")" : ""}</p>` : "";
+  const iss = c && (c.issues || []).length ? `<ul class="drivers">${c.issues.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "";
+  return `<div class="panel"><h4>Land &amp; building ${c ? `<span class="pill ${c.risk === "High" ? "l-bad" : c.risk === "Medium" ? "l-look" : "l-strong"}">Building risk: ${esc(c.risk)}</span>` : ""}</h4><dl class="mini">${lr}${ci}</dl>${rule}${iss}</div>`;
+}
+function statePanel(p) {
+  const s = p.state_housing; if (!s || s.error) return "";
+  return `<div class="panel"><h4>State housing nearby <span class="pill ${s.level === "High" ? "l-bad" : s.level === "Medium" ? "l-look" : "l-strong"}">${esc(s.level)}</span></h4><dl class="mini">
+    <div><dt>Within 100 m (street)</dt><dd class="num">${s.within_100m}</dd></div>
+    <div><dt>Within 200 m</dt><dd class="num">${s.within_200m}</dd></div>
+    <div><dt>Within 400 m</dt><dd class="num">${s.within_400m} of ${s.titles_within_400m} titles (${s.share_400m_pct}%)</dd></div>
+  </dl></div>`;
+}
+const slopeCls = c => c === "Flat" ? "l-strong" : c === "Gentle" ? "l-look" : c === "Moderate" ? "s-new" : c === "Steep" ? "l-bad" : "l-marginal";
+function slopePill(p) {
+  const s = p.slope; if (!s || s.error) return "";
+  return `<span class="pill ${slopeCls(s.class)}" title="Average slope ${s.avg_slope_pct}% · steepest 10% of the site ${s.p90_slope_pct}% · fall across site ${s.fall_m} m">Slope: ${esc(s.class)} (${s.fall_m} m fall)</span>`;
+}
+function saleTypes(p) {
+  return [].concat(p.sale_type || []).filter(Boolean).map(t => `<span class="pill ${/Mortgagee|Estate|^Private/.test(t) ? "l-strong" : "l-look"}">${esc(t)}</span>`).join("");
+}
+function powerPill(p) {
+  const w = p.power_lines; if (!w || typeof w !== "object" || !w.level || w.level === "lookup-failed") return "";
+  const tip = w.line ? `${w.kind}: ${w.line} (${w.kv} kV), ${w.nearest_m} m from boundary · Grid overlay: ${w.grid_corridor}. ${w.note}` : w.note;
+  const cls = /Over site|corridor/i.test(w.level) ? "l-bad" : /40 m/.test(w.level) ? "l-look" : "l-strong";
+  const txt = w.level === "None nearby" ? "No HV lines" : w.level === "Over site" ? `HV line over site (${w.kv} kV)` : w.level === "In grid corridor" ? "In National Grid corridor" : `HV line ${w.nearest_m} m (${w.kv} kV)`;
+  return `<span class="pill ${cls}" title="${esc(tip)}">${esc(txt)}</span>`;
+}
+function flood(p) {
+  const f = p.flood || "";
+  return /plain|prone/i.test(f) ? `<span class="pill l-bad">${esc(f)}</span>` : /sensitive/i.test(f) ? `<span class="pill l-look">${esc(f)}</span>` : `<span class="pill l-strong">No flood overlay</span>`;
+}
+function pricing(p) {
+  const pr = p.pricing; if (!pr) return "";
+  return `<div class="pricing">
+    <div><span>Expected price</span><b class="num">${money(pr.expected)}</b><small>${esc(p.price_basis || "")}</small></div>
+    <div><span>Low case</span><b class="num">${money(pr.low_case)}</b><small>CV × ${pr.ratio_low} (bottom quarter of sales here)</small></div>
+    <div><span>Typical sale vs CV here</span><b class="num">${pr.ratio_likely ? Math.round(pr.ratio_likely * 100) + "%" : "—"}</b><small>${esc(pr.ratio_basis || "")}</small></div>
+    <div><span>Budget</span><span class="pill ${fitCls(pr.fit)}">${esc(pr.fit)}</span></div>
+  </div>`;
+}
+function svc(s) {
+  if (!s || typeof s !== "object") return "Unknown";
+  if (s.on_site) return `On site${s.diameter_mm ? " · " + s.diameter_mm + " mm" : ""}`;
+  if (s.distance_m == null) return esc(s.note || "None found nearby");
+  return `${Math.round(s.distance_m)} m away${s.diameter_mm ? " · " + s.diameter_mm + " mm" : ""}`;
+}
+function schools(p) {
+  const z = p.schools; if (!z) return "";
+  const row = (lvl, list) => [].concat(list || []).filter(Boolean).map(s => `<tr><td>${lvl}</td><td><a href="${esc(safeUrl(s.ero))}" target="_blank" rel="noopener">${esc(s.name)}</a>${/Integrated/.test(s.authority || "") ? " <small>(integrated)</small>" : ""}</td>
+    <td>${s.band ? `<span class="pill ${bandCls(s.band)}">${esc(s.band)}</span>` : "—"}</td>
+    <td class="num">${/^[\d.]+$/.test(String(s.ncea_l3_pct ?? "")) ? s.ncea_l3_pct + "% NCEA L3" : "EQI-based"}</td><td class="num">${esc(s.eqi || "—")}</td><td class="num">${esc(s.roll || "—")}</td></tr>`).join("");
+  const body = row("Primary", z.primary) + row("Intermediate", z.intermediate) + row("Secondary", z.secondary);
+  return body ? `<div class="tbl"><table class="sch"><thead><tr><th>School zone</th><th>School (ERO report)</th><th>Rating</th><th>Results</th><th>EQI</th><th>Roll</th></tr></thead><tbody>${body}</tbody></table></div>` : "";
+}
+function starButton(p) {
+  const ls = listsOf(p.id), names = ls.map(listName).join(", "), txt = ls.length === 1 ? names : ls.length + " lists";
+  if (shortlistDb && canStar) return `<button type="button" class="star${ls.length ? " on" : ""}" data-save="${esc(p.id)}" aria-haspopup="dialog" title="${ls.length ? esc("Saved in: " + names) : "Save to a list"}">${ls.length ? "★ " + esc(txt) : "☆ Save"}</button>`;
+  return ls.length ? `<span class="star on" title="${esc("Saved in: " + names)}">★ ${esc(txt)}</span>` : "";
+}
+function card(p) {
+  const n = p.numbers || {};
+  const status = p.status && p.status !== "still_listed" ? `<span class="pill s-${esc(p.status)}">${p.status === "new" ? "New" : "Price change"}</span>` : "";
+  return `<article class="site">
+    <div class="top">
+      <div><h3><a href="${esc(safeUrl(p.url))}" target="_blank" rel="noopener">${esc(p.address)}</a></h3>
+        <div class="sub">${esc(p.suburb)} · ${esc(p.price_text || "Price not stated")} · ${esc(p.source || "")}
+          ${p.lat ? ` · <a href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lon}" target="_blank" rel="noopener">Map</a> · <a href="https://geomapspublic.aucklandcouncil.govt.nz/viewer/index.html" target="_blank" rel="noopener">GeoMaps</a>` : ""}</div></div>
+      <div class="score">${starButton(p)}<b class="num">${p.score ?? "–"}</b><span class="pill ${labelCls(p.label)}">${esc(p.label || "")}</span>${status}</div>
+    </div>
+    <div class="actions"><a class="btn" href="${esc(safeUrl(p.url))}" target="_blank" rel="noopener">View on realestate.co.nz</a>${p.lat ? `<button type="button" class="mapbtn" data-map="${esc(p.id)}">Show on map</button>` : ""}${p.feasibility ? `<a class="pill ${p.feasibility.verdict === "Go" ? "l-strong" : p.feasibility.verdict === "Caution" ? "l-look" : "l-bad"}" href="${esc(safeUrl(p.feasibility.url))}" target="_blank" rel="noopener" style="text-decoration:none">Feasibility: ${esc(p.feasibility.verdict)} →</a>` : ""}${saleTypes(p)}${slopePill(p)}${flood(p)}${powerPill(p)}${topZones(p).map(z => `<span class="pill l-strong" title="Top-10 Auckland state secondary by NCEA L3 (${z.ncea_l3_pct}%)">Top-10 zone: ${esc(z.name)}</span>`).join("")}${p.state_housing && p.state_housing.level ? `<span class="pill ${p.state_housing.level === "High" ? "l-bad" : p.state_housing.level === "Medium" ? "l-look" : "l-strong"}">State housing: ${esc(p.state_housing.level)}</span>` : ""}</div>
+    ${pricing(p)}
+    <div class="panels">${locPanel(p)}${landPanel(p)}${growthPanel(p)}${statePanel(p)}</div>
+    <dl class="facts">
+      <div><dt>Land</dt><dd class="num">${p.land_m2 ? p.land_m2 + " m²" : "Not stated"}</dd></div>
+      <div><dt>Zone</dt><dd>${esc((p.zone || "Unknown").replace("Residential - ", "").replace(" Zone", ""))}</dd></div>
+      <div><dt>Beds / baths</dt><dd class="num">${p.beds ?? "–"} / ${p.baths ?? "–"}</dd></div>
+      <div><dt>CV · land value</dt><dd class="num">${k(p.cv)} · ${k(p.land_value)}</dd></div>
+      <div><dt>Built</dt><dd>${esc(p.decade_built || "Unknown")}</dd></div>
+      <div><dt>Slope (LiDAR)</dt><dd>${p.slope && !p.slope.error ? `${esc(p.slope.class)} · avg ${p.slope.avg_slope_pct}% · ${p.slope.fall_m} m fall` : "Unknown"}</dd></div>
+      <div><dt>Wastewater</dt><dd>${svc(p.services?.wastewater)}</dd></div>
+      <div><dt>Stormwater</dt><dd>${svc(p.services?.stormwater)}</dd></div>
+      <div class="wide"><dt>Title (LINZ)</dt><dd>${esc(p.title_estate || p.title || "Not found")}</dd></div>
+    </dl>
+    ${schools(p)}
+    ${p.dev_angle ? `<p class="angle"><span>Development angle</span>${esc(p.dev_angle)}</p>` : ""}
+    ${p.why ? `<p class="why">${esc(p.why)}</p>` : ""}
+    ${(p.rule_fails || []).length || (p.flags || []).length ? `<ul class="flags">${(p.rule_fails || []).map(f => `<li><b>Outside your rules</b> · ${esc(f)}</li>`).join("")}${(p.flags || []).map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
+    <details class="more"><summary>Numbers and questions for the agent</summary>
+      <dl class="nums">
+        <div><dt>Expected price</dt><dd class="num">${money(p.price_used)}</dd></div>
+        <div><dt>Deposit</dt><dd class="num">${money(n.deposit)}</dd></div>
+        <div><dt>Loan</dt><dd class="num">${money(n.loan)}</dd></div>
+        <div><dt>Repayment / wk</dt><dd class="num">${money(n.weekly_repayment)}</dd></div>
+        <div><dt>Est. rent / wk</dt><dd class="num">${money(n.weekly_rent)}</dd></div>
+        <div><dt>Gross yield</dt><dd class="num">${n.gross_yield_pct ? n.gross_yield_pct.toFixed(1) + "%" : "—"}</dd></div>
+        <div><dt>Land share of CV</dt><dd class="num">${n.land_value_share_pct ? Math.round(n.land_value_share_pct) + "%" : "—"}</dd></div>
+        <div><dt>2nd dwelling cost</dt><dd class="num">${money(n.second_dwelling_cost)}</dd></div>
+        <div><dt>Estimate range</dt><dd class="num">${p.estimate ? k(p.estimate.low) + "–" + k(p.estimate.high) : "—"}</dd></div>
+      </dl>
+      ${(p.questions || []).length ? `<ol class="qs">${p.questions.map(q => `<li>${esc(q)}</li>`).join("")}</ol>` : ""}
+    </details>
+  </article>`;
+}
+
+function render() {
+  const d = DATA || { shortlist: [], rejected: [], school_rejects: [], sources: [], notes: [] };
+  if (d.run_date) $("date").textContent = "Run " + new Date(d.run_date + "T08:00:00").toLocaleDateString("en-NZ", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  $("summary").textContent = d.summary || "The first morning run will fill this page with ranked sites.";
+  const sl = d.shortlist || [];
+  const scanned = (d.sources || []).reduce((a, s) => a + (s.scanned || 0), 0);
+  $("strip").innerHTML = [
+    [scanned, "listings scanned"], [sl.filter(p => p.status === "new").length, "new on shortlist"],
+    [sl.filter(p => p.label === "Strong").length, "strong"], [sl.length, "sites listed"], [sl.filter(p => !(p.rule_fails || []).length).length, "meet your rules"]
+  ].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
+  $("sources").textContent = (d.sources || []).map(s => `${s.name}: ${s.status}`).join(" · ");
+
+  fillSchools(sl);
+  if (!subsFilled && sl.length) { subsFilled = true; fillSuburbs(sl); } else subsSummary();
+  // Address search looks across every site and pauses the other filters, so a typed address is never hidden by one.
+  const q = $("q").value.trim().toLowerCase().replace(/[,\s]+/g, " ");
+  let items = q ? sl.filter(p => (p.address + " " + p.suburb).toLowerCase().replace(/[,\s]+/g, " ").includes(q)) :
+    sl.filter(p => filter === "all" ? true : filter === "starred" ? starred.has(String(p.id)) : filter === "new" ? p.status === "new" : filter === "train" ? (p.transport?.train?.distance_m ?? 9e9) <= 1200 : filter === "Stretch" ? (p.pricing?.expected ?? 0) > 1100000 : filter === "topzone" ? topZones(p).length > 0 : p.label === filter).filter(matchExtra);
+  zoneInfo(sl);
+  // 100 cards at a time; any filter or sort change starts again from the top 100.
+  const sig = JSON.stringify([q, filter, sortBy, xIds.map(i => $(i).value), [...subSel], $("x-list").value]);
+  if (sig !== lastSig) { lastSig = sig; shown = 100; }
+  $("count").textContent = q ? `${items.length} site${items.length === 1 ? "" : "s"} match "${$("q").value.trim()}" across all ${sl.length} sites · other filters paused while searching` : items.length > shown ? `${items.length} sites match (of ${sl.length}) · showing the top ${shown}` : `Showing ${items.length} of ${sl.length} sites`;
+  const sorters = { score: (a, b) => (b.score || 0) - (a.score || 0), price: (a, b) => (a.price_used || 9e9) - (b.price_used || 9e9), cbd: (a, b) => (a.transport?.cbd_km ?? 99) - (b.transport?.cbd_km ?? 99), growth: (a, b) => (b.growth?.outlook_5y_pct ?? -99) - (a.growth?.outlook_5y_pct ?? -99) };
+  items.sort(sorters[sortBy]);
+  // Shortlisted sites always sit at the top.
+  items.sort((a, b) => (starred.has(String(b.id)) ? 1 : 0) - (starred.has(String(a.id)) ? 1 : 0));
+  updateMap(items, q);
+  $("list").innerHTML = items.length ? items.slice(0, shown).map(card).join("") + (items.length > shown ? `<button type="button" class="more-btn" id="more">Show ${Math.min(100, items.length - shown)} more</button>` : "") :
+    `<div class="empty">${sl.length ? "Nothing matches this filter." : "No sites on the shortlist yet. Each morning's run adds new matches here."}</div>`;
+  document.querySelectorAll("[data-f]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === filter)));
+  $("sort").textContent = "Sort: " + ({ score: "score", price: "price", cbd: "closest to CBD", growth: "future growth" }[sortBy]);
+
+  const rej = d.rejected || [], sch = d.school_rejects || [];
+  $("rej-title").textContent = `Screened out (${rej.length})`;
+  $("rej").innerHTML = rej.map(r => `<tr><td><a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(r.address)}</a></td><td>${esc(r.reason)}</td></tr>`).join("") || `<tr><td colspan="2">None</td></tr>`;
+  $("sch-title").textContent = `Outside your school zones (${sch.length})`;
+  $("sch").innerHTML = sch.map(r => `<tr><td><a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">${esc(r.address)}</a></td><td>${esc(r.school)}</td></tr>`).join("") || `<tr><td colspan="2">None</td></tr>`;
+  $("notes").innerHTML = (d.notes || []).map(n => `<li>${esc(n)}</li>`).join("");
+}
+
+// Extra filters: land position, state housing, school bands per level, a named school zone, flood, power lines.
+const xIds = ["x-rules", "x-zone", "x-title", "x-pmin", "x-pmax", "x-pos", "x-sh", "x-pri", "x-int", "x-sec", "x-school", "x-flood", "x-power", "x-top"];
+// Top-10 secondary zones (data.top_zones, keyed by MoE school id) that this site is in.
+function topZones(p) { const tz = DATA?.top_zones || {}; return [].concat(p.schools?.secondary || []).filter(s => s && tz[String(s.id)]).map(s => ({ id: String(s.id), ...tz[String(s.id)] })); }
+const bandRank = { High: 3, Medium: 2, Low: 1 };
+const zoneShort = z => String(z || "Unknown").replace("Residential - ", "").replace(" Zone", "");
+function bestBand(list) { let b = null; [].concat(list || []).filter(s => s && s.band).forEach(s => { if (!b || bandRank[s.band] > bandRank[b]) b = s.band; }); return b; }
+function bandOk(v, list) { if (!v) return true; const b = bestBand(list); return v === "HM" ? b === "High" || b === "Medium" : b === v; }
+function schoolNames(p) { const s = p.schools || {}; return [].concat(s.primary || [], s.intermediate || [], s.secondary || []).filter(x => x && x.name).map(x => x.name); }
+// Suburb multi-select, grouped by realestate.co.nz district (suburbs.json, published beside the page).
+// subSel holds normalised suburb keys; empty = all suburbs.
+let SUBS = null, subSel = new Set(), subsFilled = false;
+const openD = new Set();
+const norm = s => String(s || "").toLowerCase().replace(/^st\.? /, "saint ").replace(/^mt\.? /, "mount ").replace(/[^a-z]+/g, " ").trim();
+try { subSel = new Set(JSON.parse(localStorage.getItem("hunt-subs") || "[]").map(norm)); } catch (e) {}
+function saveSubs() { try { localStorage.setItem("hunt-subs", JSON.stringify([...subSel])); } catch (e) {} }
+// [[district, [suburb names]]], plus "Other" for any listing suburb the list doesn't know.
+function subGroups(sl) {
+  const groups = SUBS ? Object.entries(SUBS) : [], known = new Set(groups.flatMap(([, s]) => s.map(norm)));
+  const other = [...new Set(sl.map(p => p.suburb || "Unknown").filter(s => !known.has(norm(s))))].sort();
+  return other.length ? groups.concat([[SUBS ? "Other" : "Suburbs on this page", other]]) : groups;
+}
+function fillSuburbs(sl) {
+  const counts = {}; sl.forEach(p => { const s = norm(p.suburb || "Unknown"); counts[s] = (counts[s] || 0) + 1; });
+  const q = $("x-subs-q").value.trim().toLowerCase();
+  $("x-subs-opts").innerHTML = subGroups(sl).map(([d, subs]) => {
+    const shown = subs.filter(n => !q || n.toLowerCase().includes(q) || d.toLowerCase().includes(q));
+    if (!shown.length) return "";
+    const n = subs.reduce((a, s) => a + (counts[norm(s)] || 0), 0), open = q || openD.has(d);
+    return `<div class="grp"><div class="gh"><input type="checkbox" data-d="${esc(d)}" aria-label="All of ${esc(d)}">
+        <button type="button" data-t="${esc(d)}" aria-expanded="${!!open}">${esc(d)} <span>${open ? "▾" : "▸"}</span></button><small>${n} site${n === 1 ? "" : "s"}</small></div>
+      <div class="gs"${open ? "" : " hidden"}>${shown.map(s => `<label class="${counts[norm(s)] ? "" : "zero"}"><input type="checkbox" value="${esc(norm(s))}" data-name="${esc(s)}">${esc(s)}<small>${counts[norm(s)] || ""}</small></label>`).join("")}</div></div>`;
+  }).join("") || `<span class="muted">No match</span>`;
+  subsSummary();
+}
+// Ticking boxes only updates the label and checkmarks, so the list keeps its scroll position.
+function subsSummary() {
+  const box = $("x-subs-opts"), full = [];
+  subGroups(DATA?.shortlist || []).forEach(([d, subs]) => {
+    const keys = subs.map(norm), on = keys.filter(k => subSel.has(k)).length, c = box.querySelector(`[data-d="${CSS.escape(d)}"]`);
+    if (c) { c.checked = on > 0 && on === keys.length; c.indeterminate = on > 0 && on < keys.length; }
+    if (on && on === keys.length) full.push([d, keys]);
+  });
+  box.querySelectorAll("input[value]").forEach(c => c.checked = subSel.has(c.value));
+  // Label: whole districts by name when the pick is exactly those; otherwise suburb names or a count.
+  const inFull = new Set(full.flatMap(([, k]) => k)), onlyFull = full.length && [...subSel].every(k => inFull.has(k));
+  const names = [...subSel].map(k => box.querySelector(`input[value="${CSS.escape(k)}"]`)?.dataset.name || k.replace(/\b\w/g, ch => ch.toUpperCase()));
+  $("x-subs-sum").textContent = !subSel.size ? "All suburbs" : onlyFull && full.length <= 2 ? full.map(([d]) => d).join(", ") : subSel.size <= 2 ? names.join(", ") : `${subSel.size} suburbs`;
+}
+$("x-subs-opts").addEventListener("change", e => {
+  const c = e.target, d = c.dataset.d;
+  if (d) { const g = subGroups(DATA?.shortlist || []).find(([x]) => x === d); (g ? g[1] : []).forEach(s => c.checked ? subSel.add(norm(s)) : subSel.delete(norm(s))); }
+  else if (c.value) c.checked ? subSel.add(c.value) : subSel.delete(c.value);
+  saveSubs(); render();
+});
+$("x-subs-opts").addEventListener("click", e => {
+  const b = e.target.closest("[data-t]"); if (!b) return;
+  const d = b.dataset.t; openD.has(d) ? openD.delete(d) : openD.add(d); fillSuburbs(DATA?.shortlist || []);
+});
+$("x-subs-q").addEventListener("input", () => fillSuburbs(DATA?.shortlist || []));
+$("x-subs-all").addEventListener("click", () => { $("x-subs-opts").querySelectorAll(".gs:not([hidden]) input[value]").forEach(c => subSel.add(c.value)); saveSubs(); render(); });
+$("x-subs-none").addEventListener("click", () => { subSel.clear(); saveSubs(); render(); });
+fetch("suburbs.json").then(r => r.ok ? r.json() : null).then(d => { if (d) { SUBS = d; subsFilled = false; render(); } }).catch(() => { });
+document.addEventListener("click", e => { const d = $("x-subs"); if (d.open && !d.contains(e.target)) d.open = false; });
+function matchExtra(p) {
+  if (subSel.size && !subSel.has(norm(p.suburb || "Unknown"))) return false;
+  const rf = (p.rule_fails || []).length, rv = $("x-rules").value;
+  if (rv === "" && rf) return false;
+  if (rv === "fail" && !rf) return false;
+  if ($("x-zone").value && zoneShort(p.zone) !== $("x-zone").value) return false;
+  if ($("x-title").value && (p.title || "Unknown") !== $("x-title").value) return false;
+  const lv = $("x-list").value;
+  if (lv === "any" ? !starred.has(String(p.id)) : lv && !listsOf(p.id).includes(lv)) return false;
+  // Price range on the expected price shown on each card; sites with no price only show when no range is set.
+  const pmin = +$("x-pmin").value, pmax = +$("x-pmax").value, price = p.pricing?.expected || p.price_used;
+  if ((pmin || pmax) && !price) return false;
+  if (pmin && price < pmin) return false;
+  if (pmax && price > pmax) return false;
+  const v = id => $(id).value, l = p.land && typeof p.land === "object" ? p.land : {}, pos = l.position || "";
+  const pv = v("x-pos");
+  if (pv === "front" && !/^Road front/.test(pos)) return false;
+  if (pv === "corner" && !/corner/.test(pos)) return false;
+  if (pv === "rear" && !/^Rear/.test(pos)) return false;
+  if (pv === "battle" && !/battle-axe/.test(pos)) return false;
+  const sh = v("x-sh"), lvl = p.state_housing?.level;
+  if (sh && (sh === "LM" ? !(lvl === "Low" || lvl === "Medium") : lvl !== sh)) return false;
+  const s = p.schools || {};
+  if (!bandOk(v("x-pri"), s.primary) || !bandOk(v("x-int"), s.intermediate) || !bandOk(v("x-sec"), s.secondary)) return false;
+  if (v("x-school") && !schoolNames(p).includes(v("x-school"))) return false;
+  const fl = v("x-flood"); if (fl === "none" && p.flood) return false; if (fl === "yes" && !p.flood) return false;
+  const pw = v("x-power"), pl = p.power_lines?.level;
+  if (pw === "none" && pl && pl !== "None nearby") return false;
+  if (pw === "near" && !/Over|corridor|Within/.test(pl || "")) return false;
+  if (v("x-top") === "all" ? !topZones(p).length : v("x-top") && !topZones(p).some(z => z.id === v("x-top"))) return false;
+  return true;
+}
+function zoneInfo(sl) {
+  const id = $("x-top").value, z = (DATA?.top_zones || {})[id], el = $("zoneinfo");
+  if (id === "all") {
+    const by = Object.entries(DATA?.top_zones || {}).map(([k, t]) => [t.name, sl.filter(p => topZones(p).some(x => x.id === k)).length]).filter(([, n]) => n);
+    const n = sl.filter(p => topZones(p).length).length;
+    el.innerHTML = `<b>All top-10 zones</b>: ${n} site${n === 1 ? "" : "s"}${by.length ? " (" + by.map(([nm, c]) => `${esc(nm)} ${c}`).join(", ") + ")" : ""}. Each card shows which zone it's in.`;
+    el.hidden = false; return;
+  }
+  if (!z) { el.hidden = true; return; }
+  const n = sl.filter(p => topZones(p).some(t => t.id === id)).length;
+  const subs = (z.suburbs || []).map(s => s.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())).join(", ");
+  el.innerHTML = `<b>${esc(z.name)}</b> (NCEA L3 ${z.ncea_l3_pct}%): ${n} site${n === 1 ? "" : "s"} in zone right now. The zone touches ${esc(subs)}. Only addresses inside the zone line count. <a href="https://ero.govt.nz/institution/${esc(id)}" target="_blank" rel="noopener">School report</a>`;
+  el.hidden = false;
+}
+let schoolsFilled = false;
+function fillSchools(sl) {
+  if (schoolsFilled || !sl.length) return; schoolsFilled = true;
+  const sel = $("x-school"), lv = { primary: "Primary", intermediate: "Intermediate", secondary: "Secondary" };
+  sel.innerHTML += Object.keys(lv).map(k => {
+    const names = [...new Set(sl.flatMap(p => [].concat(p.schools?.[k] || []).filter(x => x && x.name).map(x => x.name)))].sort();
+    return names.length ? `<optgroup label="${lv[k]}">${names.map(n => `<option>${esc(n)}</option>`).join("")}</optgroup>` : "";
+  }).join("");
+  // Zone and title choices come from the sites on the page, with counts.
+  const opt = (vals) => Object.entries(vals.reduce((a, v) => (a[v] = (a[v] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]).map(([v, n]) => `<option value="${esc(v)}">${esc(v)} (${n})</option>`).join("");
+  $("x-zone").innerHTML += opt(sl.map(p => zoneShort(p.zone)));
+  $("x-title").innerHTML += opt(sl.map(p => p.title || "Unknown"));
+  // Price steps: $100k to $1.5m, then $250k up to the dearest site on the page.
+  const top = Math.max(1500000, ...sl.map(p => p.pricing?.expected || 0)), steps = [];
+  for (let v = 300000; v <= 1500000; v += 100000) steps.push(v);
+  for (let v = 1750000; v < top + 250000; v += 250000) steps.push(v);
+  const opts = steps.map(v => `<option value="${v}">${k(v)}</option>`).join("");
+  $("x-pmin").innerHTML += opts; $("x-pmax").innerHTML += opts;
+  $("x-top").innerHTML += Object.entries(DATA?.top_zones || {}).map(([id, z]) => `<option value="${esc(id)}">${esc(z.name)}</option>`).join("");
+  try { const saved = JSON.parse(localStorage.getItem("hunt-x") || "{}"); xIds.forEach(id => { if (saved[id] != null) $(id).value = saved[id]; }); } catch (e) {}
+}
+xIds.forEach(id => $(id).addEventListener("change", () => {
+  try { localStorage.setItem("hunt-x", JSON.stringify(Object.fromEntries(xIds.map(i => [i, $(i).value])))); } catch (e) {}
+  render();
+}));
+$("x-reset").addEventListener("click", () => { xIds.forEach(id => $(id).value = ""); subSel.clear(); $("x-subs-q").value = ""; fillSuburbs(DATA?.shortlist || []); try { localStorage.removeItem("hunt-x"); localStorage.removeItem("hunt-subs"); } catch (e) {} render(); });
+
+document.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => {
+  filter = b.dataset.f; try { localStorage.setItem("hunt-filter", filter); } catch (e) {} render();
+}));
+$("sort").addEventListener("click", () => { sortBy = { score: "growth", growth: "cbd", cbd: "price", price: "score" }[sortBy]; render(); });
+
+// ---- Named saved lists ----
+const siteById = id => (DATA?.shortlist || []).find(x => String(x.id) === String(id));
+const listCount = lid => [...saved.values()].filter(ls => ls.includes(lid)).length;
+function savedChanged() { starred = new Set(saved.keys()); fillListFilter(); renderListsPanel(); if (menuFor) fillMenu(); render(); }
+// Put a site on exactly these lists (none = remove its doc). Saved lists are shared: everyone with the link sees them.
+async function setSiteLists(id, ls, info) {
+  id = String(id); const ref = shortlistDb.collection("shortlist").doc(id), p = siteById(id) || info || {};
+  ls.length ? saved.set(id, ls) : saved.delete(id); savedChanged();
+  try {
+    if (ls.length) await ref.set({ address: p.address || "", url: p.url || "", suburb: p.suburb || "", at: new Date().toISOString(), lists: ls });
+    else await ref.delete();
+  } catch (err) { if (err && err.code === "invalid_argument") canStar = false; render(); }
+}
+async function newList(name) {
+  name = name.trim().slice(0, 40); if (!name) return null;
+  const id = "l" + Date.now().toString(36);
+  // The first time, write the original "Shortlist" list too so it keeps its name beside the new one.
+  if (!lists.length) { lists = [{ id: "main", name: "Shortlist", at: "" }]; await shortlistDb.collection("lists").doc("main").set({ name: "Shortlist", at: new Date().toISOString() }); }
+  lists = lists.concat([{ id, name, at: new Date().toISOString() }]); savedChanged();
+  await shortlistDb.collection("lists").doc(id).set({ name, at: new Date().toISOString() });
+  return id;
+}
+let menuFor = null;
+function fillMenu() {
+  const id = menuFor, ls = listsOf(id), m = $("savemenu");
+  m.innerHTML = `<b>Save to a list</b>${allLists().map(l => `<label><input type="checkbox" data-l="${esc(l.id)}"${ls.includes(l.id) ? " checked" : ""}>${esc(l.name)}<small>${listCount(l.id)}</small></label>`).join("")}
+    <form id="menu-new"><input type="text" maxlength="40" placeholder="New list name" aria-label="New list name"><button type="submit">Add</button></form>`;
+}
+function openMenu(btn) {
+  menuFor = btn.dataset.save; fillMenu();
+  const m = $("savemenu"), r = btn.getBoundingClientRect(), wrapR = m.offsetParent ? m.offsetParent.getBoundingClientRect() : { left: 0, top: 0 };
+  m.hidden = false;
+  m.style.top = (r.bottom - wrapR.top + 6) + "px";
+  m.style.left = Math.max(0, Math.min(r.right - wrapR.left - m.offsetWidth, document.documentElement.clientWidth - m.offsetWidth - 16 - wrapR.left)) + "px";
+}
+function closeMenu() { menuFor = null; $("savemenu").hidden = true; }
+$("list").addEventListener("click", e => {
+  if (e.target.id === "more") { shown += 100; render(); return; }
+  const mb = e.target.closest("[data-map]"); if (mb) { focusOnMap(mb.dataset.map); return; }
+  const b = e.target.closest("[data-save]"); if (!b || !shortlistDb) return;
+  e.stopPropagation(); menuFor === b.dataset.save ? closeMenu() : openMenu(b);
+});
+$("savemenu").addEventListener("change", e => {
+  const lid = e.target.dataset.l; if (!lid || !menuFor) return;
+  const ls = listsOf(menuFor).filter(x => x !== lid); if (e.target.checked) ls.push(lid);
+  setSiteLists(menuFor, ls);
+});
+$("savemenu").addEventListener("submit", async e => {
+  e.preventDefault(); const inp = e.target.querySelector("input"), id = menuFor;
+  const lid = await newList(inp.value).catch(() => null); if (lid && id) setSiteLists(id, listsOf(id).concat([lid]));
+});
+document.addEventListener("click", e => { if (menuFor && !$("savemenu").contains(e.target)) closeMenu(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && menuFor) closeMenu(); });
+
+// "Saved list" filter options follow the lists as they change.
+let wantList = ""; try { wantList = localStorage.getItem("hunt-list") || ""; } catch (e) {}
+function fillListFilter() {
+  const sel = $("x-list"), cur = sel.value || wantList;
+  sel.innerHTML = `<option value="">Any (no filter)</option><option value="any">★ On any list (${saved.size})</option>` + allLists().map(l => `<option value="${esc(l.id)}">${esc(l.name)} (${listCount(l.id)})</option>`).join("");
+  if ([...sel.options].some(o => o.value === cur)) { sel.value = cur; wantList = ""; }
+}
+$("q").addEventListener("input", () => render());
+$("x-list").addEventListener("change", () => { try { localStorage.setItem("hunt-list", $("x-list").value); } catch (e) {} render(); });
+$("x-reset").addEventListener("click", () => { $("x-list").value = ""; try { localStorage.removeItem("hunt-list"); } catch (e) {} render(); });
+
+// Lists panel: show, rename, delete (two clicks), add.
+function renderListsPanel() {
+  const edit = !!(shortlistDb && canStar);
+  $("lists-panel").innerHTML = allLists().map(l => `<div class="row">${edit ? `<input type="text" maxlength="40" value="${esc(l.name)}" data-rename="${esc(l.id)}" aria-label="List name">` : `<b>${esc(l.name)}</b>`}
+      <small>${listCount(l.id)} site${listCount(l.id) === 1 ? "" : "s"}</small><button type="button" data-show="${esc(l.id)}">Show</button>${edit ? `<button type="button" class="danger" data-del="${esc(l.id)}">Delete</button>` : ""}</div>`).join("")
+    + (edit ? `<form id="panel-new"><input type="text" maxlength="40" placeholder="New list name" aria-label="New list name"><button type="submit">Add list</button></form>` : `<p class="muted">Only the page owner can change lists.</p>`);
+}
+$("lists-panel").addEventListener("click", async e => {
+  const s = e.target.dataset.show, d = e.target.dataset.del;
+  if (s) { $("x-list").value = s; try { localStorage.setItem("hunt-list", s); } catch (er) {} render(); $("count").scrollIntoView({ block: "center" }); }
+  if (d) {
+    if (e.target.dataset.armed !== "1") { e.target.dataset.armed = "1"; e.target.textContent = "Click again to delete"; return; }
+    // Take the list off every site (deleting docs left on no list), then remove the list itself.
+    for (const [id, ls] of [...saved.entries()]) if (ls.includes(d)) await setSiteLists(id, ls.filter(x => x !== d));
+    lists = lists.filter(l => l.id !== d); savedChanged();
+    try { await shortlistDb.collection("lists").doc(d).delete(); } catch (er) {}
+  }
+});
+$("lists-panel").addEventListener("change", e => {
+  const id = e.target.dataset.rename, name = e.target.value.trim().slice(0, 40); if (!id || !name) return;
+  const l = allLists().find(x => x.id === id); if (l) l.name = name;
+  shortlistDb.collection("lists").doc(id).set({ name, at: (l && l.at) || new Date().toISOString() }).catch(() => {});
+  if (!lists.length) lists = [{ id, name, at: "" }];
+  savedChanged();
+});
+$("lists-panel").addEventListener("submit", e => { e.preventDefault(); newList(e.target.querySelector("input").value).catch(() => {}); });
+
+// ---- Map: Leaflet + Auckland Council layers (esri-leaflet) ----
+const AC = "https://services1.arcgis.com/n4yPwebTjJCmXB6W/arcgis/rest/services/";
+const TITLES = "https://services.arcgis.com/xdsHIIxuCWByZiCB/arcgis/rest/services/LINZ_NZ_Property_Titles/FeatureServer/0";
+let map = null, siteLayer = null, parcelLayer = null, ZONES = {}, lastFitQ = null, mapFitted = false;
+const markerById = new Map();
+const dotColor = l => ({ "Strong": "#23764a", "Worth a look": "#c88a00", "Stretch": "#1d5e6e", "Outside your rules": "#b9bfbd" }[l] || "#6e7a77");
+const zoneColor = n => /Single House/.test(n) ? "#f3e2a9" : /Suburban/.test(n) ? "#f2c45a" : /Mixed Housing Urban/.test(n) ? "#e8964a" : /Terrace/.test(n) ? "#c0562f" : /Business|Centre/.test(n) ? "#8e6ac8" : /Rural|Countryside/.test(n) ? "#8fbf6b" : /Open Space/.test(n) ? "#4f9a5b" : /Large Lot/.test(n) ? "#e9dfc3" : "#9aa5a2";
+fetch("zone-codes.json").then(r => r.ok ? r.json() : {}).then(z => { ZONES = z || {}; }).catch(() => { });
+function initMap() {
+  if (map || !window.L || !window.L.esri) return;
+  map = L.map("map", { preferCanvas: true }).setView([-36.88, 174.76], 10);
+  const street = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
+  const aerial = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "Imagery &copy; Esri" });
+  // Council polygons are heavy, so each layer only draws from street/suburb zoom.
+  const layer = (svc, color, minZoom) => L.esri.featureLayer({ url: AC + svc + "/FeatureServer/0", minZoom, simplifyFactor: 0.5, precision: 6, interactive: false,
+    style: () => ({ color, weight: 1, fillColor: color, fillOpacity: 0.35 }) });
+  const zoning = L.esri.featureLayer({ url: AC + "Unitary_Plan_Base_Zone/FeatureServer/0", minZoom: 15, simplifyFactor: 0.5, precision: 6, fields: ["OBJECTID", "ZONE"],
+    style: f => { const c = zoneColor(ZONES[String(f.properties.ZONE)] || ""); return { color: c, weight: 0.6, fillColor: c, fillOpacity: 0.3 }; } });
+  zoning.bindPopup(l => esc(ZONES[String(l.feature.properties.ZONE)] || "Zone"));
+  const overlays = {
+    "Flood plains": layer("Flood_Plains", "#1f6fd1", 14),
+    "Flood prone areas": layer("Flood_Prone_Areas", "#4fa3e0", 14),
+    "Flood sensitive areas": layer("Flood_Sensitive_Areas", "#9ccff0", 14),
+    "Zoning (Unitary Plan)": zoning,
+    "Special Character Areas": layer("Special_Character_Areas_Overlay_Residential_and_Business", "#a05ac8", 14),
+    "Historic heritage": layer("Historic_Heritage_Overlay_Extent_of_Place", "#b03a2e", 15),
+    "National Grid corridor": layer("National_Grid_Corridor_Overlay", "#e5b153", 13)
+  };
+  overlays["Flood plains"].addTo(map); overlays["Flood prone areas"].addTo(map);
+  L.control.layers({ "Street map": street, "Aerial photo": aerial }, overlays, { collapsed: window.innerWidth < 760 }).addTo(map);
+  L.control.scale({ imperial: false }).addTo(map);
+  const note = L.control({ position: "bottomleft" });
+  note.onAdd = () => { const d = L.DomUtil.create("div", "zoomnote"); d.id = "zoomnote"; return d; };
+  note.addTo(map);
+  const zoomNote = () => { const el = $("zoomnote"); if (el) { el.textContent = map.getZoom() < 14 ? "Zoom in to see flood and overlay layers" : ""; el.style.display = map.getZoom() < 14 ? "" : "none"; } };
+  map.on("zoomend", zoomNote); zoomNote();
+  siteLayer = L.layerGroup().addTo(map);
+  // Popup buttons: Leaflet stops clicks bubbling out of popups, so wire them when each opens.
+  map.on("popupopen", e => {
+    const el = e.popup.getElement(); if (!el) return;
+    el.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => openCard(b.dataset.open)));
+    el.querySelectorAll("[data-save]").forEach(b => b.addEventListener("click", ev => { ev.stopPropagation(); if (shortlistDb) openMenu(b); }));
+  });
+}
+function popupHtml(p) {
+  const ls = listsOf(p.id), fails = (p.rule_fails || []).length;
+  return `<div class="pop-site"><b class="addr">${esc(p.address)}</b>${esc(p.suburb)} · <b>${money(p.pricing?.expected || p.price_used)}</b> expected
+    <div class="row"><span>Score ${p.score ?? "–"} · ${esc(p.label || "")}</span><span>${p.land_m2 ? p.land_m2 + " m²" : ""}</span><span>${esc(zoneShort(p.zone))}</span>${p.flood ? `<span style="color:var(--bad)">${esc(p.flood)}</span>` : ""}${fails ? `<span>${fails} rule${fails > 1 ? "s" : ""} broken</span>` : ""}</div>
+    <div class="acts"><button type="button" data-open="${esc(p.id)}">Details</button>${shortlistDb && canStar ? `<button type="button" data-save="${esc(p.id)}">${ls.length ? "★ Saved" : "☆ Save"}</button>` : ""}<a href="${esc(safeUrl(p.url))}" target="_blank" rel="noopener"><button type="button" tabindex="-1">Listing</button></a></div></div>`;
+}
+function updateMap(items, q) {
+  initMap(); if (!map) return;
+  siteLayer.clearLayers(); markerById.clear();
+  const pts = [];
+  // Drawn bottom-up so higher-scoring and saved sites sit on top.
+  [...items].reverse().forEach(p => {
+    if (!p.lat || !p.lon) return;
+    const isSaved = starred.has(String(p.id));
+    const m = L.circleMarker([p.lat, p.lon], { radius: isSaved ? 8 : 6, color: isSaved ? "#17211f" : "#ffffff", weight: isSaved ? 2 : 1.2, fillColor: dotColor(p.label), fillOpacity: 0.95 })
+      .bindPopup(() => popupHtml(p), { maxWidth: 300 });
+    m.on("click", () => showParcel(p));
+    m.addTo(siteLayer); markerById.set(String(p.id), m); pts.push([p.lat, p.lon]);
+  });
+  // Fit to the data once, and again for each new address search.
+  if (pts.length && (!mapFitted || (q && q !== lastFitQ))) {
+    map.fitBounds(pts, { padding: [24, 24], maxZoom: q ? 17 : 13 }); mapFitted = true;
+    if (q && pts.length === 1) { const p = items.find(x => x.lat); setTimeout(() => { markerById.get(String(p.id))?.openPopup(); showParcel(p); }, 350); }
+  }
+  lastFitQ = q || null;
+}
+// Outline the site's title boundary (LINZ) when a site is picked.
+async function showParcel(p) {
+  if (!map) return;
+  try {
+    const u = `${TITLES}/query?geometry=${p.lon},${p.lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=title_no&returnGeometry=true&outSR=4326&f=json`;
+    const f = ((await (await fetch(u)).json()).features || [])[0]; if (!f) return;
+    if (parcelLayer) parcelLayer.remove();
+    parcelLayer = L.polygon(f.geometry.rings.map(r => r.map(([x, y]) => [y, x])), { color: "#e0362c", weight: 3, fill: false, interactive: false }).addTo(map);
+  } catch (e) { }
+}
+function focusOnMap(id) {
+  const p = siteById(id), m = markerById.get(String(id)); if (!p || !map) return;
+  $("map").scrollIntoView({ behavior: "smooth", block: "center" });
+  map.setView([p.lat, p.lon], 17);
+  if (m) setTimeout(() => m.openPopup(), 300);
+  showParcel(p);
+}
+function openCard(id) {
+  const p = siteById(id); if (!p) return;
+  $("q").value = p.address; render();
+  $("count").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// ---- Saved lists: stored on the web server by api/lists.php ----
+// The adapter below gives the list code the same collection().doc().set()/delete() calls it was written against.
+const LISTS_API = "api/lists.php";
+function applyStore(s) {
+  saved = new Map(Object.entries(s.shortlist || {}).map(([id, d]) => [id, Array.isArray(d.lists) && d.lists.length ? d.lists.map(String) : ["main"]]));
+  lists = Object.entries(s.lists || {}).map(([id, d]) => ({ id, name: String(d.name || "Untitled"), at: String(d.at || "") }))
+    .sort((a, b) => a.id === "main" ? -1 : b.id === "main" ? 1 : a.at.localeCompare(b.at));
+  savedChanged();
+}
+async function postStore(body) {
+  const r = await fetch(LISTS_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok) throw Object.assign(new Error("Saving failed"), { code: "http_" + r.status });
+  applyStore(await r.json());
+}
+const listsAdapter = { collection: col => ({ doc: id => ({ set: data => postStore({ op: "set", col, id, data }), delete: () => postStore({ op: "delete", col, id }) }) }) };
+function loadStore() {
+  return fetch(LISTS_API, { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(s => { if (!s) return; shortlistDb = listsAdapter; canStar = true; applyStore(s); renderListsPanel(); }).catch(() => { });
+}
+
+render(); fillListFilter(); renderListsPanel();
+if (!DATA) fetch("data.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).then(d => { if (d) { DATA = d; render(); } }).catch(() => { });
+loadStore();
+// Pick up lists changed by someone else when you come back to the tab.
+window.addEventListener("focus", () => { if (!menuFor) loadStore(); });
+</script>
+</body>
+</html>

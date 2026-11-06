@@ -1,0 +1,536 @@
+{
+    "updated":  "2026-11-02",
+    "since":  "2025-11-02",
+    "all":  {
+                "n":  1955,
+                "median":  0.961,
+                "p25":  0.88,
+                "p10":  0.786,
+                "big_n":  655,
+                "big_median":  0.958,
+                "big_p25":  0.867,
+                "big_p10":  0.769
+            },
+    "suburbs":  {
+                    "ponsonby":  {
+                                     "n":  58,
+                                     "median":  0.976,
+                                     "p25":  0.917,
+                                     "p10":  0.855,
+                                     "big_n":  2,
+                                     "big_median":  1.052,
+                                     "big_p25":  1.052,
+                                     "big_p10":  1.052
+                                 },
+                    "hillsborough":  {
+                                         "n":  56,
+                                         "median":  0.949,
+                                         "p25":  0.902,
+                                         "p10":  0.755,
+                                         "big_n":  28,
+                                         "big_median":  0.938,
+                                         "big_p25":  0.834,
+                                         "big_p10":  0.665
+                                     },
+                    "waterview":  {
+                                      "n":  57,
+                                      "median":  1.026,
+                                      "p25":  0.943,
+                                      "p10":  0.771,
+                                      "big_n":  5,
+                                      "big_median":  0.95,
+                                      "big_p25":  0.899,
+                                      "big_p10":  0.621
+                                  },
+                    "mission-bay":  {
+                                        "n":  45,
+                                        "median":  0.947,
+                                        "p25":  0.842,
+                                        "p10":  0.771,
+                                        "big_n":  13,
+                                        "big_median":  0.957,
+                                        "big_p25":  0.905,
+                                        "big_p10":  0.867
+                                    },
+                    "botany-downs":  {
+                                         "n":  56,
+                                         "median":  0.921,
+                                         "p25":  0.843,
+                                         "p10":  0.78,
+                                         "big_n":  28,
+                                         "big_median":  0.892,
+                                         "big_p25":  0.786,
+                                         "big_p10":  0.75
+                                     },
+                    "greenlane":  {
+                                      "n":  60,
+                                      "median":  0.902,
+                                      "p25":  0.848,
+                                      "p10":  0.75,
+                                      "big_n":  11,
+                                      "big_median":  0.859,
+                                      "big_p25":  0.847,
+                                      "big_p10":  0.846
+                                  },
+                    "royal-oak":  {
+                                      "n":  48,
+                                      "median":  0.916,
+                                      "p25":  0.828,
+                                      "p10":  0.733,
+                                      "big_n":  11,
+                                      "big_median":  0.871,
+                                      "big_p25":  0.786,
+                                      "big_p10":  0.694
+                                  },
+                    "new-windsor":  {
+                                        "n":  51,
+                                        "median":  0.94,
+                                        "p25":  0.851,
+                                        "p10":  0.784,
+                                        "big_n":  38,
+                                        "big_median":  0.947,
+                                        "big_p25":  0.851,
+                                        "big_p10":  0.753
+                                    },
+                    "kohimarama":  {
+                                       "n":  46,
+                                       "median":  1,
+                                       "p25":  0.881,
+                                       "p10":  0.815,
+                                       "big_n":  9,
+                                       "big_median":  0.911,
+                                       "big_p25":  0.84,
+                                       "big_p10":  0.705
+                                   },
+                    "three-kings":  {
+                                        "n":  17,
+                                        "median":  1.031,
+                                        "p25":  0.977,
+                                        "p10":  0.894,
+                                        "big_n":  2,
+                                        "big_median":  1.229,
+                                        "big_p25":  1.229,
+                                        "big_p10":  1.229
+                                    },
+                    "meadowbank":  {
+                                       "n":  59,
+                                       "median":  0.97,
+                                       "p25":  0.907,
+                                       "p10":  0.78,
+                                       "big_n":  19,
+                                       "big_median":  0.986,
+                                       "big_p25":  0.882,
+                                       "big_p10":  0.833
+                                   },
+                    "morningside":  {
+                                        "n":  36,
+                                        "median":  0.997,
+                                        "p25":  0.928,
+                                        "p10":  0.856,
+                                        "big_n":  8,
+                                        "big_median":  0.965,
+                                        "big_p25":  0.861,
+                                        "big_p10":  0.844
+                                    },
+                    "wai-o-taiki-bay":  {
+                                            "n":  19,
+                                            "median":  1,
+                                            "p25":  0.867,
+                                            "p10":  0.777,
+                                            "big_n":  7,
+                                            "big_median":  0.981,
+                                            "big_p25":  0.777,
+                                            "big_p10":  0.671
+                                        },
+                    "western-springs":  {
+                                            "n":  0,
+                                            "median":  null,
+                                            "p25":  null,
+                                            "p10":  null,
+                                            "big_n":  0,
+                                            "big_median":  null,
+                                            "big_p25":  null,
+                                            "big_p10":  null
+                                        },
+                    "mount-roskill":  {
+                                          "n":  34,
+                                          "median":  0.927,
+                                          "p25":  0.91,
+                                          "p10":  0.729,
+                                          "big_n":  10,
+                                          "big_median":  0.9,
+                                          "big_p25":  0.729,
+                                          "big_p10":  0.565
+                                      },
+                    "sandringham":  {
+                                        "n":  44,
+                                        "median":  0.94,
+                                        "p25":  0.897,
+                                        "p10":  0.825,
+                                        "big_n":  13,
+                                        "big_median":  0.947,
+                                        "big_p25":  0.918,
+                                        "big_p10":  0.842
+                                    },
+                    "westmere":  {
+                                     "n":  62,
+                                     "median":  1.007,
+                                     "p25":  0.899,
+                                     "p10":  0.776,
+                                     "big_n":  11,
+                                     "big_median":  1.057,
+                                     "big_p25":  0.899,
+                                     "big_p10":  0.887
+                                 },
+                    "point-chevalier":  {
+                                            "n":  40,
+                                            "median":  0.951,
+                                            "p25":  0.87,
+                                            "p10":  0.745,
+                                            "big_n":  12,
+                                            "big_median":  0.915,
+                                            "big_p25":  0.842,
+                                            "big_p10":  0.841
+                                        },
+                    "remuera":  {
+                                    "n":  36,
+                                    "median":  0.982,
+                                    "p25":  0.875,
+                                    "p10":  0.794,
+                                    "big_n":  15,
+                                    "big_median":  1.003,
+                                    "big_p25":  0.887,
+                                    "big_p10":  0.777
+                                },
+                    "orakei":  {
+                                   "n":  48,
+                                   "median":  0.922,
+                                   "p25":  0.839,
+                                   "p10":  0.736,
+                                   "big_n":  12,
+                                   "big_median":  0.893,
+                                   "big_p25":  0.766,
+                                   "big_p10":  0.683
+                               },
+                    "saint-heliers":  {
+                                          "n":  43,
+                                          "median":  0.932,
+                                          "p25":  0.882,
+                                          "p10":  0.786,
+                                          "big_n":  16,
+                                          "big_median":  0.912,
+                                          "big_p25":  0.882,
+                                          "big_p10":  0.657
+                                      },
+                    "mount-albert":  {
+                                         "n":  38,
+                                         "median":  0.979,
+                                         "p25":  0.921,
+                                         "p10":  0.862,
+                                         "big_n":  17,
+                                         "big_median":  0.985,
+                                         "big_p25":  0.921,
+                                         "big_p10":  0.88
+                                     },
+                    "glendowie":  {
+                                      "n":  61,
+                                      "median":  0.982,
+                                      "p25":  0.911,
+                                      "p10":  0.832,
+                                      "big_n":  33,
+                                      "big_median":  1.024,
+                                      "big_p25":  0.901,
+                                      "big_p10":  0.819
+                                  },
+                    "onehunga":  {
+                                     "n":  43,
+                                     "median":  0.88,
+                                     "p25":  0.8,
+                                     "p10":  0.752,
+                                     "big_n":  5,
+                                     "big_median":  0.866,
+                                     "big_p25":  0.791,
+                                     "big_p10":  0.769
+                                 },
+                    "penrose":  {
+                                    "n":  7,
+                                    "median":  0.921,
+                                    "p25":  0.864,
+                                    "p10":  0.835,
+                                    "big_n":  1,
+                                    "big_median":  0.894,
+                                    "big_p25":  0.894,
+                                    "big_p10":  0.894
+                                },
+                    "mellons-bay":  {
+                                        "n":  44,
+                                        "median":  0.981,
+                                        "p25":  0.875,
+                                        "p10":  0.731,
+                                        "big_n":  37,
+                                        "big_median":  0.981,
+                                        "big_p25":  0.875,
+                                        "big_p10":  0.693
+                                    },
+                    "parnell":  {
+                                    "n":  21,
+                                    "median":  0.974,
+                                    "p25":  0.912,
+                                    "p10":  0.833,
+                                    "big_n":  4,
+                                    "big_median":  0.957,
+                                    "big_p25":  0.929,
+                                    "big_p10":  0.929
+                                },
+                    "half-moon-bay":  {
+                                          "n":  57,
+                                          "median":  0.949,
+                                          "p25":  0.876,
+                                          "p10":  0.719,
+                                          "big_n":  27,
+                                          "big_median":  0.912,
+                                          "big_p25":  0.798,
+                                          "big_p10":  0.698
+                                      },
+                    "saint-johns":  {
+                                        "n":  32,
+                                        "median":  0.968,
+                                        "p25":  0.936,
+                                        "p10":  0.892,
+                                        "big_n":  13,
+                                        "big_median":  0.957,
+                                        "big_p25":  0.91,
+                                        "big_p10":  0.889
+                                    },
+                    "wynyard-quarter":  {
+                                            "n":  0,
+                                            "median":  null,
+                                            "p25":  null,
+                                            "p10":  null,
+                                            "big_n":  0,
+                                            "big_median":  null,
+                                            "big_p25":  null,
+                                            "big_p10":  null
+                                        },
+                    "ellerslie":  {
+                                      "n":  42,
+                                      "median":  0.981,
+                                      "p25":  0.891,
+                                      "p10":  0.856,
+                                      "big_n":  4,
+                                      "big_median":  0.856,
+                                      "big_p25":  0.66,
+                                      "big_p10":  0.66
+                                  },
+                    "sunnyhills":  {
+                                       "n":  56,
+                                       "median":  0.984,
+                                       "p25":  0.943,
+                                       "p10":  0.845,
+                                       "big_n":  38,
+                                       "big_median":  1.003,
+                                       "big_p25":  0.965,
+                                       "big_p10":  0.844
+                                   },
+                    "avondale":  {
+                                     "n":  56,
+                                     "median":  0.876,
+                                     "p25":  0.8,
+                                     "p10":  0.743,
+                                     "big_n":  20,
+                                     "big_median":  0.8,
+                                     "big_p25":  0.743,
+                                     "big_p10":  0.671
+                                 },
+                    "mount-wellington":  {
+                                             "n":  27,
+                                             "median":  0.887,
+                                             "p25":  0.802,
+                                             "p10":  0.72,
+                                             "big_n":  9,
+                                             "big_median":  0.942,
+                                             "big_p25":  0.801,
+                                             "big_p10":  0.539
+                                         },
+                    "freemans-bay":  {
+                                         "n":  33,
+                                         "median":  0.925,
+                                         "p25":  0.887,
+                                         "p10":  0.814,
+                                         "big_n":  3,
+                                         "big_median":  1.003,
+                                         "big_p25":  0.921,
+                                         "big_p10":  0.921
+                                     },
+                    "somerville":  {
+                                       "n":  44,
+                                       "median":  0.954,
+                                       "p25":  0.897,
+                                       "p10":  0.837,
+                                       "big_n":  24,
+                                       "big_median":  0.954,
+                                       "big_p25":  0.897,
+                                       "big_p10":  0.893
+                                   },
+                    "epsom":  {
+                                  "n":  37,
+                                  "median":  0.952,
+                                  "p25":  0.91,
+                                  "p10":  0.857,
+                                  "big_n":  13,
+                                  "big_median":  1.026,
+                                  "big_p25":  0.965,
+                                  "big_p10":  0.924
+                              },
+                    "stonefields":  {
+                                        "n":  36,
+                                        "median":  0.977,
+                                        "p25":  0.956,
+                                        "p10":  0.905,
+                                        "big_n":  0,
+                                        "big_median":  null,
+                                        "big_p25":  null,
+                                        "big_p10":  null
+                                    },
+                    "grafton":  {
+                                    "n":  5,
+                                    "median":  5.987,
+                                    "p25":  0.983,
+                                    "p10":  0.968,
+                                    "big_n":  0,
+                                    "big_median":  null,
+                                    "big_p25":  null,
+                                    "big_p10":  null
+                                },
+                    "saint-marys-bay":  {
+                                            "n":  20,
+                                            "median":  0.972,
+                                            "p25":  0.829,
+                                            "p10":  0.633,
+                                            "big_n":  1,
+                                            "big_median":  1,
+                                            "big_p25":  1,
+                                            "big_p10":  1
+                                        },
+                    "kingsland":  {
+                                      "n":  30,
+                                      "median":  0.947,
+                                      "p25":  0.891,
+                                      "p10":  0.793,
+                                      "big_n":  3,
+                                      "big_median":  0.896,
+                                      "big_p25":  0.889,
+                                      "big_p10":  0.889
+                                  },
+                    "grey-lynn":  {
+                                      "n":  30,
+                                      "median":  0.942,
+                                      "p25":  0.842,
+                                      "p10":  0.725,
+                                      "big_n":  0,
+                                      "big_median":  null,
+                                      "big_p25":  null,
+                                      "big_p10":  null
+                                  },
+                    "eden-terrace":  {
+                                         "n":  6,
+                                         "median":  0.966,
+                                         "p25":  0.932,
+                                         "p10":  0.88,
+                                         "big_n":  0,
+                                         "big_median":  null,
+                                         "big_p25":  null,
+                                         "big_p10":  null
+                                     },
+                    "one-tree-hill":  {
+                                          "n":  46,
+                                          "median":  0.946,
+                                          "p25":  0.867,
+                                          "p10":  0.627,
+                                          "big_n":  8,
+                                          "big_median":  0.868,
+                                          "big_p25":  0.627,
+                                          "big_p10":  0.555
+                                      },
+                    "blockhouse-bay":  {
+                                           "n":  59,
+                                           "median":  0.97,
+                                           "p25":  0.88,
+                                           "p10":  0.81,
+                                           "big_n":  31,
+                                           "big_median":  0.969,
+                                           "big_p25":  0.863,
+                                           "big_p10":  0.639
+                                       },
+                    "mount-eden":  {
+                                       "n":  41,
+                                       "median":  0.941,
+                                       "p25":  0.849,
+                                       "p10":  0.739,
+                                       "big_n":  17,
+                                       "big_median":  0.954,
+                                       "big_p25":  0.849,
+                                       "big_p10":  0.739
+                                   },
+                    "lynfield":  {
+                                     "n":  35,
+                                     "median":  1,
+                                     "p25":  0.926,
+                                     "p10":  0.833,
+                                     "big_n":  15,
+                                     "big_median":  1,
+                                     "big_p25":  0.941,
+                                     "big_p10":  0.908
+                                 },
+                    "newton":  {
+                                   "n":  0,
+                                   "median":  null,
+                                   "p25":  null,
+                                   "p10":  null,
+                                   "big_n":  0,
+                                   "big_median":  null,
+                                   "big_p25":  null,
+                                   "big_p10":  null
+                               },
+                    "newmarket":  {
+                                      "n":  1,
+                                      "median":  0.385,
+                                      "p25":  0.385,
+                                      "p10":  0.385,
+                                      "big_n":  0,
+                                      "big_median":  null,
+                                      "big_p25":  null,
+                                      "big_p10":  null
+                                  },
+                    "glen-innes":  {
+                                       "n":  49,
+                                       "median":  1.006,
+                                       "p25":  0.914,
+                                       "p10":  0.769,
+                                       "big_n":  13,
+                                       "big_median":  0.894,
+                                       "big_p25":  0.847,
+                                       "big_p10":  0.769
+                                   },
+                    "cockle-bay":  {
+                                       "n":  57,
+                                       "median":  0.979,
+                                       "p25":  0.891,
+                                       "p10":  0.83,
+                                       "big_n":  35,
+                                       "big_median":  0.966,
+                                       "big_p25":  0.886,
+                                       "big_p10":  0.837
+                                   },
+                    "herne-bay":  {
+                                      "n":  27,
+                                      "median":  1.006,
+                                      "p25":  0.885,
+                                      "p10":  0.824,
+                                      "big_n":  14,
+                                      "big_median":  1.02,
+                                      "big_p25":  0.872,
+                                      "big_p10":  0.824
+                                  }
+                }
+}

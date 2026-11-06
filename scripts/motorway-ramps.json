@@ -1,0 +1,3712 @@
+[
+    {
+        "type":  "On ramp",
+        "name":  "Great South",
+        "road":  "01N-0479-R2",
+        "lat":  -37.238510,
+        "lon":  175.019756
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sh 2",
+        "road":  "002-0007-R1",
+        "lat":  -37.216590,
+        "lon":  175.098809
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Sh 2",
+        "road":  "002-0009-R1",
+        "lat":  -37.220464,
+        "lon":  175.118295
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Koheroa Rd",
+        "road":  "002-0009-R2",
+        "lat":  -37.217680,
+        "lon":  175.108002
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0434-R2",
+        "lat":  -36.889642,
+        "lon":  174.798649
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "20A-0001-R2",
+        "lat":  -36.966143,
+        "lon":  174.796012
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Fire Station",
+        "road":  "20A-0001-R1",
+        "lat":  -36.966248,
+        "lon":  174.797343
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Midpoint Sh20/Sh20a",
+        "road":  "020-0009-R1",
+        "lat":  -36.965231,
+        "lon":  174.798559
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Queenstown Kerb",
+        "road":  "020-0015-R2",
+        "lat":  -36.921159,
+        "lon":  174.767729
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "020-0015-R1",
+        "lat":  -36.922264,
+        "lon":  174.767296
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Lane Change",
+        "road":  "020-0015-R1",
+        "lat":  -36.922643,
+        "lon":  174.768845
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Motorway Kerbed",
+        "road":  "020-0015-R1",
+        "lat":  -36.922957,
+        "lon":  174.769881
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Urban/Rural",
+        "road":  "020-0013-R3",
+        "lat":  -36.926840,
+        "lon":  174.781559
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Motorway Kerb",
+        "road":  "020-0013-R3",
+        "lat":  -36.927031,
+        "lon":  174.780132
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "020-0013-R2",
+        "lat":  -36.928789,
+        "lon":  174.781638
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Orpheus Dr-Kerbed",
+        "road":  "020-0013-R2",
+        "lat":  -36.929402,
+        "lon":  174.782036
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Glouchester Pk",
+        "road":  "020-0013-R4",
+        "lat":  -36.928127,
+        "lon":  174.782211
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Lane Change",
+        "road":  "020-0013-R1",
+        "lat":  -36.929761,
+        "lon":  174.782217
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Motorway Kerbed",
+        "road":  "020-0013-R1",
+        "lat":  -36.929669,
+        "lon":  174.783135
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "020-0012-R2",
+        "lat":  -36.940143,
+        "lon":  174.791235
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "020-0012-R2",
+        "lat":  -36.939502,
+        "lon":  174.790945
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Lane Change",
+        "road":  "020-0012-R1",
+        "lat":  -36.939743,
+        "lon":  174.790095
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Rimu Rd",
+        "road":  "020-0012-R1",
+        "lat":  -36.940366,
+        "lon":  174.790235
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "020-0010-R2",
+        "lat":  -36.952292,
+        "lon":  174.792350
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "020-0010-R2",
+        "lat":  -36.952544,
+        "lon":  174.791805
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "020-0010-R3",
+        "lat":  -36.953614,
+        "lon":  174.795725
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "020-0010-R3",
+        "lat":  -36.952676,
+        "lon":  174.795267
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Motorway Island",
+        "road":  "020-0010-R3",
+        "lat":  -36.952058,
+        "lon":  174.794964
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "End Of",
+        "road":  "020-0010-R1",
+        "lat":  -36.952643,
+        "lon":  174.791911
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Motorway Kerbed",
+        "road":  "020-0010-R1",
+        "lat":  -36.952352,
+        "lon":  174.792438
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "020-0010-R4",
+        "lat":  -36.956344,
+        "lon":  174.796876
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Walmsley Rd",
+        "road":  "020-0010-R4",
+        "lat":  -36.953718,
+        "lon":  174.795810
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Motorway Kerbed",
+        "road":  "020-0009-R1",
+        "lat":  -36.965122,
+        "lon":  174.801669
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Lanes Change",
+        "road":  "020-0007-R2",
+        "lat":  -36.972951,
+        "lon":  174.815920
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Massey Rd",
+        "road":  "020-0007-R2",
+        "lat":  -36.973392,
+        "lon":  174.816621
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "020-0007-R3",
+        "lat":  -36.973064,
+        "lon":  174.817046
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Motorway Kerb",
+        "road":  "020-0007-R3",
+        "lat":  -36.972492,
+        "lon":  174.816034
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Urban/Rural",
+        "road":  "020-0007-R4",
+        "lat":  -36.973472,
+        "lon":  174.817652
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Massey Rd",
+        "road":  "020-0007-R4",
+        "lat":  -36.973180,
+        "lon":  174.817257
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Lanes Change",
+        "road":  "020-0007-R1",
+        "lat":  -36.973503,
+        "lon":  174.816857
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Lanes Change",
+        "road":  "020-0007-R1",
+        "lat":  -36.974009,
+        "lon":  174.817610
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Motorway Kerbed",
+        "road":  "020-0007-R1",
+        "lat":  -36.974193,
+        "lon":  174.817905
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0478-R2",
+        "lat":  -37.229650,
+        "lon":  175.018386
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0478-R4",
+        "lat":  -37.229631,
+        "lon":  175.018021
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Bct Lhs",
+        "road":  "01N-0478-R1",
+        "lat":  -37.228676,
+        "lon":  175.020698
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Separation",
+        "road":  "01N-0478-R1",
+        "lat":  -37.229075,
+        "lon":  175.019434
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0478-R1",
+        "lat":  -37.229555,
+        "lon":  175.017956
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Sh2 Rs0",
+        "road":  "01N-0478-R3",
+        "lat":  -37.228734,
+        "lon":  175.020722
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0477-R1",
+        "lat":  -37.226772,
+        "lon":  175.011790
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Helenslee Rd",
+        "road":  "01N-0477-R2",
+        "lat":  -37.227417,
+        "lon":  175.011308
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0475-R3",
+        "lat":  -37.217287,
+        "lon":  175.000332
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Intersecting Lhs",
+        "road":  "01N-0475-R2",
+        "lat":  -37.215718,
+        "lon":  175.000830
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0475-R1",
+        "lat":  -37.214619,
+        "lon":  175.000323
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Nikau Rd",
+        "road":  "01N-0475-R4",
+        "lat":  -37.214947,
+        "lon":  174.999437
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sth Bndry",
+        "road":  "01N-0474-R3",
+        "lat":  -37.205784,
+        "lon":  174.993159
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0474-R3",
+        "lat":  -37.206783,
+        "lon":  174.994471
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Beaver Rd",
+        "road":  "01N-0474-R2",
+        "lat":  -37.205485,
+        "lon":  174.993815
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Beaver Rd",
+        "road":  "01N-0474-R4",
+        "lat":  -37.205761,
+        "lon":  174.993136
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0474-R1",
+        "lat":  -37.205471,
+        "lon":  174.993745
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Bct Rhs",
+        "road":  "01N-0472-R2",
+        "lat":  -37.195571,
+        "lon":  174.985786
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0472-R3",
+        "lat":  -37.192548,
+        "lon":  174.982295
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0472-R3",
+        "lat":  -37.193608,
+        "lon":  174.982959
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0472-R3",
+        "lat":  -37.194633,
+        "lon":  174.983795
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0472-R1",
+        "lat":  -37.192303,
+        "lon":  174.982895
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0472-R1",
+        "lat":  -37.191264,
+        "lon":  174.982447
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0472-R4",
+        "lat":  -37.191990,
+        "lon":  174.982106
+    },
+    {
+        "type":  "On ramp",
+        "name":  "In Line",
+        "road":  "01N-0472-R4",
+        "lat":  -37.192447,
+        "lon":  174.982258
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0466-R2",
+        "lat":  -37.143842,
+        "lon":  174.970396
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Ararimu Rd",
+        "road":  "01N-0466-R2",
+        "lat":  -37.143389,
+        "lon":  174.970188
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0466-R3",
+        "lat":  -37.143771,
+        "lon":  174.969348
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0466-R1",
+        "lat":  -37.142815,
+        "lon":  174.970211
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0466-R4",
+        "lat":  -37.142720,
+        "lon":  174.968741
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Ararimu Rd",
+        "road":  "01N-0466-R4",
+        "lat":  -37.143728,
+        "lon":  174.969069
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Width Change",
+        "road":  "01N-0462-R3",
+        "lat":  -37.107959,
+        "lon":  174.945641
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Drury Rail",
+        "road":  "01N-0462-R3",
+        "lat":  -37.108760,
+        "lon":  174.945992
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0462-R3",
+        "lat":  -37.109347,
+        "lon":  174.946257
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0462-R2",
+        "lat":  -37.107993,
+        "lon":  174.946670
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Sh22 On",
+        "road":  "01N-0462-R2",
+        "lat":  -37.107253,
+        "lon":  174.947327
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Sh22",
+        "road":  "01N-0462-R4",
+        "lat":  -37.107755,
+        "lon":  174.945520
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0462-R1",
+        "lat":  -37.107070,
+        "lon":  174.947276
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Join Drury",
+        "road":  "01N-0462-R1",
+        "lat":  -37.106577,
+        "lon":  174.946970
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0460-R2",
+        "lat":  -37.089550,
+        "lon":  174.940276
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Concrete Island",
+        "road":  "01N-0460-R2",
+        "lat":  -37.089034,
+        "lon":  174.940174
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0460-R1",
+        "lat":  -37.087083,
+        "lon":  174.938850
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0460-R1",
+        "lat":  -37.086919,
+        "lon":  174.938263
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0458-R4",
+        "lat":  -37.074594,
+        "lon":  174.928130
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0458-R4",
+        "lat":  -37.075246,
+        "lon":  174.929263
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Beach Rd",
+        "road":  "01N-0458-R5",
+        "lat":  -37.073804,
+        "lon":  174.927985
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0458-R2",
+        "lat":  -37.072801,
+        "lon":  174.929920
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Beach Rd",
+        "road":  "01N-0458-R2",
+        "lat":  -37.073402,
+        "lon":  174.930002
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0454-R3",
+        "lat":  -37.037741,
+        "lon":  174.909421
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0454-R2",
+        "lat":  -37.038570,
+        "lon":  174.910573
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Nose Great",
+        "road":  "01N-0454-R2",
+        "lat":  -37.037461,
+        "lon":  174.911317
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0454-R4",
+        "lat":  -37.036693,
+        "lon":  174.909864
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Great South",
+        "road":  "01N-0454-R4",
+        "lat":  -37.035839,
+        "lon":  174.909215
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0454-R1",
+        "lat":  -37.036372,
+        "lon":  174.911024
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Nose Bct/Seal",
+        "road":  "01N-0454-R1",
+        "lat":  -37.035593,
+        "lon":  174.910464
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0451-R1",
+        "lat":  -37.014311,
+        "lon":  174.906933
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0451-R1",
+        "lat":  -37.014057,
+        "lon":  174.906706
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0451-R2",
+        "lat":  -37.012829,
+        "lon":  174.905018
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Grande View",
+        "road":  "01N-0451-R2",
+        "lat":  -37.013856,
+        "lon":  174.904663
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0448-R4",
+        "lat":  -36.991459,
+        "lon":  174.886863
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Redoubt Rd",
+        "road":  "01N-0448-R4",
+        "lat":  -36.992291,
+        "lon":  174.886481
+    },
+    {
+        "type":  "On ramp",
+        "name":  "100 Kph",
+        "road":  "01N-0447-R2",
+        "lat":  -36.985278,
+        "lon":  174.883955
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Te Irirangi",
+        "road":  "01N-0447-R2",
+        "lat":  -36.985763,
+        "lon":  174.884178
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "5O Kph",
+        "road":  "01N-0447-R1",
+        "lat":  -36.985450,
+        "lon":  174.885007
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0447-R1",
+        "lat":  -36.985050,
+        "lon":  174.884800
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Motorway Island",
+        "road":  "01N-0447-R1",
+        "lat":  -36.984310,
+        "lon":  174.884336
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Cesspit Lhs",
+        "road":  "01N-0444-R2",
+        "lat":  -36.964298,
+        "lon":  174.868914
+    },
+    {
+        "type":  "On ramp",
+        "name":  "K/L At",
+        "road":  "01N-0444-R2",
+        "lat":  -36.963457,
+        "lon":  174.868560
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0444-R3",
+        "lat":  -36.964251,
+        "lon":  174.867087
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0444-R3",
+        "lat":  -36.963826,
+        "lon":  174.866375
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0444-R4",
+        "lat":  -36.963867,
+        "lon":  174.866345
+    },
+    {
+        "type":  "On ramp",
+        "name":  "East Tamaki",
+        "road":  "01N-0444-R4",
+        "lat":  -36.964302,
+        "lon":  174.867032
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0444-R1",
+        "lat":  -36.963356,
+        "lon":  174.868264
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Solid Nose",
+        "road":  "01N-0444-R1",
+        "lat":  -36.962932,
+        "lon":  174.866985
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Crash Cushion",
+        "road":  "01N-0434-R5",
+        "lat":  -36.889377,
+        "lon":  174.796082
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Join",
+        "road":  "01N-0441-R1",
+        "lat":  -36.937143,
+        "lon":  174.853674
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0441-R1",
+        "lat":  -36.936531,
+        "lon":  174.852858
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0438-R3",
+        "lat":  -36.919437,
+        "lon":  174.840265
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0438-R3",
+        "lat":  -36.920536,
+        "lon":  174.843055
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0438-R2",
+        "lat":  -36.919157,
+        "lon":  174.841366
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Mt Wellington",
+        "road":  "01N-0438-R2",
+        "lat":  -36.918407,
+        "lon":  174.839965
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0437-R2",
+        "lat":  -36.915781,
+        "lon":  174.838036
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0438-R4",
+        "lat":  -36.918332,
+        "lon":  174.838155
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Mt Wellington",
+        "road":  "01N-0438-R4",
+        "lat":  -36.919394,
+        "lon":  174.839969
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0438-R1",
+        "lat":  -36.918365,
+        "lon":  174.839699
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0438-R1",
+        "lat":  -36.917806,
+        "lon":  174.838219
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0437-R1",
+        "lat":  -36.916735,
+        "lon":  174.834589
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Isl Nse",
+        "road":  "01N-0437-R1",
+        "lat":  -36.916619,
+        "lon":  174.835453
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0437-R1",
+        "lat":  -36.915629,
+        "lon":  174.836006
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0437-R1",
+        "lat":  -36.915837,
+        "lon":  174.834892
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0437-R3",
+        "lat":  -36.915038,
+        "lon":  174.825459
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Stheastern H/Way",
+        "road":  "01N-0437-R3",
+        "lat":  -36.915631,
+        "lon":  174.826244
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Ellerslie R/A",
+        "road":  "01N-0436-R5",
+        "lat":  -36.903116,
+        "lon":  174.808087
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0436-R5",
+        "lat":  -36.904261,
+        "lon":  174.811337
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0436-R5",
+        "lat":  -36.904774,
+        "lon":  174.812633
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Separation",
+        "road":  "01N-0436-R5",
+        "lat":  -36.905253,
+        "lon":  174.813711
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Ellerslie R/A",
+        "road":  "01N-0436-R4",
+        "lat":  -36.903654,
+        "lon":  174.812318
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Panmure R/B",
+        "road":  "01N-0436-R2",
+        "lat":  -36.900078,
+        "lon":  174.815094
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0436-R6",
+        "lat":  -36.903031,
+        "lon":  174.810768
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Ellerslie R/A",
+        "road":  "01N-0436-R6",
+        "lat":  -36.903863,
+        "lon":  174.811117
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Great South",
+        "road":  "01N-0436-R6",
+        "lat":  -36.902938,
+        "lon":  174.808026
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0436-R1",
+        "lat":  -36.903189,
+        "lon":  174.811724
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0436-R1",
+        "lat":  -36.902548,
+        "lon":  174.811041
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0436-R1",
+        "lat":  -36.902128,
+        "lon":  174.810698
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Tecoma St",
+        "road":  "01N-0435-R2",
+        "lat":  -36.894484,
+        "lon":  174.805854
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Separation",
+        "road":  "01N-0435-R1",
+        "lat":  -36.894220,
+        "lon":  174.805591
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Greenlane R/A",
+        "road":  "01N-0434-R2",
+        "lat":  -36.888892,
+        "lon":  174.797747
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0434-R3",
+        "lat":  -36.889255,
+        "lon":  174.797155
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Separation",
+        "road":  "01N-0434-R3",
+        "lat":  -36.889636,
+        "lon":  174.797893
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0434-R1",
+        "lat":  -36.888490,
+        "lon":  174.797070
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0434-R1",
+        "lat":  -36.888100,
+        "lon":  174.796048
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Greenlane R/A",
+        "road":  "01N-0434-R4",
+        "lat":  -36.888822,
+        "lon":  174.796618
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0433-R2",
+        "lat":  -36.882489,
+        "lon":  174.786825
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0433-R2",
+        "lat":  -36.882880,
+        "lon":  174.787222
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0433-R1",
+        "lat":  -36.880808,
+        "lon":  174.785787
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0433-R1",
+        "lat":  -36.880376,
+        "lon":  174.785271
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0432-R1",
+        "lat":  -36.875038,
+        "lon":  174.780232
+    },
+    {
+        "type":  "On ramp",
+        "name":  "St Marks",
+        "road":  "01N-0432-R1",
+        "lat":  -36.874542,
+        "lon":  174.779706
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0431-R1",
+        "lat":  -36.872070,
+        "lon":  174.774220
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0431-R1",
+        "lat":  -36.871623,
+        "lon":  174.773621
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Gillies Ave",
+        "road":  "01N-0431-R2",
+        "lat":  -36.872881,
+        "lon":  174.773992
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Khyber Pass",
+        "road":  "01N-0430-R1",
+        "lat":  -36.865836,
+        "lon":  174.767610
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Khyber Pass",
+        "road":  "01N-0430-R1",
+        "lat":  -36.865500,
+        "lon":  174.767697
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0430-R2",
+        "lat":  -36.865415,
+        "lon":  174.767172
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0430-R2",
+        "lat":  -36.866656,
+        "lon":  174.767506
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0430-R2",
+        "lat":  -36.867237,
+        "lon":  174.767828
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0429-R2",
+        "lat":  -36.855020,
+        "lon":  174.769117
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Symonds St",
+        "road":  "01N-0428-R4",
+        "lat":  -36.860245,
+        "lon":  174.764813
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Separation",
+        "road":  "01N-0428-R4",
+        "lat":  -36.862900,
+        "lon":  174.764177
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0429-R5",
+        "lat":  -36.861208,
+        "lon":  174.762146
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0429-R5",
+        "lat":  -36.861675,
+        "lon":  174.763133
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Wellesley",
+        "road":  "01N-0429-R5",
+        "lat":  -36.862056,
+        "lon":  174.763492
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0436-R3",
+        "lat":  -36.900166,
+        "lon":  174.815145
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Symonds St",
+        "road":  "01N-0429-R1",
+        "lat":  -36.858762,
+        "lon":  174.763571
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Barrier Nose",
+        "road":  "01N-0428-R3",
+        "lat":  -36.860494,
+        "lon":  174.758671
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Nelson Street",
+        "road":  "01N-0427-R2",
+        "lat":  -36.853889,
+        "lon":  174.757453
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Nelson Street",
+        "road":  "01N-0427-R2",
+        "lat":  -36.854332,
+        "lon":  174.757268
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Barrier Nose",
+        "road":  "01N-0427-R2",
+        "lat":  -36.858883,
+        "lon":  174.756609
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0427-R3",
+        "lat":  -36.855294,
+        "lon":  174.757427
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Diverge",
+        "road":  "01N-0427-R3",
+        "lat":  -36.854677,
+        "lon":  174.757811
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Hobson St",
+        "road":  "01N-0427-R3",
+        "lat":  -36.854156,
+        "lon":  174.758306
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Wellington St",
+        "road":  "01N-0427-R4",
+        "lat":  -36.852929,
+        "lon":  174.754994
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0427-R1",
+        "lat":  -36.849988,
+        "lon":  174.754098
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0426-R3",
+        "lat":  -36.844466,
+        "lon":  174.751546
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Beaumont St",
+        "road":  "01N-0426-R3",
+        "lat":  -36.844929,
+        "lon":  174.752264
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Barrier End",
+        "road":  "01N-0426-R1",
+        "lat":  -36.844481,
+        "lon":  174.752079
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Separation",
+        "road":  "01N-0425-R1",
+        "lat":  -36.837342,
+        "lon":  174.742047
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0423-R1",
+        "lat":  -36.816275,
+        "lon":  174.749592
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0422-R3",
+        "lat":  -36.812382,
+        "lon":  174.750681
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0422-R3",
+        "lat":  -36.812970,
+        "lon":  174.751239
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0422-R4",
+        "lat":  -36.811503,
+        "lon":  174.753333
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0419-R2",
+        "lat":  -36.788532,
+        "lon":  174.753492
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Northcote Rd",
+        "road":  "01N-0419-R2",
+        "lat":  -36.788006,
+        "lon":  174.753271
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0419-R3",
+        "lat":  -36.788646,
+        "lon":  174.752431
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0419-R3",
+        "lat":  -36.789024,
+        "lon":  174.752793
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0419-R4",
+        "lat":  -36.788023,
+        "lon":  174.752085
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Northcote Road",
+        "road":  "01N-0419-R4",
+        "lat":  -36.788455,
+        "lon":  174.752263
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0419-R1",
+        "lat":  -36.787799,
+        "lon":  174.753128
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0419-R1",
+        "lat":  -36.787422,
+        "lon":  174.752858
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0417-R2",
+        "lat":  -36.772520,
+        "lon":  174.743513
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Tristram Ave",
+        "road":  "01N-0417-R2",
+        "lat":  -36.771823,
+        "lon":  174.743188
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0417-R3",
+        "lat":  -36.772116,
+        "lon":  174.742365
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0417-R3",
+        "lat":  -36.773038,
+        "lon":  174.742985
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Tristram Ave",
+        "road":  "01N-0417-R4",
+        "lat":  -36.771910,
+        "lon":  174.742257
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0417-R1",
+        "lat":  -36.771635,
+        "lon":  174.743117
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0417-R1",
+        "lat":  -36.770559,
+        "lon":  174.742492
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0414-R4",
+        "lat":  -36.751009,
+        "lon":  174.725637
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0414-R4",
+        "lat":  -36.751913,
+        "lon":  174.726523
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Light Pole",
+        "road":  "01N-0414-R3",
+        "lat":  -36.753772,
+        "lon":  174.729421
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerb Line",
+        "road":  "01N-0414-R3",
+        "lat":  -36.750752,
+        "lon":  174.726571
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Physical Nose",
+        "road":  "01N-0414-R2",
+        "lat":  -36.750580,
+        "lon":  174.726416
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Constellation Drv",
+        "road":  "01N-0414-R5",
+        "lat":  -36.750821,
+        "lon":  174.725531
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0412-R3",
+        "lat":  -36.736566,
+        "lon":  174.717753
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0412-R2",
+        "lat":  -36.735308,
+        "lon":  174.718317
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerb Nose",
+        "road":  "01N-0412-R2",
+        "lat":  -36.734376,
+        "lon":  174.718072
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerbnose Rhs",
+        "road":  "01N-0412-R4",
+        "lat":  -36.735789,
+        "lon":  174.716868
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Width Change",
+        "road":  "01N-0412-R1",
+        "lat":  -36.734153,
+        "lon":  174.717976
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0412-R1",
+        "lat":  -36.733051,
+        "lon":  174.717063
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0410-R3",
+        "lat":  -36.718847,
+        "lon":  174.712275
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0410-R3",
+        "lat":  -36.719939,
+        "lon":  174.712840
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0410-R2",
+        "lat":  -36.719818,
+        "lon":  174.713736
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerbline Oteha",
+        "road":  "01N-0410-R2",
+        "lat":  -36.718168,
+        "lon":  174.713413
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0410-R4",
+        "lat":  -36.717200,
+        "lon":  174.711418
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerbline Oteha",
+        "road":  "01N-0410-R4",
+        "lat":  -36.718627,
+        "lon":  174.712183
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "End Mkcc",
+        "road":  "01N-0410-R1",
+        "lat":  -36.717994,
+        "lon":  174.713264
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0410-R1",
+        "lat":  -36.716799,
+        "lon":  174.712283
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0398-R4",
+        "lat":  -36.626679,
+        "lon":  174.662323
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0398-R3",
+        "lat":  -36.625719,
+        "lon":  174.663394
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0398-R3",
+        "lat":  -36.624755,
+        "lon":  174.664665
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerb Nose",
+        "road":  "01N-0398-R2",
+        "lat":  -36.625190,
+        "lon":  174.663806
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "020-0005-R1",
+        "lat":  -36.993435,
+        "lon":  174.842707
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "020-0005-R2",
+        "lat":  -36.993107,
+        "lon":  174.843753
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerb Line",
+        "road":  "016-0001-R2",
+        "lat":  -36.853970,
+        "lon":  174.770682
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Barrier Start",
+        "road":  "01N-0398-R1",
+        "lat":  -36.624752,
+        "lon":  174.663787
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0398-R1",
+        "lat":  -36.623792,
+        "lon":  174.663292
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerbline (Roundabout)",
+        "road":  "01N-0398-R5",
+        "lat":  -36.625179,
+        "lon":  174.661792
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Kerb Nosing",
+        "road":  "018-0005-R1",
+        "lat":  -36.770593,
+        "lon":  174.686885
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Width Change",
+        "road":  "018-0005-R1",
+        "lat":  -36.771327,
+        "lon":  174.686621
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerbline Of",
+        "road":  "018-0005-R2",
+        "lat":  -36.771482,
+        "lon":  174.685594
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "018-0005-R2",
+        "lat":  -36.770055,
+        "lon":  174.686225
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Crash Cushion",
+        "road":  "018-0002-R1",
+        "lat":  -36.756967,
+        "lon":  174.704344
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start 3",
+        "road":  "018-0002-R1",
+        "lat":  -36.757490,
+        "lon":  174.703878
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerbline Albany",
+        "road":  "018-0002-R2",
+        "lat":  -36.757740,
+        "lon":  174.703763
+    },
+    {
+        "type":  "On ramp",
+        "name":  "2 Lane/1",
+        "road":  "018-0002-R2",
+        "lat":  -36.760145,
+        "lon":  174.701654
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Crash Cushion",
+        "road":  "018-0002-R3",
+        "lat":  -36.758463,
+        "lon":  174.702322
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Width Change",
+        "road":  "018-0002-R3",
+        "lat":  -36.757266,
+        "lon":  174.703189
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerbline Albany",
+        "road":  "018-0002-R4",
+        "lat":  -36.757071,
+        "lon":  174.703347
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Nose Of",
+        "road":  "018-0006-R1",
+        "lat":  -36.781438,
+        "lon":  174.678041
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Royal Rd",
+        "road":  "016-0018-R2",
+        "lat":  -36.832071,
+        "lon":  174.620449
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "016-0016-R2",
+        "lat":  -36.848550,
+        "lon":  174.631118
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Lincoln Rd",
+        "road":  "016-0016-R2",
+        "lat":  -36.848646,
+        "lon":  174.631417
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0016-R3",
+        "lat":  -36.845893,
+        "lon":  174.629045
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Nd Of",
+        "road":  "016-0016-R4",
+        "lat":  -36.848520,
+        "lon":  174.633083
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Selwood Rd",
+        "road":  "016-0016-R4",
+        "lat":  -36.847508,
+        "lon":  174.631627
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0016-R1",
+        "lat":  -36.849845,
+        "lon":  174.634339
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0016-R1",
+        "lat":  -36.850208,
+        "lon":  174.635128
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0014-R3",
+        "lat":  -36.856218,
+        "lon":  174.649908
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Te Atatu",
+        "road":  "016-0014-R2",
+        "lat":  -36.858147,
+        "lon":  174.652004
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Te Atatu",
+        "road":  "016-0014-R4",
+        "lat":  -36.856259,
+        "lon":  174.651659
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Te Atatu",
+        "road":  "016-0014-R5",
+        "lat":  -36.856022,
+        "lon":  174.652025
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Separation",
+        "road":  "016-0014-R1",
+        "lat":  -36.858776,
+        "lon":  174.654570
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "016-0012-R2",
+        "lat":  -36.867013,
+        "lon":  174.666383
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0012-R2",
+        "lat":  -36.866182,
+        "lon":  174.666422
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Patiki Rd",
+        "road":  "016-0012-R1",
+        "lat":  -36.866724,
+        "lon":  174.666247
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Barrier Terminal",
+        "road":  "016-0011-R1",
+        "lat":  -36.870554,
+        "lon":  174.674438
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Rosebank Rd",
+        "road":  "016-0011-R2",
+        "lat":  -36.870202,
+        "lon":  174.672629
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0008-R3",
+        "lat":  -36.871217,
+        "lon":  174.699385
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Great North",
+        "road":  "016-0008-R4",
+        "lat":  -36.871876,
+        "lon":  174.704851
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Great North",
+        "road":  "016-0008-R2",
+        "lat":  -36.872615,
+        "lon":  174.705066
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Waterview West",
+        "road":  "016-0008-R5",
+        "lat":  -36.873279,
+        "lon":  174.705432
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0008-R1",
+        "lat":  -36.872360,
+        "lon":  174.706067
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Great North",
+        "road":  "016-0006-R2",
+        "lat":  -36.869149,
+        "lon":  174.725588
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0006-R3",
+        "lat":  -36.867602,
+        "lon":  174.729067
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0006-R3",
+        "lat":  -36.868483,
+        "lon":  174.728544
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Great North",
+        "road":  "016-0006-R4",
+        "lat":  -36.867508,
+        "lon":  174.729157
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0006-R1",
+        "lat":  -36.869128,
+        "lon":  174.727155
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Newton Rd",
+        "road":  "016-0004-R2",
+        "lat":  -36.862501,
+        "lon":  174.754569
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Nose Of",
+        "road":  "018-0006-R2",
+        "lat":  -36.782650,
+        "lon":  174.674831
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start 2",
+        "road":  "018-0006-R2",
+        "lat":  -36.782048,
+        "lon":  174.675458
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0441-R3",
+        "lat":  -36.938865,
+        "lon":  174.852564
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Hobson St",
+        "road":  "016-0004-R1",
+        "lat":  -36.854116,
+        "lon":  174.758250
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0002-R2",
+        "lat":  -36.855787,
+        "lon":  174.768600
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerb Line",
+        "road":  "016-0002-R1",
+        "lat":  -36.855589,
+        "lon":  174.769572
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Wellesley Off",
+        "road":  "016-0002-R3",
+        "lat":  -36.856167,
+        "lon":  174.769662
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Welesley",
+        "road":  "01N-0429-R2",
+        "lat":  -36.855713,
+        "lon":  174.768544
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Nthbnd On",
+        "road":  "01N-0428-R4",
+        "lat":  -36.857314,
+        "lon":  174.767361
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Sh22 @",
+        "road":  "022-0001-R1",
+        "lat":  -37.108096,
+        "lon":  174.944491
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Boundary 62M",
+        "road":  "01N-0425-R2",
+        "lat":  -36.838576,
+        "lon":  174.739618
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Curran St",
+        "road":  "01N-0425-R2",
+        "lat":  -36.837219,
+        "lon":  174.740938
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0425-R2",
+        "lat":  -36.836707,
+        "lon":  174.741394
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Princes St",
+        "road":  "016-0002-R5",
+        "lat":  -36.854571,
+        "lon":  174.768811
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose/Buses",
+        "road":  "01N-0410-R6",
+        "lat":  -36.722409,
+        "lon":  174.713382
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0472-R5",
+        "lat":  -37.193242,
+        "lon":  174.982029
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0420-R1",
+        "lat":  -36.798889,
+        "lon":  174.761722
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0420-R2",
+        "lat":  -36.798271,
+        "lon":  174.763324
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0420-R3",
+        "lat":  -36.800183,
+        "lon":  174.759936
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0420-R4",
+        "lat":  -36.799940,
+        "lon":  174.760630
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0420-R5",
+        "lat":  -36.799620,
+        "lon":  174.760475
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "South-Northwest Link",
+        "road":  "01N-0428-R3",
+        "lat":  -36.860844,
+        "lon":  174.757191
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Welesley",
+        "road":  "01N-0428-R4",
+        "lat":  -36.857170,
+        "lon":  174.767513
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Crash Cushion",
+        "road":  "016-0003-R3",
+        "lat":  -36.859703,
+        "lon":  174.758280
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "01N-0428-R2",
+        "lat":  -36.859918,
+        "lon":  174.759957
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0427-R5",
+        "lat":  -36.857049,
+        "lon":  174.755596
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Crash Cushion",
+        "road":  "016-0003-R2",
+        "lat":  -36.860182,
+        "lon":  174.757530
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Crash Cushion",
+        "road":  "016-0003-R4",
+        "lat":  -36.860230,
+        "lon":  174.755621
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Grafton Rd",
+        "road":  "016-0002-R4",
+        "lat":  -36.852794,
+        "lon":  174.767397
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0004-R4",
+        "lat":  -36.853935,
+        "lon":  174.757574
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Crash Cushion",
+        "road":  "016-0004-R4",
+        "lat":  -36.856097,
+        "lon":  174.756310
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "01N-0441-R2",
+        "lat":  -36.939460,
+        "lon":  174.854396
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0441-R3",
+        "lat":  -36.940135,
+        "lon":  174.853375
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0441-R3",
+        "lat":  -36.939621,
+        "lon":  174.853133
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Splitter Island",
+        "road":  "01N-0441-R4",
+        "lat":  -36.938673,
+        "lon":  174.852649
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0443-R1",
+        "lat":  -36.951294,
+        "lon":  174.859367
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Speed Restriction",
+        "road":  "01N-0443-R1",
+        "lat":  -36.950400,
+        "lon":  174.859562
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0443-R2",
+        "lat":  -36.951557,
+        "lon":  174.859710
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0443-R3",
+        "lat":  -36.953223,
+        "lon":  174.859022
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0443-R3",
+        "lat":  -36.952337,
+        "lon":  174.858463
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Highbrook Drive",
+        "road":  "01N-0443-R3",
+        "lat":  -36.951749,
+        "lon":  174.859775
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Island",
+        "road":  "01N-0443-R4",
+        "lat":  -36.951873,
+        "lon":  174.859844
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Highbrook Dr",
+        "road":  "01N-0443-R4",
+        "lat":  -36.952277,
+        "lon":  174.858400
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0443-R4",
+        "lat":  -36.951646,
+        "lon":  174.858128
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Akoranga Station",
+        "road":  "01N-0420-R6",
+        "lat":  -36.797762,
+        "lon":  174.761429
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0420-R6",
+        "lat":  -36.800370,
+        "lon":  174.762039
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0402-R1",
+        "lat":  -36.660505,
+        "lon":  174.668023
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "01N-0420-R7",
+        "lat":  -36.798277,
+        "lon":  174.763469
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Kcc",
+        "road":  "01N-0420-R7",
+        "lat":  -36.799801,
+        "lon":  174.762309
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Concrete /",
+        "road":  "01N-0402-R2",
+        "lat":  -36.658745,
+        "lon":  174.666149
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "01N-0389-R1",
+        "lat":  -36.587550,
+        "lon":  174.665344
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "01N-0389-R2",
+        "lat":  -36.587900,
+        "lon":  174.665344
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "01N-0389-R3",
+        "lat":  -36.587451,
+        "lon":  174.663379
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "01N-0389-R4",
+        "lat":  -36.587074,
+        "lon":  174.663440
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Kerb Nosing",
+        "road":  "020-0016-R1",
+        "lat":  -36.918018,
+        "lon":  174.758265
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerb Nosing",
+        "road":  "020-0016-R2",
+        "lat":  -36.918021,
+        "lon":  174.758013
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Kerb Nosing",
+        "road":  "020-0016-R3",
+        "lat":  -36.917436,
+        "lon":  174.758189
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerb Nosing",
+        "road":  "020-0016-R4",
+        "lat":  -36.917481,
+        "lon":  174.758498
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Kerb Nosing",
+        "road":  "020-0018-R1",
+        "lat":  -36.911610,
+        "lon":  174.739578
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerb Nosing",
+        "road":  "020-0018-R2",
+        "lat":  -36.911525,
+        "lon":  174.739402
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Kerb Nosing",
+        "road":  "020-0018-R3",
+        "lat":  -36.910949,
+        "lon":  174.739524
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kerb Nosing",
+        "road":  "020-0018-R4",
+        "lat":  -36.911016,
+        "lon":  174.739762
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0434-R6",
+        "lat":  -36.888634,
+        "lon":  174.797933
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "020-0001-R1",
+        "lat":  -36.996959,
+        "lon":  174.875694
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "020-0001-R2",
+        "lat":  -36.996647,
+        "lon":  174.875456
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "020-0001-R3",
+        "lat":  -36.996715,
+        "lon":  174.875191
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "020-0001-R4",
+        "lat":  -36.995287,
+        "lon":  174.874180
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "020-0001-R5",
+        "lat":  -36.995369,
+        "lon":  174.874223
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "020-0003-R1",
+        "lat":  -36.998242,
+        "lon":  174.852040
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "020-0003-R2",
+        "lat":  -36.998178,
+        "lon":  174.851764
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "020-0003-R3",
+        "lat":  -36.997386,
+        "lon":  174.849522
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "020-0003-R4",
+        "lat":  -36.997514,
+        "lon":  174.852471
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "020-0005-R3",
+        "lat":  -36.997459,
+        "lon":  174.852172
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "020-0005-R4",
+        "lat":  -36.995844,
+        "lon":  174.847298
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Motorway Concrete",
+        "road":  "020-0010-R2",
+        "lat":  -36.950567,
+        "lon":  174.793902
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Motorway Kerbed",
+        "road":  "020-0012-R1",
+        "lat":  -36.938555,
+        "lon":  174.789860
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start 2",
+        "road":  "020-0013-R3",
+        "lat":  -36.926786,
+        "lon":  174.782453
+    },
+    {
+        "type":  "On ramp",
+        "name":  "M/Way Isl",
+        "road":  "020-0013-R4",
+        "lat":  -36.928423,
+        "lon":  174.782382
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Motorway Kerb",
+        "road":  "020-0015-R2",
+        "lat":  -36.922055,
+        "lon":  174.768983
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "01N-0448-R1",
+        "lat":  -36.991764,
+        "lon":  174.888625
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Redoubt Rd",
+        "road":  "01N-0448-R2",
+        "lat":  -36.991961,
+        "lon":  174.888625
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "01N-0448-R3",
+        "lat":  -36.996277,
+        "lon":  174.885610
+    },
+    {
+        "type":  "On ramp",
+        "name":  "01N-0431/11.16-I",
+        "road":  "01N-0448-R5",
+        "lat":  -36.991757,
+        "lon":  174.887925
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "01N-0448-D",
+        "road":  "01N-0448-R6",
+        "lat":  -36.997342,
+        "lon":  174.890055
+    },
+    {
+        "type":  "On ramp",
+        "name":  "020-0000-D",
+        "road":  "01N-0448-R7",
+        "lat":  -36.995847,
+        "lon":  174.886307
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "01N-0448-R8",
+        "lat":  -36.995729,
+        "lon":  174.885875
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Eno Of",
+        "road":  "018-0012-R2",
+        "lat":  -36.814204,
+        "lon":  174.613552
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sh 16",
+        "road":  "016-0019-R1",
+        "lat":  -36.820673,
+        "lon":  174.615134
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "016-0019-R2",
+        "lat":  -36.818943,
+        "lon":  174.613955
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "016-0019-R3",
+        "lat":  -36.819014,
+        "lon":  174.613811
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "016-0019-R4",
+        "lat":  -36.818706,
+        "lon":  174.613709
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "016-0019-R5",
+        "lat":  -36.818066,
+        "lon":  174.614933
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "016-0019-R6",
+        "lat":  -36.818420,
+        "lon":  174.614975
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "018-0012-R1",
+        "lat":  -36.809933,
+        "lon":  174.619581
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "018-0012-R3",
+        "lat":  -36.808241,
+        "lon":  174.618398
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "018-0010-R1",
+        "lat":  -36.799314,
+        "lon":  174.640187
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "018-0010-R2",
+        "lat":  -36.800899,
+        "lon":  174.637706
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "018-0010-R3",
+        "lat":  -36.799912,
+        "lon":  174.636401
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "018-0010-R4",
+        "lat":  -36.799641,
+        "lon":  174.637013
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "018-0008-R1",
+        "lat":  -36.791633,
+        "lon":  174.655361
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "018-0008-R2",
+        "lat":  -36.790588,
+        "lon":  174.654496
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0422-R1",
+        "lat":  -36.810498,
+        "lon":  174.755414
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0422-R2",
+        "lat":  -36.813287,
+        "lon":  174.753328
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0422-R5",
+        "lat":  -36.812161,
+        "lon":  174.751786
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Onewa Rd",
+        "road":  "01N-0422-R3",
+        "lat":  -36.812300,
+        "lon":  174.750420
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "01N-0422-R4",
+        "lat":  -36.812053,
+        "lon":  174.751743
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "01N-0443-R1",
+        "lat":  -36.950516,
+        "lon":  174.858332
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "020-0003-R4",
+        "lat":  -36.997982,
+        "lon":  174.854687
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start 016-0019-R5",
+        "road":  "018-0012-R2",
+        "lat":  -36.815835,
+        "lon":  174.613542
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "End Ramp",
+        "road":  "016-0019-R1",
+        "lat":  -36.815050,
+        "lon":  174.612735
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Width Change",
+        "road":  "016-0002-R5",
+        "lat":  -36.852830,
+        "lon":  174.767308
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0002-R2",
+        "lat":  -36.855116,
+        "lon":  174.769218
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Newton Ramp",
+        "road":  "016-0003-R2",
+        "lat":  -36.857163,
+        "lon":  174.755464
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Beresford Street",
+        "road":  "016-0003-R2",
+        "lat":  -36.854715,
+        "lon":  174.756302
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Nelson St",
+        "road":  "016-0003-R4",
+        "lat":  -36.858630,
+        "lon":  174.755908
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Hobson St",
+        "road":  "016-0004-R1",
+        "lat":  -36.855543,
+        "lon":  174.756717
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0004-R4",
+        "lat":  -36.854491,
+        "lon":  174.757545
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0006-R1",
+        "lat":  -36.869120,
+        "lon":  174.725909
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0006-R2",
+        "lat":  -36.868961,
+        "lon":  174.723890
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0008-R2",
+        "lat":  -36.872728,
+        "lon":  174.702321
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0008-R2",
+        "lat":  -36.872553,
+        "lon":  174.701039
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "016-0011-R2",
+        "lat":  -36.870212,
+        "lon":  174.675123
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0012-R1",
+        "lat":  -36.865971,
+        "lon":  174.666083
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0014-R2",
+        "lat":  -36.857208,
+        "lon":  174.650495
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0014-R3",
+        "lat":  -36.856168,
+        "lon":  174.650554
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0014-R4",
+        "lat":  -36.856746,
+        "lon":  174.650893
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0001-R1",
+        "lat":  -36.854335,
+        "lon":  174.772061
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0003-R1",
+        "lat":  -36.857746,
+        "lon":  174.768108
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0004-R3",
+        "lat":  -36.863336,
+        "lon":  174.752076
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0018-R1",
+        "lat":  -36.833052,
+        "lon":  174.618466
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End 2",
+        "road":  "016-0004-R2",
+        "lat":  -36.864692,
+        "lon":  174.751655
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Road Widens",
+        "road":  "016-0004-R3",
+        "lat":  -36.861524,
+        "lon":  174.753818
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0006-R4",
+        "lat":  -36.868095,
+        "lon":  174.730737
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0008-R4",
+        "lat":  -36.871838,
+        "lon":  174.701176
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0008-R4",
+        "lat":  -36.872175,
+        "lon":  174.702163
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0014-R5",
+        "lat":  -36.857342,
+        "lon":  174.652955
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0018-R2",
+        "lat":  -36.833376,
+        "lon":  174.619955
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "020-0019-R1",
+        "lat":  -36.904700,
+        "lon":  174.724826
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Maioro St",
+        "road":  "020-0019-R4",
+        "lat":  -36.903493,
+        "lon":  174.723820
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Nose Papakura On Ramp",
+        "road":  "01N-0458-R6",
+        "lat":  -37.073812,
+        "lon":  174.926425
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Tea Rhs",
+        "road":  "01N-0412-R2",
+        "lat":  -36.736444,
+        "lon":  174.718658
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Ramp",
+        "road":  "016-0019-R1",
+        "lat":  -36.816598,
+        "lon":  174.612996
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Diverge To",
+        "road":  "01N-0448-R2",
+        "lat":  -36.993399,
+        "lon":  174.889230
+    },
+    {
+        "type":  "On ramp",
+        "name":  "01N-0448-R2 Join",
+        "road":  "01N-0448-R5",
+        "lat":  -36.993600,
+        "lon":  174.889105
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Diverge To",
+        "road":  "01N-0448-R6",
+        "lat":  -36.995951,
+        "lon":  174.886304
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "016-0002-R3 Joins",
+        "road":  "016-0003-R1",
+        "lat":  -36.862505,
+        "lon":  174.764562
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Great South",
+        "road":  "01N-0480-R1",
+        "lat":  -37.248206,
+        "lon":  175.026824
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sh1n-D (Lightpole)",
+        "road":  "01N-0480-R2",
+        "lat":  -37.248275,
+        "lon":  175.026570
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sh 1N-I",
+        "road":  "01N-0479-R1",
+        "lat":  -37.238788,
+        "lon":  175.021484
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Beumont St",
+        "road":  "01N-0426-R2",
+        "lat":  -36.845460,
+        "lon":  174.752626
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Barrier End",
+        "road":  "01N-0428-R1",
+        "lat":  -36.849001,
+        "lon":  174.753373
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "2 Lanes",
+        "road":  "01N-0426-R1",
+        "lat":  -36.845019,
+        "lon":  174.752838
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0426-R2",
+        "lat":  -36.844620,
+        "lon":  174.751256
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0426-R2",
+        "lat":  -36.844058,
+        "lon":  174.750426
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Victoria Park",
+        "road":  "01N-0428-R1",
+        "lat":  -36.849622,
+        "lon":  174.753527
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Cook St",
+        "road":  "01N-0428-R1",
+        "lat":  -36.856861,
+        "lon":  174.756163
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sh 16",
+        "road":  "01N-0428-R1",
+        "lat":  -36.862465,
+        "lon":  174.753985
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0458-R6",
+        "lat":  -37.073486,
+        "lon":  174.927493
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0458-R6",
+        "lat":  -37.071817,
+        "lon":  174.927867
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Nose Papakura Off Ramp",
+        "road":  "01N-0458-R1",
+        "lat":  -37.070883,
+        "lon":  174.928195
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Newton No.3",
+        "road":  "016-0003-R2",
+        "lat":  -36.859003,
+        "lon":  174.756203
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Newton Ramp",
+        "road":  "016-0003-R2",
+        "lat":  -36.858561,
+        "lon":  174.755983
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Beresford Street",
+        "road":  "016-0003-R2",
+        "lat":  -36.855578,
+        "lon":  174.755945
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Hobson St",
+        "road":  "016-0004-R1",
+        "lat":  -36.854895,
+        "lon":  174.757326
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Newton Road",
+        "road":  "016-0004-R2",
+        "lat":  -36.863083,
+        "lon":  174.753867
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Eastbound Flyover",
+        "road":  "016-0019-R1",
+        "lat":  -36.814236,
+        "lon":  174.612841
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Eastbound Flyover",
+        "road":  "016-0019-R1",
+        "lat":  -36.808964,
+        "lon":  174.620088
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Onewa Southbound",
+        "road":  "01N-0422-R1",
+        "lat":  -36.811130,
+        "lon":  174.754961
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Onewa Southbound",
+        "road":  "01N-0422-R1",
+        "lat":  -36.812785,
+        "lon":  174.754533
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Onewa Southbound",
+        "road":  "01N-0422-R2",
+        "lat":  -36.813317,
+        "lon":  174.751866
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Onewa Southbound",
+        "road":  "01N-0422-R2",
+        "lat":  -36.812338,
+        "lon":  174.750939
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Onewa Southbound",
+        "road":  "01N-0422-R5",
+        "lat":  -36.811821,
+        "lon":  174.753261
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Onewa Southbound",
+        "road":  "01N-0422-R5",
+        "lat":  -36.812472,
+        "lon":  174.754270
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Newton Ramp",
+        "road":  "01N-0427-R2",
+        "lat":  -36.856503,
+        "lon":  174.755907
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Nelson St",
+        "road":  "01N-0427-R5",
+        "lat":  -36.854253,
+        "lon":  174.757166
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Nelson St",
+        "road":  "01N-0427-R5",
+        "lat":  -36.853841,
+        "lon":  174.757365
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sh16 Underpass",
+        "road":  "01N-0428-R4",
+        "lat":  -36.856675,
+        "lon":  174.768049
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sh16 Underpass",
+        "road":  "01N-0428-R4",
+        "lat":  -36.856044,
+        "lon":  174.768797
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Khyber Pass",
+        "road":  "01N-0430-R1",
+        "lat":  -36.866790,
+        "lon":  174.768093
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Khyberpass Off",
+        "road":  "01N-0430-R2",
+        "lat":  -36.865939,
+        "lon":  174.767250
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Market Rd",
+        "road":  "01N-0433-R2",
+        "lat":  -36.881959,
+        "lon":  174.786287
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Sylvia Park",
+        "road":  "01N-0438-R2",
+        "lat":  -36.919611,
+        "lon":  174.842265
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Sylvia Park",
+        "road":  "01N-0438-R2",
+        "lat":  -36.919983,
+        "lon":  174.843031
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sylvia Park",
+        "road":  "01N-0438-R3",
+        "lat":  -36.920160,
+        "lon":  174.842197
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Sylvia Park",
+        "road":  "01N-0438-R3",
+        "lat":  -36.919877,
+        "lon":  174.841582
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Slippery Ck",
+        "road":  "01N-0448-R5",
+        "lat":  -36.994244,
+        "lon":  174.889413
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Br11 Redoubt",
+        "road":  "01N-0448-R5",
+        "lat":  -36.996198,
+        "lon":  174.887723
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Br12 Sh1",
+        "road":  "01N-0448-R7",
+        "lat":  -36.995871,
+        "lon":  174.887992
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Br12 Sh1",
+        "road":  "01N-0448-R7",
+        "lat":  -36.996754,
+        "lon":  174.890561
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0016-R1",
+        "lat":  -36.849238,
+        "lon":  174.632962
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0016-R1",
+        "lat":  -36.848983,
+        "lon":  174.631823
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0016-R3",
+        "lat":  -36.846288,
+        "lon":  174.629620
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "End Of",
+        "road":  "016-0016-R3",
+        "lat":  -36.847007,
+        "lon":  174.630668
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0458-R1",
+        "lat":  -37.071406,
+        "lon":  174.928408
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0458-R1",
+        "lat":  -37.072754,
+        "lon":  174.930051
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0458-R1",
+        "lat":  -37.073477,
+        "lon":  174.930505
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0458-R5",
+        "lat":  -37.074274,
+        "lon":  174.927989
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0458-R5",
+        "lat":  -37.073985,
+        "lon":  174.928886
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0458-R4",
+        "lat":  -37.073797,
+        "lon":  174.927706
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Row Entrance",
+        "road":  "01N-0472-R6",
+        "lat":  -37.200098,
+        "lon":  174.988913
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Seal Separation",
+        "road":  "01N-0425-R1",
+        "lat":  -36.839483,
+        "lon":  174.741564
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Seal Join",
+        "road":  "01N-0420-R6",
+        "lat":  -36.808299,
+        "lon":  174.757406
+    },
+    {
+        "type":  "On ramp",
+        "name":  "",
+        "road":  "01N-0391-R1",
+        "lat":  -36.601950,
+        "lon":  174.663329
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "01N-0391-R2",
+        "lat":  -36.601276,
+        "lon":  174.661356
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0412-R3",
+        "lat":  -36.735922,
+        "lon":  174.716779
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0011-R2",
+        "lat":  -36.871417,
+        "lon":  174.678288
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Rosebank Off",
+        "road":  "016-0011-R1",
+        "lat":  -36.870166,
+        "lon":  174.673320
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0008-R6",
+        "lat":  -36.874096,
+        "lon":  174.704003
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0008-R7",
+        "lat":  -36.874531,
+        "lon":  174.703219
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "016-0008-R8",
+        "lat":  -36.871256,
+        "lon":  174.700631
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose",
+        "road":  "016-0008-R9",
+        "lat":  -36.874997,
+        "lon":  174.703416
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Maioro St",
+        "road":  "020-0019-R2",
+        "lat":  -36.903760,
+        "lon":  174.723003
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "020-0019-R3",
+        "lat":  -36.902611,
+        "lon":  174.722120
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Tba",
+        "road":  "20A-0002-R1",
+        "lat":  -36.973685,
+        "lon":  174.789478
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kirkbride Rd",
+        "road":  "20A-0002-R2",
+        "lat":  -36.973892,
+        "lon":  174.789357
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Island Nose",
+        "road":  "20A-0002-R3",
+        "lat":  -36.973444,
+        "lon":  174.788628
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Kirkbride Rd",
+        "road":  "20A-0002-R4",
+        "lat":  -36.973270,
+        "lon":  174.788745
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0422-R5",
+        "lat":  -36.812200,
+        "lon":  174.750255
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0016-R3",
+        "lat":  -36.847336,
+        "lon":  174.631289
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "016-0008-R4",
+        "lat":  -36.871442,
+        "lon":  174.704578
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Rosebank Off",
+        "road":  "016-0011-R1",
+        "lat":  -36.870288,
+        "lon":  174.672718
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "020-0019-R1",
+        "lat":  -36.904162,
+        "lon":  174.723766
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "020-0019-R1",
+        "lat":  -36.903884,
+        "lon":  174.723218
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "020-0019-R2",
+        "lat":  -36.902568,
+        "lon":  174.721075
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "020-0019-R3",
+        "lat":  -36.903386,
+        "lon":  174.723569
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "020-0019-R4",
+        "lat":  -36.905095,
+        "lon":  174.726629
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "020-0019-R4",
+        "lat":  -36.905622,
+        "lon":  174.727511
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0008-R7",
+        "lat":  -36.871957,
+        "lon":  174.699350
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "End Of",
+        "road":  "016-0008-R7",
+        "lat":  -36.871835,
+        "lon":  174.697900
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0008-R8",
+        "lat":  -36.873571,
+        "lon":  174.703997
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "End Of",
+        "road":  "016-0008-R8",
+        "lat":  -36.874078,
+        "lon":  174.703900
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "016-0008-R9",
+        "lat":  -36.874515,
+        "lon":  174.703556
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "016-0008-R9",
+        "lat":  -36.871446,
+        "lon":  174.706975
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0008-R3",
+        "lat":  -36.870726,
+        "lon":  174.703833
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0008-R3",
+        "lat":  -36.871431,
+        "lon":  174.705167
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Ramp R5",
+        "road":  "016-0008-R1",
+        "lat":  -36.872606,
+        "lon":  174.705334
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0014-R1",
+        "lat":  -36.858235,
+        "lon":  174.652381
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "016-0014-R3",
+        "lat":  -36.855745,
+        "lon":  174.651580
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Seal Separation",
+        "road":  "016-0014-R5",
+        "lat":  -36.857814,
+        "lon":  174.653630
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Lincoln Bridge",
+        "road":  "016-0016-R2",
+        "lat":  -36.846777,
+        "lon":  174.629404
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "End Of",
+        "road":  "01N-0398-R4",
+        "lat":  -36.625689,
+        "lon":  174.661795
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0454-R3",
+        "lat":  -37.036636,
+        "lon":  174.908983
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0454-R3",
+        "lat":  -37.035611,
+        "lon":  174.908904
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "Start Of",
+        "road":  "01N-0454-R1",
+        "lat":  -37.037371,
+        "lon":  174.911712
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start Of",
+        "road":  "01N-0454-R4",
+        "lat":  -37.033765,
+        "lon":  174.909813
+    },
+    {
+        "type":  "Off ramp",
+        "name":  "",
+        "road":  "018-0000-R1",
+        "lat":  -36.751056,
+        "lon":  174.720739
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Of",
+        "road":  "01N-0412-R4",
+        "lat":  -36.735654,
+        "lon":  174.717689
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0458-R2",
+        "lat":  -37.073134,
+        "lon":  174.929067
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Start",
+        "road":  "01N-0458-R3",
+        "lat":  -37.073681,
+        "lon":  174.930564
+    },
+    {
+        "type":  "On ramp",
+        "name":  "End Concrete",
+        "road":  "01N-0458-R5",
+        "lat":  -37.073446,
+        "lon":  174.928684
+    },
+    {
+        "type":  "On ramp",
+        "name":  "Island Nose",
+        "road":  "01N-0458-R6",
+        "lat":  -37.069562,
+        "lon":  174.927161
+    }
+]

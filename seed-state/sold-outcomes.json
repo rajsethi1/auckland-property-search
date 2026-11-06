@@ -1,0 +1,1093 @@
+{
+    "last_checked":  "2026-11-06",
+    "sold":  {
+                 "43128622":  {
+                                  "address":  "36 North Road, Clevedon",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1450000,
+                                  "expected":  1375050,
+                                  "low":  1249000
+                              },
+                 "42940074":  {
+                                  "address":  "329 Don Buck Road, Massey",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1000000,
+                                  "expected":  887000,
+                                  "low":  770000
+                              },
+                 "43147106":  {
+                                  "address":  "9 Bluewater Place, Wattle Downs",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  990000,
+                                  "expected":  908210,
+                                  "low":  819000
+                              },
+                 "43145247":  {
+                                  "address":  "13 Perth Street, Otara",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  720000,
+                                  "expected":  677880,
+                                  "low":  617000
+                              },
+                 "43070561":  {
+                                  "address":  "12  Camphora Place, Ranui",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1100000,
+                                  "expected":  983400,
+                                  "low":  865000
+                              },
+                 "43051702":  {
+                                  "address":  "6 Kaipara Portage Road, Riverhead",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1600000,
+                                  "expected":  1550900,
+                                  "low":  1387200
+                              },
+                 "43109917":  {
+                                  "address":  "137 West Hoe Heights, Orewa",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1600000,
+                                  "expected":  1599000,
+                                  "low":  1387200
+                              },
+                 "43125290":  {
+                                  "address":  "7 Hapukupuku Avenue, Beachlands",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1650000,
+                                  "expected":  1608850,
+                                  "low":  1430550
+                              },
+                 "43087730":  {
+                                  "address":  "39 Paterson Avenue West, Pukekohe",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  940000,
+                                  "expected":  915760,
+                                  "low":  814980
+                              },
+                 "43148113":  {
+                                  "address":  "20 Kairanga Street, Mangere East",
+                                  "status":  "hidden",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  870000,
+                                  "expected":  798230,
+                                  "low":  720000
+                              },
+                 "43149494":  {
+                                  "address":  "8 Shortt Avenue, Mangere Bridge",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1100000,
+                                  "expected":  1028900,
+                                  "low":  906000
+                              },
+                 "43110977":  {
+                                  "address":  "48 McEntee Road, Waitakere",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-02",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  990000,
+                                  "expected":  930715,
+                                  "low":  857340
+                              },
+                 "43137620":  {
+                                  "address":  "3 Maka Terrace, Orewa",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1375000,
+                                  "expected":  1379000,
+                                  "low":  1192125
+                              },
+                 "43157362":  {
+                                  "address":  "5 Bowen Street, Manurewa",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  960000,
+                                  "expected":  870840,
+                                  "low":  772000
+                              },
+                 "43144560":  {
+                                  "address":  "24 Frobisher Way, Clendon Park",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  "2026-10-28",
+                                  "sale_price":  605000,
+                                  "cv":  730000,
+                                  "expected":  697170,
+                                  "low":  632910,
+                                  "sale_vs_cv":  0.829,
+                                  "sale_vs_expected":  0.868
+                              },
+                 "43140138":  {
+                                  "address":  "7 Milwaukee Place, Glendene",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  "2026-10-29",
+                                  "sale_price":  1201000,
+                                  "cv":  1475000,
+                                  "expected":  1362525,
+                                  "low":  1170000,
+                                  "sale_vs_cv":  0.814,
+                                  "sale_vs_expected":  0.881
+                              },
+                 "43008502":  {
+                                  "address":  "36 Beauvoir Avenue, Matakatia",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1925000,
+                                  "expected":  1788075,
+                                  "low":  1622000
+                              },
+                 "43138835":  {
+                                  "address":  "11 Hyde Road, Clevedon",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1225000,
+                                  "expected":  1124775,
+                                  "low":  986000
+                              },
+                 "43086816":  {
+                                  "address":  "72 Cargill Street, Papakura",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  830000,
+                                  "expected":  749000,
+                                  "low":  719610
+                              },
+                 "43134493":  {
+                                  "address":  "60 Port Albert Road, Wellsford",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  655000,
+                                  "expected":  649000,
+                                  "low":  567885
+                              },
+                 "43125255":  {
+                                  "address":  "3 Huruhuru Road, Massey",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  920000,
+                                  "expected":  989000,
+                                  "low":  797640
+                              },
+                 "43069453":  {
+                                  "address":  "3 Pleasant Road, Glen Eden",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1500000,
+                                  "expected":  1188800,
+                                  "low":  1160000
+                              },
+                 "43148399":  {
+                                  "address":  "23 Maui Pomare Street, Blockhouse Bay",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1065000,
+                                  "expected":  990492,
+                                  "low":  884000
+                              },
+                 "43150667":  {
+                                  "address":  "7 Carter Road, Oratia",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1780000,
+                                  "expected":  1670120,
+                                  "low":  1525000
+                              },
+                 "43148034":  {
+                                  "address":  "19 Lieshout Way, Pukekohe",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  940000,
+                                  "expected":  921260,
+                                  "low":  814980
+                              },
+                 "43103249":  {
+                                  "address":  "37 Claverdon Drive, Massey",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  950000,
+                                  "expected":  869550,
+                                  "low":  793000
+                              },
+                 "43045527":  {
+                                  "address":  "6 Fisk Road, Pukekohe",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1250000,
+                                  "expected":  1223250,
+                                  "low":  1083750
+                              },
+                 "43163716":  {
+                                  "address":  "91 Freshfields Road, Waimauku",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  0,
+                                  "expected":  0,
+                                  "low":  0
+                              },
+                 "43051074":  {
+                                  "address":  "10 Putney Place, Ranui",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  870000,
+                                  "expected":  855000,
+                                  "low":  754290
+                              },
+                 "43114305":  {
+                                  "address":  "336 Whangaparaoa Road, Stanmore Bay",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-02",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  800000,
+                                  "expected":  782300,
+                                  "low":  692800
+                              },
+                 "43112668":  {
+                                  "address":  "12 Staines Avenue, Mangere East",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1250000,
+                                  "expected":  1114250,
+                                  "low":  916000
+                              },
+                 "43111414":  {
+                                  "address":  "2 Links Road, New Lynn",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1425000,
+                                  "expected":  895000,
+                                  "low":  1050000
+                              },
+                 "43148410":  {
+                                  "address":  "84 Kiwi Esplanade, Mangere Bridge",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1475000,
+                                  "expected":  1439025,
+                                  "low":  1278825
+                              },
+                 "43118038":  {
+                                  "address":  "333 Roscommon Road, Clendon Park",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  750000,
+                                  "expected":  711750,
+                                  "low":  650250
+                              },
+                 "43067146":  {
+                                  "address":  "9 Tee Point, Red Beach",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1125000,
+                                  "expected":  1150000,
+                                  "low":  975375
+                              },
+                 "43149401":  {
+                                  "address":  "9 Parkview Place, Pakuranga",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1275000,
+                                  "expected":  1190225,
+                                  "low":  1101000
+                              },
+                 "43135161":  {
+                                  "address":  "30 WESTMUIR CRESCENT, Pokeno",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  980000,
+                                  "expected":  957920,
+                                  "low":  849660
+                              },
+                 "43125703":  {
+                                  "address":  "1 and 2/8 Atkinson Avenue, Papatoetoe",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  0,
+                                  "expected":  0,
+                                  "low":  0
+                              },
+                 "43150663":  {
+                                  "address":  "30 Opanuku Road, Henderson Valley",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  980000,
+                                  "expected":  916920,
+                                  "low":  849660
+                              },
+                 "43050294":  {
+                                  "address":  "53 Beachwood Drive, Hatfields Beach",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1650000,
+                                  "expected":  1575850,
+                                  "low":  1430550
+                              },
+                 "43142818":  {
+                                  "address":  "14 Glendhu Road, Bayview",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1200000,
+                                  "expected":  1249000,
+                                  "low":  1040400
+                              },
+                 "43001015":  {
+                                  "address":  "7 Hywell Place, Manurewa",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  700000,
+                                  "expected":  687300,
+                                  "low":  606900
+                              },
+                 "43074731":  {
+                                  "address":  "41 Barrier View Road, Leigh",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1360000,
+                                  "expected":  1249000,
+                                  "low":  1179120
+                              },
+                 "43127487":  {
+                                  "address":  "15 Skiffington Road, Pokeno",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  990000,
+                                  "expected":  957210,
+                                  "low":  858330
+                              },
+                 "43148721":  {
+                                  "address":  "246 Glengarry Road, Glen Eden",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1000000,
+                                  "expected":  921000,
+                                  "low":  835000
+                              },
+                 "43139230":  {
+                                  "address":  "29 Catkin Crescent, Papatoetoe",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  980000,
+                                  "expected":  895420,
+                                  "low":  796000
+                              },
+                 "43114673":  {
+                                  "address":  "191A Maraetai Drive, Maraetai",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-02",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  910000,
+                                  "expected":  940000,
+                                  "low":  788060
+                              },
+                 "43121704":  {
+                                  "address":  "15 Oakmont Place, Wattle Downs",
+                                  "status":  "hidden",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  910000,
+                                  "expected":  853390,
+                                  "low":  788970
+                              },
+                 "43146619":  {
+                                  "address":  "5 Twilight Bay, Omaha",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1375000,
+                                  "expected":  1320625,
+                                  "low":  1187000
+                              },
+                 "43138762":  {
+                                  "address":  "8 Sunningdale Street, Wattle Downs",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  950000,
+                                  "expected":  879550,
+                                  "low":  804000
+                              },
+                 "43089121":  {
+                                  "address":  "17 Farwood Drive, Henderson",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  700000,
+                                  "expected":  661300,
+                                  "low":  606900
+                              },
+                 "43148373":  {
+                                  "address":  "632 South Titirangi Road, Titirangi",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1540000,
+                                  "expected":  1429660,
+                                  "low":  1269000
+                              },
+                 "43137830":  {
+                                  "address":  "70 Haycock Avenue, Mount Roskill",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1075000,
+                                  "expected":  976250,
+                                  "low":  783675
+                              },
+                 "43054346":  {
+                                  "address":  "45 Tahatai Road, Oneroa",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1500000,
+                                  "expected":  1475000,
+                                  "low":  1300500
+                              },
+                 "43150088":  {
+                                  "address":  "56 Totara Road, TE ATATU PENINSULA",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1375000,
+                                  "expected":  1399000,
+                                  "low":  1024000
+                              },
+                 "43098931":  {
+                                  "address":  "44 Clayton Avenue, Otara",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  550000,
+                                  "expected":  537450,
+                                  "low":  476850
+                              },
+                 "43157948":  {
+                                  "address":  "20 Rata Street, Helensville",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  930000,
+                                  "expected":  685000,
+                                  "low":  806310
+                              },
+                 "43119420":  {
+                                  "address":  "60 Helena Street, Massey",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  960000,
+                                  "expected":  829000,
+                                  "low":  766000
+                              },
+                 "43150446":  {
+                                  "address":  "6 Rutland Road, Mount Wellington",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1400000,
+                                  "expected":  1267400,
+                                  "low":  1107000
+                              },
+                 "43110107":  {
+                                  "address":  "10 Ramoana Mews, Shelly Park",
+                                  "status":  "hidden",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  2050000,
+                                  "expected":  1889950,
+                                  "low":  1655000
+                              },
+                 "43149396":  {
+                                  "address":  "67 David Avenue, Hillpark",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  910000,
+                                  "expected":  940000,
+                                  "low":  788970
+                              },
+                 "43134936":  {
+                                  "address":  "38 Tyrone Street, Otara",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  720000,
+                                  "expected":  710880,
+                                  "low":  624240
+                              },
+                 "43092202":  {
+                                  "address":  "22 Innismara Avenue, Wattle Downs",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  780000,
+                                  "expected":  789000,
+                                  "low":  676260
+                              },
+                 "43148014":  {
+                                  "address":  "10 Frank Place, Hillpark",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1025000,
+                                  "expected":  994975,
+                                  "low":  888675
+                              },
+                 "42959740":  {
+                                  "address":  "30 Carlton Road, Pukekohe",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  880000,
+                                  "expected":  1149000,
+                                  "low":  762960
+                              },
+                 "43111885":  {
+                                  "address":  "15 Nor\u0027east Drive, Northcross",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1225000,
+                                  "expected":  1173275,
+                                  "low":  1062075
+                              },
+                 "43094521":  {
+                                  "address":  "15 Undine Street, Pakuranga",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1000000,
+                                  "expected":  959500,
+                                  "low":  867000
+                              },
+                 "43133298":  {
+                                  "address":  "19 Titchener Street, New Lynn",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1150000,
+                                  "expected":  1094850,
+                                  "low":  997050
+                              },
+                 "43138058":  {
+                                  "address":  "444 Weymouth Road, Weymouth",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  750000,
+                                  "expected":  718250,
+                                  "low":  650250
+                              },
+                 "43123716":  {
+                                  "address":  "1 Gateshead Road, Pokeno",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  930000,
+                                  "expected":  899970,
+                                  "low":  806310
+                              },
+                 "43126803":  {
+                                  "address":  "74 Solan Drive, Waimauku",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1575000,
+                                  "expected":  1586425,
+                                  "low":  1365525
+                              },
+                 "43137164":  {
+                                  "address":  "33 Green Road, Matakana",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  "2026-10-31",
+                                  "sale_price":  1050000,
+                                  "cv":  1125000,
+                                  "expected":  1065875,
+                                  "low":  955000,
+                                  "sale_vs_cv":  0.933,
+                                  "sale_vs_expected":  0.985
+                              },
+                 "43105792":  {
+                                  "address":  "23 Defender Crescent, Beachlands",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  2450000,
+                                  "expected":  2354050,
+                                  "low":  2124150
+                              },
+                 "43139252":  {
+                                  "address":  "5 Kelly Greens, Millwater",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1425000,
+                                  "expected":  1299000,
+                                  "low":  1235475
+                              },
+                 "43083709":  {
+                                  "address":  "73 Blue Gum Drive, Warkworth",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1150000,
+                                  "expected":  1159000,
+                                  "low":  997050
+                              },
+                 "43084722":  {
+                                  "address":  "30 Cargill Street, Papakura",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  800000,
+                                  "expected":  737700,
+                                  "low":  671000
+                              },
+                 "43148115":  {
+                                  "address":  "73 Mt Lebanon Crescent, The Gardens",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1350000,
+                                  "expected":  1284150,
+                                  "low":  1170450
+                              },
+                 "43141299":  {
+                                  "address":  "106 Matakana Valley Road, Matakana",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  "2026-10-31",
+                                  "sale_price":  1450000,
+                                  "cv":  1520000,
+                                  "expected":  1426080,
+                                  "low":  1298000,
+                                  "sale_vs_cv":  0.954,
+                                  "sale_vs_expected":  1.017
+                              },
+                 "43150572":  {
+                                  "address":  "28  Blundell Place, Chatswood",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1675000,
+                                  "expected":  1614825,
+                                  "low":  1452225
+                              },
+                 "43146642":  {
+                                  "address":  "5 Elsie Drive, Waiuku",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  860000,
+                                  "expected":  842940,
+                                  "low":  745620
+                              },
+                 "43043413":  {
+                                  "address":  "2 Kawakawa Bay Coast Road, Kawakawa Bay",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  950000,
+                                  "expected":  799000,
+                                  "low":  791000
+                              },
+                 "43127428":  {
+                                  "address":  "5 Kivell Close, Mangere East",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  980000,
+                                  "expected":  913420,
+                                  "low":  835000
+                              },
+                 "43088491":  {
+                                  "address":  "20 Sir Lincoln Drive, Kumeu",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-02",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1300000,
+                                  "expected":  1251050,
+                                  "low":  1125800
+                              },
+                 "43123947":  {
+                                  "address":  "5 Dumas Place, Rosehill",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1045000,
+                                  "expected":  989000,
+                                  "low":  906015
+                              },
+                 "42974507":  {
+                                  "address":  "13 Te Awa Place, Red Beach",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  0,
+                                  "expected":  0,
+                                  "low":  0
+                              },
+                 "43157206":  {
+                                  "address":  "24 Inglis Street, Birkenhead",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1200000,
+                                  "expected":  1195300,
+                                  "low":  1040400
+                              },
+                 "43134987":  {
+                                  "address":  "93 Kitchener Road, Pukekohe",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  930000,
+                                  "expected":  895470,
+                                  "low":  806310
+                              },
+                 "43096189":  {
+                                  "address":  "16 Dalry Place, Mangere Bridge",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-02",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1075000,
+                                  "expected":  1100000,
+                                  "low":  930950
+                              },
+                 "43115791":  {
+                                  "address":  "9  Grimshaw Place, Henderson",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1075000,
+                                  "expected":  849000,
+                                  "low":  865000
+                              },
+                 "43147188":  {
+                                  "address":  "19 Landscape Road, Papatoetoe",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1025000,
+                                  "expected":  939975,
+                                  "low":  824000
+                              },
+                 "42999735":  {
+                                  "address":  "11 Pekanga Road, Millwater",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  0,
+                                  "expected":  0,
+                                  "low":  0
+                              },
+                 "43151086":  {
+                                  "address":  "18 South Pacific Road, Rakino Island",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  620000,
+                                  "expected":  599480,
+                                  "low":  537540
+                              },
+                 "42927148":  {
+                                  "address":  "44 Harbour Crest Drive, Waiuku",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  500000,
+                                  "expected":  533500,
+                                  "low":  433500
+                              },
+                 "43065386":  {
+                                  "address":  "17 Fingal Way, Gulf Harbour",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1025000,
+                                  "expected":  1125000,
+                                  "low":  888675
+                              },
+                 "43143932":  {
+                                  "address":  "315 Massey Road, Mangere East",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1250000,
+                                  "expected":  1153750,
+                                  "low":  1031000
+                              },
+                 "43134822":  {
+                                  "address":  "277 Don Buck Road, Massey",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  950000,
+                                  "expected":  945000,
+                                  "low":  823650
+                              },
+                 "43123763":  {
+                                  "address":  "36 Stonex Road, Papatoetoe",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1375000,
+                                  "expected":  849000,
+                                  "low":  1083000
+                              },
+                 "43107109":  {
+                                  "address":  "47 Winsford Street, Manurewa",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-03",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  800000,
+                                  "expected":  849000,
+                                  "low":  693600
+                              },
+                 "43128406":  {
+                                  "address":  "101 Methuen Road, New Windsor",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1220000,
+                                  "expected":  1095000,
+                                  "low":  1037000
+                              },
+                 "43157516":  {
+                                  "address":  "13 Bathgate Court, POKENO",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1010000,
+                                  "expected":  999290,
+                                  "low":  875670
+                              },
+                 "43126436":  {
+                                  "address":  "7 Eastburn Street, Papakura",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  810000,
+                                  "expected":  695000,
+                                  "low":  669000
+                              },
+                 "43103971":  {
+                                  "address":  "1 and 2/21 Hanui Place, Massey",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1045000,
+                                  "expected":  915000,
+                                  "low":  867000
+                              },
+                 "43145196":  {
+                                  "address":  "118 Taikata Road, Te Atatu Peninsula",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1225000,
+                                  "expected":  1113275,
+                                  "low":  969000
+                              },
+                 "43138298":  {
+                                  "address":  "45 Lothian Brae, Wattle Downs",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1100000,
+                                  "expected":  1048900,
+                                  "low":  953700
+                              },
+                 "43133889":  {
+                                  "address":  "16 Thompson Terrace, Manurewa",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1000000,
+                                  "expected":  1050000,
+                                  "low":  867000
+                              },
+                 "42962104":  {
+                                  "address":  "2 \u0026 2A Mutetai Road, Clarks Beach",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  0,
+                                  "expected":  1295000,
+                                  "low":  0
+                              },
+                 "43146704":  {
+                                  "address":  "22 Ihaka Place, Papatoetoe",
+                                  "status":  "sold",
+                                  "checked":  "2026-11-06",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1000000,
+                                  "expected":  958500,
+                                  "low":  867000
+                              },
+                 "43095047":  {
+                                  "address":  "3 Marlin Street, West Harbour",
+                                  "status":  "withdrawn",
+                                  "checked":  "2026-11-04",
+                                  "sale_date":  null,
+                                  "sale_price":  null,
+                                  "cv":  1525000,
+                                  "expected":  1464975,
+                                  "low":  1322175
+                              }
+             }
+}

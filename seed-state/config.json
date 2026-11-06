@@ -1,0 +1,129 @@
+{
+    "report_url":  "https://claude.ai/artifact/MC1xpPsDEiahT4y1nzQs6V",
+    "email_to":  [
+                     "rajs@virtualbuild.co.nz",
+                     "vanessa.mingming@gmail.com"
+                 ],
+    "max_price":  1100000,
+    "ideal_high":  900000,
+    "stretch_pct":  15,
+    "search_max_price":  2500000,
+    "min_land_m2":  600,
+    "min_beds":  2,
+    "auckland_wide":  true,
+    "districts":  [
+                      "auckland-city",
+                      "manukau-city",
+                      "north-shore-city"
+                  ],
+    "suburbs":  [
+                    "greenlane",
+                    "epsom",
+                    "mission-bay",
+                    "freemans-bay",
+                    "new-windsor",
+                    "point-chevalier",
+                    "meadowbank",
+                    "avondale",
+                    "westmere",
+                    "mount-eden",
+                    "herne-bay",
+                    "remuera",
+                    "penrose",
+                    "waterview",
+                    "sandringham",
+                    "one-tree-hill",
+                    "grafton",
+                    "western-springs",
+                    "kohimarama",
+                    "mount-wellington",
+                    "blockhouse-bay",
+                    "onehunga",
+                    "eden-terrace",
+                    "royal-oak",
+                    "glendowie",
+                    "lynfield",
+                    "ponsonby",
+                    "three-kings",
+                    "parnell",
+                    "saint-johns",
+                    "st-johns",
+                    "hillsborough",
+                    "stonefields",
+                    "newton",
+                    "morningside",
+                    "wai-o-taiki-bay",
+                    "wynyard-quarter",
+                    "mount-roskill",
+                    "newmarket",
+                    "glen-innes",
+                    "grey-lynn",
+                    "orakei",
+                    "saint-marys-bay",
+                    "st-marys-bay",
+                    "kingsland",
+                    "saint-heliers",
+                    "st-heliers",
+                    "ellerslie",
+                    "mount-albert",
+                    "mellons-bay",
+                    "half-moon-bay",
+                    "botany-downs",
+                    "somerville",
+                    "sunnyhills",
+                    "cockle-bay"
+                ],
+    "top_schools":  [
+                        {
+                            "ncea_l3_pct":  86,
+                            "name":  "Westlake Boys\u0027 High School",
+                            "id":  "37"
+                        },
+                        {
+                            "ncea_l3_pct":  85.7,
+                            "name":  "Macleans College",
+                            "id":  "41"
+                        },
+                        {
+                            "ncea_l3_pct":  85.6,
+                            "name":  "Westlake Girls\u0027 High School",
+                            "id":  "38"
+                        },
+                        {
+                            "ncea_l3_pct":  81.9,
+                            "name":  "Auckland Girls\u0027 Grammar School",
+                            "id":  "53"
+                        },
+                        {
+                            "ncea_l3_pct":  81.6,
+                            "name":  "Rangitoto College",
+                            "id":  "28"
+                        },
+                        {
+                            "ncea_l3_pct":  81.5,
+                            "name":  "Epsom Girls\u0027 Grammar School",
+                            "id":  "64"
+                        },
+                        {
+                            "ncea_l3_pct":  81.2,
+                            "name":  "Takapuna Grammar School",
+                            "id":  "36"
+                        },
+                        {
+                            "ncea_l3_pct":  79.7,
+                            "name":  "Auckland Grammar School",
+                            "id":  "54"
+                        },
+                        {
+                            "ncea_l3_pct":  78.6,
+                            "name":  "Glendowie College",
+                            "id":  "65"
+                        },
+                        {
+                            "ncea_l3_pct":  77.7,
+                            "name":  "Selwyn College",
+                            "id":  "49"
+                        }
+                    ],
+    "zone_search":  true
+}
