@@ -74,6 +74,9 @@ jobs:
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq lftp
           cd outbox
+          # Drop spaces or line breaks pasted around the secrets.
+          FTP_USER="$(printf '%s' "$FTP_USER" | tr -d '[:space:]')"
+          export LFTP_PASSWORD="$(printf '%s' "$LFTP_PASSWORD" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
           # Encrypted FTP is required; the certificate names Hostinger's server, not the IP, so its name isn't checked.
           lftp -c "set cmd:fail-exit yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate no; set net:max-retries 4; set net:reconnect-interval-base 5; set net:timeout 30; open --env-password -u \"$FTP_USER\" \"ftp://$(cat host.txt)\"; source upload.lftp"
           echo "Website updated and state saved (${{ matrix.region }})"
