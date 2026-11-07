@@ -14,6 +14,8 @@ if ($user['admin']) with_json('lists.json', function (&$d) use ($me) {
 
 function clean_entry(string $col, $d): array {
     if (!is_array($d)) $d = [];
+    // prefs/budget: this person's own price range, used for the "Your budget" box.
+    if ($col === 'prefs') return ['ideal' => max(0, min(50000000, (int)($d['ideal'] ?? 0))), 'max' => max(0, min(50000000, (int)($d['max'] ?? 0)))];
     if ($col === 'lists') return ['name' => clean_text($d['name'] ?? '', 40) ?: 'Untitled', 'at' => clean_text($d['at'] ?? '', 40)];
     $url = clean_text($d['url'] ?? '', 300);
     $ids = array_values(array_filter(is_array($d['lists'] ?? null) ? $d['lists'] : [], fn($x) => is_string($x) && preg_match('/^[A-Za-z0-9_-]{1,40}$/', $x)));
@@ -21,15 +23,15 @@ function clean_entry(string $col, $d): array {
         'suburb' => clean_text($d['suburb'] ?? '', 80), 'at' => clean_text($d['at'] ?? '', 40), 'lists' => array_slice($ids, 0, 20)];
 }
 // Objects, not arrays, even when empty, so the page can always use Object.entries().
-function mine(array $d, string $me): array { $s = $d['users'][$me] ?? []; return ['shortlist' => (object)($s['shortlist'] ?? []), 'lists' => (object)($s['lists'] ?? [])]; }
+function mine(array $d, string $me): array { $s = $d['users'][$me] ?? []; return ['shortlist' => (object)($s['shortlist'] ?? []), 'lists' => (object)($s['lists'] ?? []), 'prefs' => (object)($s['prefs'] ?? [])]; }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') out(mine(read_json('lists.json'), $me));
 
 $in = body();
 $op = $in['op'] ?? ''; $col = $in['col'] ?? ''; $id = (string)($in['id'] ?? '');
-if (!in_array($op, ['set', 'delete'], true) || !in_array($col, ['shortlist', 'lists'], true) || !preg_match('/^[A-Za-z0-9_-]{1,40}$/', $id)) fail(400, 'Bad request');
+if (!in_array($op, ['set', 'delete'], true) || !in_array($col, ['shortlist', 'lists', 'prefs'], true) || !preg_match('/^[A-Za-z0-9_-]{1,40}$/', $id)) fail(400, 'Bad request');
 $res = with_json('lists.json', function (&$d) use ($me, $op, $col, $id, $in) {
-    $d['users'][$me] = ($d['users'][$me] ?? []) + ['shortlist' => [], 'lists' => []];
+    $d['users'][$me] = ($d['users'][$me] ?? []) + ['shortlist' => [], 'lists' => [], 'prefs' => []];
     $s = &$d['users'][$me][$col];
     if ($op === 'delete') unset($s[$id]);
     elseif (count($s) >= 2000 && !isset($s[$id])) return 'Too many saved items';

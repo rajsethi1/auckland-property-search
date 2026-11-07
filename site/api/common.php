@@ -63,8 +63,9 @@ function current_user(): ?array {
     if (!$u) return null;
     $rec = read_json('users.json')['users'][$u] ?? null;
     if (!$rec) { $_SESSION = []; return null; }
-    return ['username' => $u, 'name' => $rec['name'] ?? $u, 'admin' => !empty($rec['admin'])];
+    return ['username' => $u, 'name' => $rec['name'] ?? $u, 'admin' => !empty($rec['admin']), 'email' => $rec['email'] ?? ''];
 }
+function clean_email($s): string { $s = strtolower(trim((string)$s)); return mb_strlen($s) <= 120 && filter_var($s, FILTER_VALIDATE_EMAIL) ? $s : ''; }
 function require_user(): array { $u = current_user(); if (!$u) fail(401, 'Please sign in'); return $u; }
 function require_admin(): array { $u = require_user(); if (!$u['admin']) fail(403, 'Admins only'); return $u; }
 function sign_in(string $u): void { session_regenerate_id(true); $_SESSION['user'] = $u; }

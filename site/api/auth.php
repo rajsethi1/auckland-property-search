@@ -34,7 +34,9 @@ if ($op === 'setup' || $op === 'register') {
     if ($name === '') $name = $u;
     check_password($pw);
     $code = strtoupper(trim((string)($in['invite'] ?? '')));
-    $err = with_json('users.json', function (&$d) use ($op, $u, $name, $pw, $code) {
+    $email = clean_email($in['email'] ?? '');
+    if (trim((string)($in['email'] ?? '')) !== '' && !$email) fail(400, 'That email address does not look right');
+    $err = with_json('users.json', function (&$d) use ($op, $u, $name, $pw, $code, $email) {
         $d += ['users' => [], 'invite' => ['code' => '', 'enabled' => false]];
         if ($op === 'setup') {
             if ($d['users']) return 'The admin account already exists. Sign in instead.';
@@ -44,7 +46,7 @@ if ($op === 'setup' || $op === 'register') {
             if (!$inv['enabled'] || $inv['code'] === '' || !hash_equals($inv['code'], $code)) return 'That invite code is not valid';
             if (isset($d['users'][$u])) return 'That username is taken';
         }
-        $d['users'][$u] = ['name' => $name, 'hash' => password_hash($pw, PASSWORD_DEFAULT), 'admin' => $op === 'setup', 'created' => gmdate('c'), 'last' => gmdate('c')];
+        $d['users'][$u] = ['name' => $name, 'hash' => password_hash($pw, PASSWORD_DEFAULT), 'admin' => $op === 'setup', 'created' => gmdate('c'), 'last' => gmdate('c'), 'email' => $email];
         return null;
     });
     if ($err) { note_fail("ip:$ip"); fail(400, $err); }
@@ -64,6 +66,62 @@ if ($op === 'password') {
     });
     if (!$ok) fail(400, 'Your current password is not right');
     out(['ok' => true]);
+}
+
+if ($op === 'email') {
+    $me = require_user();
+    $email = clean_email($in['email'] ?? '');
+    if (trim((string)($in['email'] ?? '')) !== '' && !$email) fail(400, 'That email address does not look right');
+    with_json('users.json', function (&$d) use ($me, $email) { $d['users'][$me['username']]['email'] = $email; });
+    out(['user' => current_user()]);
+}
+
+// Forgot password: emails a one-hour reset link when the account has an email address, and always
+// flags the request on the Admin page. The reply never says whether the account exists.
+if ($op === 'forgot') {
+    if (limited("forgot:$ip")) fail(429, 'Too many requests. Wait 15 minutes and try again.');
+    note_fail("forgot:$ip"); note_fail("forgot:$ip"); // at most 5 requests per 15 minutes
+    $who = strtolower(trim((string)($in['who'] ?? '')));
+    $token = bin2hex(random_bytes(24));
+    $to = with_json('users.json', function (&$d) use ($who, $token) {
+        if (empty($d['users'])) return null;
+        foreach ($d['users'] as $u => &$r) {
+            if ($who === '' || ($u !== $who && ($r['email'] ?? '') !== $who)) continue;
+            $r['reset_asked'] = gmdate('c');
+            if (empty($r['email'])) return null;
+            $r['reset'] = ['hash' => hash('sha256', $token), 'until' => time() + 3600];
+            return ['email' => $r['email'], 'name' => $r['name'] ?? $u, 'username' => $u];
+        }
+        return null;
+    });
+    if ($to) {
+        $host = preg_replace('/[^a-z0-9.-]/i', '', (string)($_SERVER['SERVER_NAME'] ?? ''));
+        $link = "https://$host/#/reset?t=$token";
+        $body = "Hi {$to['name']},\r\n\r\nSomeone (hopefully you) asked to reset the PropertyHunte password for username {$to['username']}.\r\n\r\n"
+              . "Choose a new password here (the link works for one hour):\r\n$link\r\n\r\nIf you didn't ask for this, ignore this email; your password stays the same.\r\n";
+        @mail($to['email'], 'Reset your PropertyHunte password', $body, "From: PropertyHunte <noreply@$host>\r\nContent-Type: text/plain; charset=utf-8");
+    }
+    out(['ok' => true]);
+}
+
+if ($op === 'reset') {
+    if (limited("ip:$ip")) fail(429, 'Too many attempts. Wait 15 minutes and try again.');
+    $t = (string)($in['token'] ?? ''); $pw = (string)($in['password'] ?? '');
+    check_password($pw);
+    $u = preg_match('/^[a-f0-9]{48}$/', $t) ? with_json('users.json', function (&$d) use ($t, $pw) {
+        if (empty($d['users'])) return null;
+        foreach ($d['users'] as $u => &$r) {
+            $rs = $r['reset'] ?? null;
+            if ($rs && $rs['until'] > time() && hash_equals($rs['hash'], hash('sha256', $t))) {
+                $r['hash'] = password_hash($pw, PASSWORD_DEFAULT); unset($r['reset'], $r['reset_asked']);
+                return $u;
+            }
+        }
+        return null;
+    }) : null;
+    if (!$u) { note_fail("ip:$ip"); fail(400, 'This reset link has expired or was already used. Ask for a new one.'); }
+    sign_in($u);
+    out(['user' => current_user()]);
 }
 
 fail(400, 'Unknown action');

@@ -7,7 +7,8 @@ $me = require_admin();
 function listing(): array {
     $d = read_json('users.json');
     $users = [];
-    foreach ($d['users'] ?? [] as $u => $r) $users[] = ['username' => $u, 'name' => $r['name'] ?? $u, 'admin' => !empty($r['admin']), 'created' => $r['created'] ?? '', 'last' => $r['last'] ?? ''];
+    foreach ($d['users'] ?? [] as $u => $r) $users[] = ['username' => $u, 'name' => $r['name'] ?? $u, 'admin' => !empty($r['admin']), 'created' => $r['created'] ?? '', 'last' => $r['last'] ?? '',
+        'email' => $r['email'] ?? '', 'asked' => (isset($r['reset_asked']) && strtotime($r['reset_asked']) > time() - 7 * 86400) ? $r['reset_asked'] : ''];
     usort($users, fn($a, $b) => strcmp($a['username'], $b['username']));
     return ['users' => $users, 'invite' => $d['invite'] ?? ['code' => '', 'enabled' => false]];
 }
@@ -27,6 +28,7 @@ $err = with_json('users.json', function (&$d) use ($op, $u, $me, $in, &$extra) {
     if ($op === 'reset') {
         $pw = random_code(10);
         $d['users'][$u]['hash'] = password_hash($pw, PASSWORD_DEFAULT);
+        unset($d['users'][$u]['reset'], $d['users'][$u]['reset_asked']);
         $extra = ['password' => $pw];
         return null;
     }
