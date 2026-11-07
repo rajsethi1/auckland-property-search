@@ -12,6 +12,10 @@
 param([switch]$Weekly, [string]$Date = (Get-Date -Format 'yyyy-MM-dd'), [switch]$SkipSearch)
 
 $ErrorActionPreference = 'Continue'
+# Time budget (minutes, env HUNT_MINUTES, default 270): the cloud job is killed at 350, losing everything, so each slow
+# step stops early instead; unfinished listings are picked up by the next run.
+$started = Get-Date; $budgetMin = if ($env:HUNT_MINUTES) { [int]$env:HUNT_MINUTES } else { 270 }
+function MinLeft { $budgetMin - ((Get-Date) - $started).TotalMinutes }
 # Data folder: HUNT_ROOT when set (the cloud run), else the local folder.
 function HuntRoot { if ($env:HUNT_ROOT) { $env:HUNT_ROOT } else { 'C:\Claude\Personal\property-hunt' } }
 $root = (HuntRoot); $sk = $PSScriptRoot; $utf8 = [Text.Encoding]::UTF8
@@ -61,7 +65,8 @@ if ($Weekly) {
         # Christchurch: one city-wide pass over recent sales, grouped by each property's own suburb.
         $ids = New-Object System.Collections.Generic.HashSet[string]
         for ($p = 1; $p -le 40; $p++) { $h = GetHtml "https://www.realestate.co.nz/residential/sold/${searchPath}?page=$p"; $m = [regex]::Matches($h, '/property/[a-z0-9-]+/([a-z0-9]{6,12})'); if (-not $m.Count) { break }; foreach ($x in $m) { [void]$ids.Add($x.Groups[1].Value) } }
-        foreach ($id in $ids) { $a = (GetJson "$API/properties/$id").data.attributes; $sl = $a.'latest-sale'; $cv = $a.'council-information'.'capital-value'
+        foreach ($id in $ids) { if ((MinLeft) -lt $budgetMin * 0.8) { break }   # the price refresh gets at most a fifth of the time
+            $a = (GetJson "$API/properties/$id").data.attributes; $sl = $a.'latest-sale'; $cv = $a.'council-information'.'capital-value'
             if ($sl -and $sl.'sale-price' -and $cv -and $sl.'sale-date' -ge $since -and "$($sl.category)" -match 'Residence|Home and Income') {
                 $sk2 = ("$($a.address.suburb)".ToLower() -replace '^st\.? ', 'saint ' -replace '^mt\.? ', 'mount ' -replace '[^a-z]+', '-').Trim('-')
                 if (-not $sales.ContainsKey($sk2)) { $sales[$sk2] = @() }
@@ -69,6 +74,7 @@ if ($Weekly) {
         $subs = @()
     }
     foreach ($s in ($subs | Where-Object { $_ -notmatch '^st-' } | Select-Object -Unique)) {
+        if ((MinLeft) -lt $budgetMin * 0.8) { break }
         $ids = New-Object System.Collections.Generic.HashSet[string]
         for ($p = 1; $p -le 4; $p++) { $h = GetHtml "https://www.realestate.co.nz/residential/sold/auckland/$($suburbDistrict[$s])/${s}?page=$p"; $m = [regex]::Matches($h, '/property/[a-z0-9-]+/([a-z0-9]{6,12})'); if (-not $m.Count) { break }; foreach ($x in $m) { [void]$ids.Add($x.Groups[1].Value) } }
         $rows = @(); foreach ($id in $ids) { $a = (GetJson "$API/properties/$id").data.attributes; $sl = $a.'latest-sale'; $cv = $a.'council-information'.'capital-value'
@@ -119,9 +125,9 @@ $CLAD = [ordered]@{ 'Monolithic plaster/stucco' = '\b(plaster(ed)?|stucco|monoli
 $ROOF = [ordered]@{ 'Tile (concrete/clay)' = '\b(tile roof|tiled roof|(brick|block|weatherboard) (and|&) tile|terracotta|concrete tiles?)\b'; 'Long-run iron / Colorsteel' = '\b(iron roof|corrugated|long[- ]?run|colou?rsteel|metal roof|(brick|weatherboard) (and|&) iron)\b'; 'Decramastic (pressed metal tile)' = '\b(decramastic|pressed metal tile)\b'; 'Butynol / membrane (flat roof)' = '\b(butynol|membrane roof|flat roof)\b' }
 $cands = @(); $screenedOut = 0; $deferred = 0
 # Site checks take ~20 s each, so each run checks at most max_new_per_run new listings (newest first) to stay inside the time limit.
-$maxNew = if ($cfg.max_new_per_run) { [int]$cfg.max_new_per_run } else { 500 }
+$maxNew = if ($cfg.max_new_per_run) { [int]$cfg.max_new_per_run } else { 300 }
 foreach ($id in $newIds) {
-    if ($cands.Count -ge $maxNew) { $deferred++; continue }   # the rest are checked on the next runs (not marked seen)
+    if ($cands.Count -ge $maxNew -or (MinLeft) -lt 120) { $deferred++; continue }   # the rest are checked on the next runs (not marked seen)
     $l = (GetJson "$API/listings/$id").data.attributes; if (-not $l) { continue }
     $desc = (("$($l.description)") -replace '<[^>]+>', ' ' -replace '\s+', ' ')
     $land = [double]$l.'land-area'; $beds = [int]$l.'bedroom-count'; $sub = "$($l.address.suburb)"
@@ -169,11 +175,14 @@ if ($todo.Count) {
         @(for ($i = $w; $i -lt $todo.Count; $i += $nW) { $t = $todo[$i]; [pscustomobject]@{ id = $t.id; address = "$($t.address), $cityName"; lat = $t.lat; lon = $t.lon } }) | Export-Csv $csv -NoTypeInformation -Encoding UTF8
         $procs += Start-Process powershell -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$sk\check-site.ps1`"", '-InputCsv', "`"$csv`"", '-JsonLines', "`"$root\site-checks-$w.jsonl`"" -WindowStyle Hidden -PassThru
     }
-    $procs | Wait-Process
+    # Stop the checkers in time to build and save the report; each finished site is already written to its file.
+    $waitS = [int][math]::Max(60, ((MinLeft) - 25) * 60)
+    try { $procs | Wait-Process -Timeout $waitS -ErrorAction Stop } catch { }
+    $late = @($procs | Where-Object { -not $_.HasExited }); if ($late.Count) { $late | Stop-Process -Force; Log "Site checks stopped at the time limit; the rest continue next run" }
     for ($w = 0; $w -lt $nW; $w++) { $f = "$root\site-checks-$w.jsonl"; if (Test-Path $f) { [IO.File]::AppendAllText($cacheF, [IO.File]::ReadAllText($f, $utf8), $utf8); Remove-Item $f } }
     LoadChecks
 }
-Log "Site checks: $($todo.Count) run today, $(@($cands | Where-Object { $checked.ContainsKey("$($_.id)") }).Count) of $($cands.Count) available"
+Log "Site checks: $($todo.Count) queued today ($([math]::Round(((Get-Date) - $started).TotalMinutes)) min in), $(@($cands | Where-Object { $checked.ContainsKey("$($_.id)") }).Count) of $($cands.Count) available"
 
 # Flood: worst layer that touches the whole parcel (flood_site, % of site area), else the old address-point test.
 function FloodText($c) {
