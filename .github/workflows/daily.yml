@@ -17,8 +17,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # 1. The hunt runs on Windows (the scripts are Windows PowerShell) and stages everything to upload.
+  # 1. One hunt per city, on Windows (the scripts are Windows PowerShell); each stages its files to upload.
+  #    akl = Auckland (also uploads the website pages), chc = Christchurch.
   hunt:
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [akl, chc]
     runs-on: windows-latest
     timeout-minutes: 300
     steps:
@@ -26,6 +31,7 @@ jobs:
       - name: Run the hunt
         shell: powershell
         env:
+          REGION: ${{ matrix.region }}
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.FTP_USER }}
           FTP_PASS: ${{ secrets.FTP_PASS }}
@@ -40,19 +46,26 @@ jobs:
       - name: Hand the files to the upload job
         uses: actions/upload-artifact@v4
         with:
-          name: outbox
+          name: outbox-${{ matrix.region }}
           path: ${{ runner.temp }}/outbox
           retention-days: 3
 
   # 2. Upload from Linux with lftp: Windows' TLS makes Hostinger abort encrypted FTP uploads (426).
+  #    Runs for each city whose hunt finished, even if the other city's hunt failed.
   upload:
     needs: hunt
+    if: ${{ always() }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        region: [akl, chc]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: outbox
+          name: outbox-${{ matrix.region }}
           path: outbox
       - name: Upload the website and state to Hostinger
         env:
@@ -63,4 +76,4 @@ jobs:
           cd outbox
           # Encrypted FTP is required; the certificate names Hostinger's server, not the IP, so its name isn't checked.
           lftp -c "set cmd:fail-exit yes; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ssl:verify-certificate no; set net:max-retries 4; set net:reconnect-interval-base 5; set net:timeout 30; open --env-password -u \"$FTP_USER\" \"ftp://$(cat host.txt)\"; source upload.lftp"
-          echo "Website updated and state saved"
+          echo "Website updated and state saved (${{ matrix.region }})"
