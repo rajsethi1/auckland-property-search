@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Auckland Property Search</title>
+<title>PropertyHunte</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b6e5f'/%3E%3Cpath d='M8 16l8-7 8 7v8h-5v-5h-6v5H8z' fill='white'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,6 +40,7 @@ h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 1.15; le
 .brand svg { flex: none }
 .brand span b { color: var(--accent) }
 .nav { display: flex; gap: 4px; margin-left: auto }
+.citysel { border: 1px solid var(--line); background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 7px 12px; font-weight: 700; font-size: 14px; cursor: pointer; max-width: 150px }
 .nav a { text-decoration: none; color: var(--ink); font-weight: 600; font-size: 14.5px; padding: 8px 14px; border-radius: 999px }
 .nav a:hover { background: var(--soft) }
 .nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent) }
@@ -55,7 +56,7 @@ h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 1.15; le
 .chip.good { background: var(--good-soft); color: var(--good) } .chip.warn { background: var(--warn-soft); color: var(--warn) }
 .chip.bad { background: var(--bad-soft); color: var(--bad) } .chip.blue { background: var(--blue-soft); color: var(--blue) } .chip.accent { background: var(--accent-soft); color: var(--accent) }
 .score { display: inline-grid; place-items: center; min-width: 42px; height: 42px; border-radius: 12px; font: 800 17px var(--f-display); color: #fff; background: var(--quiet) }
-.score.s-Strong { background: var(--good) } .score.s-Worth { background: #c08000 } .score.s-Stretch { background: var(--blue) } .score.s-Outside { background: #a7b0ad }
+.score.s-Strong { background: var(--good) } .score.s-Worth { background: #c08000 } .score.s-Stretch { background: var(--blue) } .score.s-Marginal { background: #8a9592 }
 
 /* Home */
 .hero { position: relative; color: #fff; background: #0d2a26 center/cover no-repeat; min-height: 440px; display: grid; align-items: center }
@@ -126,7 +127,7 @@ h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 1.15; le
 .results { overflow-y: auto; padding: 18px 20px 40px }
 .results .rhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px }
 .results .rhead h1 { font-size: 20px } .results .rhead p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px }
-.results .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px }
+.results .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr)); gap: 12px }
 /* isolation keeps Leaflet's high z-index panes inside the map, so the filter panel and menus sit above it. */
 .mapcol { position: relative; border-left: 1px solid var(--line); isolation: isolate; z-index: 0 }
 .mapcol .map { position: absolute; inset: 0 }
@@ -140,6 +141,51 @@ h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 1.15; le
   .split.show-map .results, .split:not(.show-map) .mapcol { display: none }
   .viewtoggle { display: inline-flex }
 }
+/* Phones: the price and zone pickers live in the Filters panel, so the bar stays one tidy row. */
+.mob { display: none }
+@media (max-width: 700px) {
+  .container { padding: 0 16px }
+  .topbar .container { gap: 8px; height: 56px }
+  .brand span { display: none }
+  .nav { overflow-x: auto; scrollbar-width: none; min-width: 0 }
+  .nav::-webkit-scrollbar { display: none }
+  .nav a { padding: 7px 10px; font-size: 13.5px; white-space: nowrap }
+  .citysel { padding: 6px 8px; font-size: 13px; max-width: 120px; flex: none }
+  .fbar { top: 56px }
+  .fbar .container { gap: 6px; padding-top: 8px; padding-bottom: 8px }
+  .fsearch { flex: 1 1 100%; min-width: 0 }
+  .desk { display: none }
+  .mob { display: block }
+  .fsel { flex: 1 1 0; min-width: 0; max-width: none }
+  .split { height: auto }
+  .mapcol { height: calc(100vh - 56px - 104px) }
+  .results { padding: 14px 16px 32px }
+  .phead .acts .btn { padding: 8px 12px }
+  .panel { padding: 16px }
+  .pricebox { grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 10px }
+  .pricebox b { font-size: 18px }
+  table.sch { display: block; overflow-x: auto }
+  .pmap { height: 340px }
+  .mapchips { max-width: calc(100vw - 80px) }
+  .stats { margin-top: -30px }
+}
+/* Boundary dimension labels on the map */
+.dimlbl { background: rgba(20,32,29,.85); color: #fff; font: 700 11px var(--f-body); padding: 1px 5px; border-radius: 5px; white-space: nowrap; transform: translate(-50%, -50%); display: inline-block; pointer-events: none }
+.dimicon { width: 0 !important; height: 0 !important }
+/* Feasibility */
+.drop { border: 2px dashed #c9d1cf; border-radius: var(--r); padding: 26px; text-align: center; background: var(--soft); cursor: pointer }
+.drop.over { border-color: var(--accent); background: var(--accent-soft) }
+.finds { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px }
+.finds li { border-radius: 10px; padding: 10px 12px; font-size: 14px; background: var(--soft) }
+.finds li.bad { background: var(--bad-soft) } .finds li.warn { background: var(--warn-soft) } .finds li.good { background: var(--good-soft) }
+.finds li q { display: block; color: var(--muted); font-size: 12.5px; margin-top: 4px; quotes: "“" "”" }
+.fin { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px }
+.fin label { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted) }
+.fin input, .fin select { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface); width: 100%; color: var(--ink) }
+.scen { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px }
+.scen > div { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px }
+.verdict { display: inline-block; font: 800 15px var(--f-display); padding: 4px 12px; border-radius: 999px }
+.verdict.go { background: var(--good-soft); color: var(--good) } .verdict.caution { background: var(--warn-soft); color: var(--warn) } .verdict.no { background: var(--bad-soft); color: var(--bad) }
 
 /* Filter drawer */
 .drawer-back { position: fixed; inset: 0; z-index: 90; background: rgba(10,20,18,.35) }
@@ -237,8 +283,9 @@ footer.site p { margin: 6px 0; max-width: 900px }
   <div class="container">
     <a class="brand" href="#/">
       <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0b6e5f"/><path d="M8 16l8-7 8 7v8h-5v-5h-6v5H8z" fill="#fff"/></svg>
-      <span>Auckland <b>Property</b> Search</span>
+      <span>Property<b>Hunte</b></span>
     </a>
+    <select class="citysel" id="citySel" aria-label="City" hidden><option value="akl">Auckland</option><option value="chc">Christchurch</option></select>
     <nav class="nav" aria-label="Main">
       <a href="#/" data-nav="home" hidden>Home</a>
       <a href="#/search" data-nav="search" hidden>Search</a>
@@ -248,16 +295,16 @@ footer.site p { margin: 6px 0; max-width: 900px }
     </nav>
   </div>
 </header>
-<main id="app"><div class="loading">Loading Auckland sites…</div></main>
+<main id="app"><div class="loading">Loading sites…</div></main>
 <footer class="site">
   <div class="container">
     <p><b>Screening estimates, not advice.</b> Prices, scores and checks come from listing data, council GIS and public datasets. Confirm title, LIM, zoning and flood overlays before any offer, and take finance and purchase decisions with your broker, lawyer and adviser.</p>
-    <p>Listings link to realestate.co.nz. Zoning, flood and overlay data © Auckland Council; title boundaries © LINZ (both CC BY 4.0). Map © OpenStreetMap contributors; aerial imagery © Esri and its partners.</p>
+    <p>Listings link to realestate.co.nz. Zoning, flood, overlay and stormwater data © Auckland Council; wastewater network © Watercare; title boundaries © LINZ (CC BY 4.0). Feasibility figures are rough screening estimates; LIM files you add are read in your browser and never uploaded. Map © OpenStreetMap contributors; aerial imagery © Esri and its partners.</p>
   </div>
 </footer>
 <div class="savemenu" id="savemenu" role="dialog" aria-label="Save to a list" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
