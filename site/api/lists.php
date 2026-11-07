@@ -16,6 +16,18 @@ function clean_entry(string $col, $d): array {
     if (!is_array($d)) $d = [];
     // prefs/budget: this person's own price range, used for the "Your budget" box.
     if ($col === 'prefs') return ['ideal' => max(0, min(50000000, (int)($d['ideal'] ?? 0))), 'max' => max(0, min(50000000, (int)($d['max'] ?? 0)))];
+    // searches: a named set of search filters (city, sort and the filter values) the person can re-apply.
+    if ($col === 'searches') {
+        $f = [];
+        foreach ((is_array($d['f'] ?? null) ? $d['f'] : []) as $k => $v) {
+            if (!is_string($k) || !preg_match('/^[a-z]{1,12}$/i', $k) || count($f) >= 40) continue;
+            if (is_bool($v)) $f[$k] = $v;
+            elseif (is_string($v) || is_int($v) || is_float($v)) $f[$k] = clean_text((string)$v, 40);
+            elseif (is_array($v)) $f[$k] = array_slice(array_values(array_map(fn($x) => clean_text((string)$x, 60), array_filter($v, 'is_string'))), 0, 500);
+        }
+        return ['name' => clean_text($d['name'] ?? '', 60) ?: 'My search', 'city' => ($d['city'] ?? '') === 'chc' ? 'chc' : 'akl',
+            'sort' => clean_text($d['sort'] ?? '', 20), 'at' => clean_text($d['at'] ?? '', 40), 'f' => (object)$f];
+    }
     if ($col === 'lists') return ['name' => clean_text($d['name'] ?? '', 40) ?: 'Untitled', 'at' => clean_text($d['at'] ?? '', 40)];
     $url = clean_text($d['url'] ?? '', 300);
     $ids = array_values(array_filter(is_array($d['lists'] ?? null) ? $d['lists'] : [], fn($x) => is_string($x) && preg_match('/^[A-Za-z0-9_-]{1,40}$/', $x)));
@@ -23,18 +35,18 @@ function clean_entry(string $col, $d): array {
         'suburb' => clean_text($d['suburb'] ?? '', 80), 'at' => clean_text($d['at'] ?? '', 40), 'lists' => array_slice($ids, 0, 20)];
 }
 // Objects, not arrays, even when empty, so the page can always use Object.entries().
-function mine(array $d, string $me): array { $s = $d['users'][$me] ?? []; return ['shortlist' => (object)($s['shortlist'] ?? []), 'lists' => (object)($s['lists'] ?? []), 'prefs' => (object)($s['prefs'] ?? [])]; }
+function mine(array $d, string $me): array { $s = $d['users'][$me] ?? []; return ['shortlist' => (object)($s['shortlist'] ?? []), 'lists' => (object)($s['lists'] ?? []), 'prefs' => (object)($s['prefs'] ?? []), 'searches' => (object)($s['searches'] ?? [])]; }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') out(mine(read_json('lists.json'), $me));
 
 $in = body();
 $op = $in['op'] ?? ''; $col = $in['col'] ?? ''; $id = (string)($in['id'] ?? '');
-if (!in_array($op, ['set', 'delete'], true) || !in_array($col, ['shortlist', 'lists', 'prefs'], true) || !preg_match('/^[A-Za-z0-9_-]{1,40}$/', $id)) fail(400, 'Bad request');
+if (!in_array($op, ['set', 'delete'], true) || !in_array($col, ['shortlist', 'lists', 'prefs', 'searches'], true) || !preg_match('/^[A-Za-z0-9_-]{1,40}$/', $id)) fail(400, 'Bad request');
 $res = with_json('lists.json', function (&$d) use ($me, $op, $col, $id, $in) {
-    $d['users'][$me] = ($d['users'][$me] ?? []) + ['shortlist' => [], 'lists' => [], 'prefs' => []];
+    $d['users'][$me] = ($d['users'][$me] ?? []) + ['shortlist' => [], 'lists' => [], 'prefs' => [], 'searches' => []];
     $s = &$d['users'][$me][$col];
     if ($op === 'delete') unset($s[$id]);
-    elseif (count($s) >= 2000 && !isset($s[$id])) return 'Too many saved items';
+    elseif (count($s) >= ($col === 'searches' ? 50 : 2000) && !isset($s[$id])) return 'Too many saved items';
     else $s[$id] = clean_entry($col, $in['data'] ?? []);
     return mine($d, $me);
 });
