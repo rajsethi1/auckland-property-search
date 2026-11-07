@@ -133,7 +133,11 @@ $sfx = if ($CHC) { '-chc' } else { '' }
 if (-not $CHC) { foreach ($f in $pages) { FtpPut (Join-Path $site $f) "$siteDir/$f" } }
 FtpPut "$root\reports\suburbs.json" "$siteDir/suburbs$sfx.json"
 # The sites go in the closed api/data folder; api/data.php serves them to signed-in users only.
-FtpPut "$root\reports\data.json" "$siteDir/api/data/data$sfx.json" -Atomic
+# Split first: a light summary (data.json) plus 64 detail parts the property page loads on demand.
+& powershell -NoProfile -ExecutionPolicy Bypass -File "$repo\scripts\split-data.ps1" -DataFile "$root\reports\data.json" -Out "$root\split"
+if ($LASTEXITCODE) { throw "split-data.ps1 failed ($LASTEXITCODE)" }
+Get-ChildItem "$root\split\parts\*.json" | ForEach-Object { FtpPut $_.FullName "$siteDir/api/data/parts$sfx/$($_.Name)" }
+FtpPut "$root\split\summary.json" "$siteDir/api/data/data$sfx.json" -Atomic
 # Remove the public copy older versions uploaded (no error if it's already gone).
 if (-not $CHC) { FtpDel "$siteDir/data.json" }
 "Website files staged"
