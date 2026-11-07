@@ -22,7 +22,9 @@ $hostRaw = $env:FTP_HOST -replace '[a-z]+://', ''
 $hostName = [regex]::Match($hostRaw, '[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+(:\d+)?').Value
 "FTP_HOST shape: '$($hostRaw -replace '[0-9]', '9' -replace '[A-Za-z]', 'a' -replace "`r|`n", '<newline>')' -> using a $($hostName.Length)-character host"
 if (-not $hostName) { throw 'FTP_HOST does not contain a host name or IP address' }
-$ftp = "ftp://$hostName"; $cred = "$($env:FTP_USER):$($env:FTP_PASS)"
+$ftpUser = $env:FTP_USER.Trim(); $ftpPass = $env:FTP_PASS.Trim()
+"FTP_USER shape: '$($ftpUser -replace '[0-9]', '9' -replace '[A-Za-z]', 'a')' ($($ftpUser.Length) characters); FTP_PASS is $($ftpPass.Length) characters$(if ($ftpPass.Length -ne $env:FTP_PASS.Length -or $ftpUser.Length -ne $env:FTP_USER.Length) { ' (spaces or line breaks were trimmed)' })"
+$ftp = "ftp://$hostName"; $cred = "$($ftpUser):$($ftpPass)"
 # REGION=chc runs the Christchurch hunt: its own state folder, seed and data file; the pages are uploaded by the Auckland run.
 $CHC = $env:REGION -eq 'chc'
 $stateDir = if ($CHC) { 'hunt-state-chc' } elseif ($env:FTP_STATE_DIR) { $env:FTP_STATE_DIR.Trim('/') } else { 'hunt-state' }
