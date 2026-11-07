@@ -25,7 +25,7 @@ jobs:
       matrix:
         region: [akl, chc]
     runs-on: windows-latest
-    timeout-minutes: 300
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
       - name: Run the hunt
@@ -63,11 +63,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      # If this city's hunt failed there's nothing to upload: skip quietly (the hunt job's log shows why).
       - uses: actions/download-artifact@v4
+        id: dl
+        continue-on-error: true
         with:
           name: outbox-${{ matrix.region }}
           path: outbox
+      - name: Nothing to upload
+        if: ${{ steps.dl.outcome != 'success' }}
+        run: echo "The ${{ matrix.region }} hunt didn't finish, so nothing was uploaded for it. Open that city's hunt job for the error."
       - name: Upload the website and state to Hostinger
+        if: ${{ steps.dl.outcome == 'success' }}
         env:
           FTP_USER: ${{ secrets.FTP_USER }}
           LFTP_PASSWORD: ${{ secrets.FTP_PASS }}
