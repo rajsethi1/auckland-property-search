@@ -1,0 +1,10 @@
+{
+    "Central City": ["Christchurch Central", "Central City", "City Centre"],
+    "Inner North": ["Merivale", "St Albans", "Fendalton", "Strowan", "Edgeware", "Mairehau", "Papanui", "Shirley", "Richmond", "Dallington", "Avonside"],
+    "North West": ["Bryndwr", "Burnside", "Bishopdale", "Harewood", "Avonhead", "Ilam", "Russley", "Yaldhurst", "Northcote", "Redwood", "Casebrook", "Northwood", "Belfast", "Styx", "Marshland", "Westmorland Heights", "Clearwater", "Upper Riccarton"],
+    "East": ["Linwood", "Phillipstown", "Woolston", "Bromley", "Aranui", "Wainoni", "Avondale", "Burwood", "Parklands", "Waimairi Beach", "North New Brighton", "New Brighton", "South New Brighton", "Southshore", "Bexley", "Travis Wetland", "Ferrymead"],
+    "South": ["Sydenham", "Addington", "Spreydon", "Somerfield", "Beckenham", "St Martins", "Opawa", "Waltham", "Hillsborough", "Cashmere", "Hoon Hay", "Hillmorton", "Halswell", "Westmorland", "Aidanfield", "Oaklands", "Kennedys Bush", "Wigram", "Huntsbury", "Murray Aynsley", "Cracroft", "Kennedy's Bush"],
+    "West": ["Riccarton", "Church Corner", "Sockburn", "Hornby", "Hei Hei", "Islington", "Broomfield", "Templeton", "Middleton", "Hornby South", "Masham", "Avonhead West"],
+    "Port Hills and Bays": ["Sumner", "Redcliffs", "Mount Pleasant", "Heathcote Valley", "Moncks Bay", "Clifton", "Scarborough", "Taylors Mistake", "Lyttelton", "Governors Bay", "Diamond Harbour", "Cass Bay", "Corsair Bay", "Rapaki", "Purau", "Teddington", "Church Bay", "Charteris Bay"],
+    "Banks Peninsula": ["Akaroa", "Duvauchelle", "Little River", "Wainui", "Takamatua", "Barrys Bay", "French Farm", "Okains Bay", "Le Bons Bay", "Pigeon Bay", "Little Akaloa", "Birdlings Flat", "Port Levy", "Robinsons Bay"]
+}

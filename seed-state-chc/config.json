@@ -1,0 +1,20 @@
+{
+    "region": "chc",
+    "region_label": "Christchurch",
+    "search_path": "canterbury/christchurch-city",
+    "api_region": 45,
+    "district_name": "Christchurch City",
+    "report_url": "",
+    "email_to": [],
+    "max_price": 1100000,
+    "ideal_high": 900000,
+    "stretch_pct": 15,
+    "search_max_price": 2500000,
+    "min_land_m2": 600,
+    "min_beds": 2,
+    "auckland_wide": true,
+    "districts": [],
+    "suburbs": [],
+    "top_schools": [],
+    "zone_search": false
+}
