@@ -125,7 +125,10 @@ h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 1.15; le
 .fsel.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft) }
 .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); height: calc(100vh - 64px - 58px) }
 .results { overflow-y: auto; padding: 18px 20px 40px }
-.results .rhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px }
+.results .rhead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px }
+.rtools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px }
+.sortby { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted) }
+.sortby .fsel { flex: none; max-width: 200px; color: var(--ink) }
 .results .rhead h1 { font-size: 20px } .results .rhead p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px }
 .results .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr)); gap: 12px }
 /* isolation keeps Leaflet's high z-index panes inside the map, so the filter panel and menus sit above it. */
@@ -173,7 +176,9 @@ h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 1.15; le
 .dimlbl { background: rgba(20,32,29,.85); color: #fff; font: 700 11px var(--f-body); padding: 1px 5px; border-radius: 5px; white-space: nowrap; transform: translate(-50%, -50%); display: inline-block; pointer-events: none }
 .dimicon { width: 0 !important; height: 0 !important }
 /* Feasibility */
-.drop { border: 2px dashed #c9d1cf; border-radius: var(--r); padding: 26px; text-align: center; background: var(--soft); cursor: pointer }
+.drop { display: flex; flex-direction: column; align-items: center; gap: 8px; position: static; width: auto; height: auto; margin: 0; border: 2px dashed #c9d1cf; border-radius: var(--r); padding: 24px 16px; text-align: center; background: var(--soft); color: var(--ink); cursor: pointer }
+.drop .dropbtn { display: inline-block; background: var(--accent); color: #fff; font-weight: 700; padding: 10px 18px; border-radius: 999px }
+.drop .droptxt { font-size: 14px } .drop small { font-size: 12.5px; max-width: 460px; line-height: 1.45 }
 .drop.over { border-color: var(--accent); background: var(--accent-soft) }
 .finds { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px }
 .finds li { border-radius: 10px; padding: 10px 12px; font-size: 14px; background: var(--soft) }

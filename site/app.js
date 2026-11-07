@@ -10,15 +10,6 @@ const k = n => !n ? "—" : n >= 1e6 ? "$" + (n / 1e6).toFixed(2).replace(/0$/, 
 const isNum = v => typeof v === "number" && isFinite(v);
 const pct = v => !isNum(v) ? "—" : (v > 0 ? "+" : "") + v + "%";
 const rentOf = p => isNum(p.numbers?.weekly_rent) && p.numbers.weekly_rent > 0 ? p.numbers.weekly_rent : 0;
-// The signed-in person's own budget (Account page), compared with the expected price and the low case.
-const fitOf = p => {
-  const b = S.budget, pr = priceOf(p), low = p.pricing?.low_case || 0;
-  if (!b.max) return ""; if (!pr) return "Price unknown";
-  if (b.ideal && pr <= b.ideal) return "Ideal range";
-  if (pr <= b.max) return "In budget";
-  if (low && low <= b.max) return "Possible: below CV";
-  return pr <= b.max * 1.15 ? "Stretch: slightly over" : "Over budget";
-};
 const yieldOf = p => { const r = rentOf(p), pr = priceOf(p); return r && pr ? Math.round(1000 * r * 52 / pr) / 10 : 0; };
 const dist = m => m == null ? "—" : m >= 1000 ? (m / 1000).toFixed(1) + " km" : Math.round(m) + " m";
 const safeUrl = u => /^https?:\/\//.test(u || "") ? u : "#";
@@ -51,9 +42,12 @@ let CITY = CITIES[ls.get("aps-city", "akl")] ? ls.get("aps-city", "akl") : "akl"
 const C = () => CITIES[CITY];
 
 // ---------- State ----------
-const S = { data: null, sites: [], byId: new Map(), subs: {}, subDistrict: new Map(), zones: {}, saved: new Map(), lists: [], api: false, budget: {} };
-const DEF = { lmin: "", lmax: "", bmin: "", ptype: "", ymin: "", inBudget: false, pmin: "", pmax: "", label: "", zone: "", title: "", flood: "", power: "", sh: "", sec: "", pri: "", pos: "", train: false, isNew: false, topzone: false, list: "", subs: [] };
-let F = Object.assign({}, DEF, ls.get("aps-f-" + CITY, CITY === "akl" ? ls.get("aps-f", {}) : {}));
+const S = { data: null, sites: [], byId: new Map(), subs: {}, subDistrict: new Map(), zones: {}, saved: new Map(), lists: [], api: false };
+const DEF = { lmin: "", lmax: "", bmin: "", ptype: [], ymin: "", pmin: "", pmax: "", label: [], zone: [], title: [], flood: "", power: "", sh: "", sec: "", pri: "", pos: "", train: false, isNew: false, topzone: false, list: "", subs: [] };
+// Zone, property type, rating and title allow several choices (arrays); older saved filters held one string.
+const MULTI = ["zone", "ptype", "label", "title"];
+const normF = f => { const o = Object.assign({}, DEF, f || {}); MULTI.concat(["subs"]).forEach(key => { const v = o[key]; o[key] = Array.isArray(v) ? v.map(String) : v ? [String(v)] : []; }); return o; };
+let F = normF(ls.get("aps-f-" + CITY, CITY === "akl" ? ls.get("aps-f", {}) : {}));
 let Q = "", SORT = ls.get("aps-sort", "score");
 const saveF = () => ls.set("aps-f-" + CITY, F);
 
@@ -69,15 +63,14 @@ function match(p, f = F, q = Q) {
   if (f.lmin && !((+p.land_m2 || 0) >= +f.lmin)) return false;
   if (f.lmax && !((+p.land_m2 || 0) < +f.lmax)) return false;
   if (f.bmin && !((+p.beds || 0) >= +f.bmin)) return false;
-  if (f.ptype && typeOf(p) !== f.ptype) return false;
+  if (f.ptype.length && !f.ptype.includes(typeOf(p))) return false;
   if (f.ymin && yieldOf(p) < +f.ymin) return false;
-  if (f.inBudget && S.budget.max && !/Ideal|In budget|Possible/.test(fitOf(p))) return false;
   if ((f.pmin || f.pmax) && !price) return false;
   if (f.pmin && price < +f.pmin) return false;
   if (f.pmax && price > +f.pmax) return false;
-  if (f.label && p.label !== f.label) return false;
-  if (f.zone && zoneShort(p.zone) !== f.zone) return false;
-  if (f.title && (p.title || "Unknown") !== f.title) return false;
+  if (f.label.length && !f.label.includes(p.label)) return false;
+  if (f.zone.length && !f.zone.includes(zoneShort(p.zone))) return false;
+  if (f.title.length && !f.title.includes(p.title || "Unknown")) return false;
   if (f.flood === "none" && p.flood) return false;
   if (f.flood === "yes" && !p.flood) return false;
   const pl = p.power_lines?.level;
@@ -108,7 +101,7 @@ const SORTS = {
   growth: ["Future growth", (a, b) => (b.growth?.outlook_5y_pct ?? -99) - (a.growth?.outlook_5y_pct ?? -99)]
 };
 const results = () => S.sites.filter(p => match(p)).sort(SORTS[SORT]?.[1] || SORTS.score[1]);
-const activeCount = () => Object.keys(DEF).filter(key => key === "subs" ? F.subs.length : F[key] !== DEF[key]).length;
+const activeCount = () => Object.keys(DEF).filter(key => Array.isArray(DEF[key]) ? (F[key] || []).length : F[key] !== DEF[key]).length;
 const PRICE_STEPS = (() => { const s = []; for (let v = 100000; v <= 1500000; v += 100000) s.push(v); for (let v = 1750000; v <= 3000000; v += 250000) s.push(v); s.push(3500000, 4000000, 5000000); return s; })();
 // Listing type from realestate.co.nz's sub-type; older records (houses only) have none.
 function typeOf(p) {
@@ -163,9 +156,9 @@ const zoneColor = n => /Single House/.test(n) ? "#f3e2a9" : /Suburban/.test(n) ?
 let maps = [];
 function makeMap(el, { aerialFirst = false, floodOn = true } = {}) {
   if (!window.L || !L.esri) { el.innerHTML = `<div class="empty">The map couldn't load.</div>`; return null; }
-  const map = L.map(el, { preferCanvas: true, zoomControl: true }).setView(C().center, C().zoom);
-  const street = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" });
-  const air = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "Imagery &copy; Esri" });
+  const map = L.map(el, { preferCanvas: true, zoomControl: true, maxZoom: 21 }).setView(C().center, C().zoom);
+  const street = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 21, maxNativeZoom: 19, attribution: "&copy; OpenStreetMap contributors" });
+  const air = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 21, maxNativeZoom: 19, attribution: "Imagery &copy; Esri" });
   (aerialFirst ? air : street).addTo(map);
   // Council polygons are heavy, so each layer only draws from street/suburb zoom.
   const layer = (svc, color, minZoom) => L.esri.featureLayer({ url: AC + svc + "/FeatureServer/0", minZoom, simplifyFactor: 0.5, precision: 6, interactive: false, style: () => ({ color, weight: 1, fillColor: color, fillOpacity: 0.35 }) });
@@ -177,7 +170,7 @@ function makeMap(el, { aerialFirst = false, floodOn = true } = {}) {
   const overlays = CITY === "chc" ? {
     "Flood plains": ccc("DistrictPlanB/FeatureServer/25", "#1f6fd1", 14), "Flood prone areas": ccc("DistrictPlanB/FeatureServer/30", "#4fa3e0", 14),
     "Flood sensitive areas": ccc("DistrictPlan/FeatureServer/89", "#9ccff0", 14),
-    "Zoning (Unitary Plan)": L.esri.featureLayer({ url: CCC + "DistrictPlan/FeatureServer/78", minZoom: 15, where: "RemovedByPlanChangeIdentifier IS NULL", simplifyFactor: 0.5, precision: 6, fields: ["OBJECTID", "Type"],
+    "Zoning (Unitary Plan)": L.esri.featureLayer({ url: CCC + "DistrictPlan/FeatureServer/78", minZoom: 15, where: "RemovedByPlanChangeIdentifier IS NULL", simplifyFactor: 0.5, precision: 6, fields: ["DPZoneID", "Type"],
       style: f => { const t = String(f.properties.Type || ""), c = /High density/i.test(t) ? "#c0562f" : /Medium density|Medium Density/.test(t) ? "#e8964a" : /Density Transition/.test(t) ? "#f2c45a" : /Residential/.test(t) ? "#f3e2a9" : /Transport/.test(t) ? "#d9d9d9" : zoneColor(t); return { color: c, weight: 0.6, fillColor: c, fillOpacity: 0.3 }; } })
       .bindPopup(l => esc(l.feature.properties.Type || "Zone")),
     "Special Character Areas": ccc("DistrictPlan/FeatureServer/59", "#a05ac8", 14),
@@ -206,9 +199,9 @@ function makeMap(el, { aerialFirst = false, floodOn = true } = {}) {
   const pipeTip = (l, what, dia) => `<b>${what}</b>${dia && dia < 990 ? `<br>${dia} mm` : ""}`;
   if (CITY === "chc") {
     const cw = "ServiceStatus='In Service' AND Ownership='CCC'";
-    overlays["Stormwater pipes"] = L.esri.featureLayer({ url: CCC + "StormWater/FeatureServer/1", where: cw, minZoom: 16, precision: 6, fields: ["OBJECTID", "NominalDiameter"],
+    overlays["Stormwater pipes"] = L.esri.featureLayer({ url: CCC + "StormWater/FeatureServer/1", where: cw, minZoom: 16, precision: 6, fields: ["SwPipeID", "NominalDiameter"],
       style: () => ({ color: "#1f9ad6", weight: 3, opacity: 0.9 }) }).bindPopup(l => pipeTip(l, "Stormwater pipe", l.feature.properties.NominalDiameter));
-    overlays["Wastewater pipes"] = L.esri.featureLayer({ url: CCC + "WasteWater/FeatureServer/1", where: cw, minZoom: 16, precision: 6, fields: ["OBJECTID", "NominalDiameter"],
+    overlays["Wastewater pipes"] = L.esri.featureLayer({ url: CCC + "WasteWater/FeatureServer/1", where: cw, minZoom: 16, precision: 6, fields: ["WwPipeID", "NominalDiameter"],
       style: () => ({ color: "#8a5a2b", weight: 3, opacity: 0.9, dashArray: "6 4" }) }).bindPopup(l => pipeTip(l, "Wastewater pipe", l.feature.properties.NominalDiameter));
   } else {
   overlays["Stormwater pipes"] = L.esri.featureLayer({ url: AC + "Stormwater_Pipe/FeatureServer/0", minZoom: 16, precision: 6, fields: ["OBJECTID", "SW_DIAMETER_MM"],
@@ -217,12 +210,29 @@ function makeMap(el, { aerialFirst = false, floodOn = true } = {}) {
     where: "STATUS='OP' AND UNITTYPE LIKE 'PIPE%'", minZoom: 16, precision: 6, fields: ["OBJECTID", "NOM_DIA_MM"],
     style: () => ({ color: "#8a5a2b", weight: 3, opacity: 0.9, dashArray: "6 4" }) }).bindPopup(l => pipeTip(l, "Wastewater pipe", l.feature.properties.NOM_DIA_MM));
   }
+  // Manholes and chambers (lid level and depth when recorded), from street level; they switch on with their pipes.
+  const num = v => typeof v === "number" && isFinite(v) ? v : null;
+  const mhTip = (what, type, depth, lid) => `<b>${esc(what)}</b>${type ? `<br>${esc(type)}` : ""}${num(depth) ? `<br>Depth ${num(depth).toFixed(2)} m` : ""}${num(lid) ? `<br>Lid level ${num(lid).toFixed(2)} m` : ""}`;
+  // fields[0] is the layer's ID field (Christchurch layers name theirs SwAccessID / WwAccessID, not OBJECTID).
+  const mh = (url, where, fields, color, tip) => L.esri.featureLayer({ url, where, minZoom: 17, fields,
+    pointToLayer: (g, ll) => L.circleMarker(ll, { radius: 5, color: "#fff", weight: 1.5, fillColor: color, fillOpacity: 1 }) }).bindPopup(l => tip(l.feature.properties));
+  if (CITY === "chc") {
+    overlays["Stormwater manholes"] = mh(CCC + "StormWater/FeatureServer/0", "ServiceStatus='In Service'", ["SwAccessID", "Type", "PitDepth", "LidLevel", "Ownership"], "#1f9ad6",
+      p => mhTip("Stormwater " + (/chamber/i.test(p.Type || "") ? "chamber" : "manhole"), [p.Type, p.Ownership === "Private" ? "Private" : ""].filter(Boolean).join(" · "), p.PitDepth, p.LidLevel));
+    overlays["Wastewater manholes"] = mh(CCC + "WasteWater/FeatureServer/0", "ServiceStatus='In Service'", ["WwAccessID", "Type", "PitDepth", "LidLevel", "Ownership"], "#8a5a2b",
+      p => mhTip("Wastewater " + (/chamber/i.test(p.Type || "") ? "chamber" : "manhole"), [p.Type, p.Ownership === "Private" ? "Private" : ""].filter(Boolean).join(" · "), p.PitDepth, p.LidLevel));
+  } else {
+    overlays["Stormwater manholes"] = mh(AC + "Stormwater_Manhole_And_Chamber/FeatureServer/0", "SW_STATUS='INSR'", ["OBJECTID", "SW_DEPTH_TO_INVERT_M", "SW_COVER_LEVEL_M"], "#1f9ad6",
+      p => mhTip("Stormwater manhole", "", p.SW_DEPTH_TO_INVERT_M, p.SW_COVER_LEVEL_M));
+    overlays["Wastewater manholes"] = mh("https://services5.arcgis.com/PnnKqtqi3qfxnaPc/arcgis/rest/services/Wastewater_Network/FeatureServer/3", "STATUS='OP'", ["OBJECTID", "INV_DEPTH", "LID_LEV"], "#8a5a2b",
+      p => mhTip("Wastewater manhole", "", p.INV_DEPTH, p.LID_LEV));
+  }
   if (floodOn) { overlays["Flood plains"].addTo(map); overlays["Flood prone areas"].addTo(map); }
   const labels = CITY === "chc" ? { "Flood plains": "High flood hazard", "Flood prone areas": "Flood management areas", "Flood sensitive areas": "Fixed floor level areas",
     "Zoning (Unitary Plan)": "Zoning (District Plan)", "Special Character Areas": "Residential character areas", "Historic heritage": "Heritage settings" } : {};
   L.control.layers({ "Street map": street, "Aerial photo": air }, Object.fromEntries(Object.entries(overlays).map(([key, v]) => [labels[key] || key, v])), { collapsed: true }).addTo(map);
   // Quick on/off buttons for the layers people use most.
-  const quick = [["Flood", ["Flood plains", "Flood prone areas"]], ["Zoning", ["Zoning (Unitary Plan)"]], ["School zones", ["Top-10 school zones"]], ["State housing", ["State housing (Kāinga Ora)"]], ["Stormwater", ["Stormwater pipes"]], ["Wastewater", ["Wastewater pipes"]]]
+  const quick = [["Flood", ["Flood plains", "Flood prone areas"]], ["Zoning", ["Zoning (Unitary Plan)"]], ["School zones", ["Top-10 school zones"]], ["State housing", ["State housing (Kāinga Ora)"]], ["Stormwater", ["Stormwater pipes", "Stormwater manholes"]], ["Wastewater", ["Wastewater pipes", "Wastewater manholes"]]]
     .filter(([, names]) => names.every(nm => overlays[nm]));
   const qc = L.control({ position: "topleft" });
   qc.onAdd = () => {
@@ -244,8 +254,8 @@ function makeMap(el, { aerialFirst = false, floodOn = true } = {}) {
   note.addTo(map);
   const pipesOn = () => map.hasLayer(overlays["Stormwater pipes"]) || map.hasLayer(overlays["Wastewater pipes"]);
   const upd = () => { const d = note.getContainer(), z = map.getZoom();
-    d.textContent = z < 14 ? "Zoom in to see flood and zoning layers" : "Zoom in further to see pipes";
-    d.style.display = z < 14 || (z < 16 && pipesOn()) ? "" : "none"; };
+    d.textContent = z < 14 ? "Zoom in to see flood and zoning layers" : z < 16 ? "Zoom in further to see pipes" : "Zoom in further to see manholes";
+    d.style.display = z < 14 || (z < 17 && pipesOn()) ? "" : "none"; };
   map.on("zoomend overlayadd overlayremove", upd); upd();
   maps.push(map);
   return map;
@@ -310,7 +320,7 @@ async function saveSearch() {
 }
 function applySearch(id) {
   const s = (S.searches || []).find(x => x.id === id); if (!s) return;
-  const f = Object.assign({}, DEF, s.f); f.subs = Array.isArray(f.subs) ? f.subs : [];
+  const f = normF(s.f);
   if (s.sort && SORTS[s.sort]) { SORT = s.sort; ls.set("aps-sort", SORT); }
   Q = "";
   if (s.city !== CITY) { ls.set("aps-f-" + s.city, f); location.hash = "#/search"; setCity(s.city); return; }
@@ -353,7 +363,6 @@ let menuFor = null;
 async function postStore(body) { applyStore(await api("lists.php", body)); }
 function applyStore(s) {
   S.saved = new Map(Object.entries(s.shortlist || {}).map(([id, d]) => [id, Array.isArray(d.lists) && d.lists.length ? d.lists.map(String) : ["main"]]));
-  const bd = s.prefs?.budget || {}; S.budget = { max: +bd.max || 0, ideal: +bd.ideal || 0 };
   S.searches = Object.entries(s.searches || {}).filter(([, d]) => d && typeof d === "object").map(([id, d]) => ({ id, name: String(d.name || "My search"), city: d.city === "chc" ? "chc" : "akl", sort: String(d.sort || ""), at: String(d.at || ""), f: d.f || {} }))
     .sort((a, b) => a.name.localeCompare(b.name));
   if ($("#mySel")) renderMySearches();
@@ -435,7 +444,7 @@ function home() {
     <div class="stats">
       <div class="stat"><b class="num">${ok.length}</b><span>sites for sale</span></div>
       <div class="stat"><b class="num">${newOk.length}</b><span>new today</span></div>
-      ${S.budget.max ? `<div class="stat"><b class="num">${ok.filter(p => /Ideal|In budget|Possible/.test(fitOf(p))).length}</b><span>within your budget</span></div>` : `<div class="stat"><b class="num">${ok.filter(p => priceOf(p) && priceOf(p) <= 1000000).length}</b><span>under $1m</span></div>`}
+      <div class="stat"><b class="num">${ok.filter(p => priceOf(p) && priceOf(p) <= 1000000).length}</b><span>under $1m</span></div>
       <div class="stat"><b class="num">${ok.filter(p => yieldOf(p) >= 4).length}</b><span>yield 4%+</span></div>
       <div class="stat"><b>${esc(run || "—")}</b><span>last updated</span></div>
     </div>
@@ -453,9 +462,9 @@ function search(params) {
   if ([...params.keys()].length) {
     const pre = params.get("preset"), d = params.get("district");
     Q = params.get("q") || "";
-    if (pre || d) { F = Object.assign({}, DEF); Q = ""; }
+    if (pre || d) { F = normF({}); Q = ""; }
     if (pre === "ideal") F.pmax = "900000";
-    if (pre === "strong") F.label = "Strong";
+    if (pre === "strong") F.label = ["Strong"];
     if (pre === "train") F.train = true;
     if (pre === "top") F.topzone = true;
     if (pre === "new") F.isNew = true;
@@ -468,27 +477,28 @@ function search(params) {
     <label class="fsearch"><span aria-hidden="true">⌕</span><input id="fq" type="search" placeholder="Address or suburb" aria-label="Search an address or suburb" value="${esc(Q)}" autocomplete="off"></label>
     <select class="fsel desk" id="f-pmin" aria-label="Minimum price">${opts([["", "Min price"], ...PRICE_STEPS.map(v => [v, k(v)])], F.pmin)}</select>
     <select class="fsel desk" id="f-pmax" aria-label="Maximum price">${opts([["", "Max price"], ...PRICE_STEPS.map(v => [v, k(v)])], F.pmax)}</select>
-    <select class="fsel desk" id="f-zone" aria-label="Zone">${opts([["", "Any zone"], ...zonesList.map(z => [z, z])], F.zone)}</select>
-    <select class="fsel" id="f-sort" aria-label="Sort">${opts(Object.entries(SORTS).map(([key, v]) => [key, v[0]]), SORT)}</select>
+    <button class="fsel desk" id="f-zone" type="button" aria-label="Zones">Any zone</button>
     <button class="btn sm" id="moreF" type="button">Filters</button>
     <button class="btn sm" id="saveS" type="button" hidden>Save search</button><select class="fsel" id="mySel" aria-label="Saved searches" hidden></select>
     <button class="btn sm viewtoggle" id="vt" type="button">Map</button>
   </div></div>
   <div class="split" id="split">
-    <div class="results"><div class="rhead"><div><h1 id="rtitle"></h1><p id="rsub"></p></div><button class="btn sm" id="clearF" type="button">Clear filters</button></div>
+    <div class="results"><div class="rhead"><div><h1 id="rtitle"></h1><p id="rsub"></p></div>
+      <div class="rtools"><label class="sortby">Sort by <select class="fsel" id="f-sort">${opts(Object.entries(SORTS).map(([key, v]) => [key, v[0]]), SORT)}</select></label><button class="btn sm" id="clearF" type="button">Clear filters</button></div></div>
       <div class="grid" id="grid"></div><button class="btn more" id="moreBtn" type="button" hidden></button></div>
     <div class="mapcol"><div class="map" id="smap"></div></div>
   </div>`;
   sMap = makeMap($("#smap")); lastSig = ""; shown = 24;
   const bind = (id, key) => $(id).addEventListener("change", e => { F[key] = e.target.value; saveF(); renderResults(); });
-  bind("#f-pmin", "pmin"); bind("#f-pmax", "pmax"); bind("#f-zone", "zone");
+  bind("#f-pmin", "pmin"); bind("#f-pmax", "pmax");
+  $("#f-zone").addEventListener("click", () => { openDrawer(); $(".drawer [data-mseg=zone]")?.closest(".fgroup").scrollIntoView({ block: "start" }); });
   $("#f-sort").addEventListener("change", e => { SORT = e.target.value; ls.set("aps-sort", SORT); renderResults(); });
   $("#fq").addEventListener("input", e => { Q = e.target.value; renderResults(); });
   $("#moreF").addEventListener("click", openDrawer);
   $("#saveS").addEventListener("click", saveSearch);
   $("#mySel").addEventListener("change", e => { const v = e.target.value; e.target.value = ""; if (v.startsWith("del:")) deleteSearch(v.slice(4)); else if (v) applySearch(v); });
   renderMySearches();
-  $("#clearF").addEventListener("click", () => { F = Object.assign({}, DEF); Q = ""; saveF(); search(new URLSearchParams()); });
+  $("#clearF").addEventListener("click", () => { F = normF({}); Q = ""; saveF(); search(new URLSearchParams()); });
   $("#vt").addEventListener("click", () => { const s = $("#split"); s.classList.toggle("show-map"); $("#vt").textContent = s.classList.contains("show-map") ? "List" : "Map"; sMap?.invalidateSize(); });
   $("#moreBtn").addEventListener("click", () => { shown += 24; renderResults(false); });
   $("#grid").addEventListener("mouseover", e => { const c = e.target.closest(".card"); hiMarker(c?.dataset.id); });
@@ -506,7 +516,8 @@ function renderResults(resetPaging = true) {
   const sig = JSON.stringify([F, Q, SORT]);
   if (resetPaging && sig !== lastSig) shown = 24;
   const n = activeCount(); $("#moreF").textContent = n ? `Filters (${n})` : "Filters";
-  [["#f-pmin", "pmin"], ["#f-pmax", "pmax"], ["#f-zone", "zone"]].forEach(([s, key]) => { $(s).value = F[key]; $(s).classList.toggle("on", !!F[key]); });
+  [["#f-pmin", "pmin"], ["#f-pmax", "pmax"]].forEach(([s, key]) => { $(s).value = F[key]; $(s).classList.toggle("on", !!F[key]); });
+  $("#f-zone").textContent = !F.zone.length ? "Any zone" : F.zone.length === 1 ? F.zone[0] : `${F.zone.length} zones`; $("#f-zone").classList.toggle("on", !!F.zone.length);
   const area = F.subs.length ? (Object.entries(S.subs).find(([, list]) => list.length === F.subs.length && list.every(s => F.subs.includes(norm(s))))?.[0] || `${F.subs.length} suburbs`) : C().name;
   $("#rtitle").textContent = Q ? `Results for "${Q}"` : `${items.length.toLocaleString()} site${items.length === 1 ? "" : "s"} in ${area}`;
   $("#rsub").textContent = Q ? `${items.length} match across all ${S.sites.length} sites (other filters paused while searching)` : SORTS[SORT][0];
@@ -538,6 +549,8 @@ function openDrawer() {
   closeDrawer();
   const seg = (key, list) => `<div class="seg" data-seg="${key}">${list.map(([v, t]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${String(F[key]) === String(v)}">${esc(t)}</button>`).join("")}</div>`;
   const sel = (key, list) => `<select data-k="${key}">${opts(list, F[key])}</select>`;
+  // Several choices allowed: "Any" clears them; the others toggle on and off.
+  const mseg = (key, list) => `<div class="seg" data-mseg="${key}"><button type="button" data-v="" aria-pressed="${!F[key].length}">Any</button>${list.map(([v, t]) => `<button type="button" data-v="${esc(v)}" aria-pressed="${F[key].includes(String(v))}">${esc(t)}</button>`).join("")}</div>`;
   const titles = [...new Set(S.sites.map(p => p.title || "Unknown"))].sort();
   const counts = {}; S.sites.forEach(p => { const s = norm(p.suburb); counts[s] = (counts[s] || 0) + 1; });
   const area = Object.entries(S.subs).map(([d, subs]) => {
@@ -549,20 +562,19 @@ function openDrawer() {
   <aside class="drawer" role="dialog" aria-label="Filters"><header><h2>Filters</h2><button class="btn sm" type="button" data-close>Close</button></header>
   <div class="body">
     <div class="fgroup"><h3>Area</h3><input type="search" id="dq" placeholder="Find a suburb"><div class="dlist">${area}</div></div>
-    <div class="fgroup mob"><h3>Price and zone</h3><div class="row2"><label class="f">From${sel("pmin", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label><label class="f">Up to${sel("pmax", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label>
-      <label class="f">Zone${sel("zone", [["", "Any zone"], ...[...new Set(S.sites.map(p => zoneShort(p.zone)))].sort().map(z => [z, z])])}</label></div></div>
-    <div class="fgroup"><h3>Property type</h3>${seg("ptype", [["", "Any"], ["House", "House"], ["Townhouse", "Townhouse"], ["Unit", "Unit"], ["Apartment", "Apartment"], ["Section", "Section"]])}</div>
+    <div class="fgroup mob"><h3>Price</h3><div class="row2"><label class="f">From${sel("pmin", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label><label class="f">Up to${sel("pmax", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label></div></div>
+    <div class="fgroup"><h3>Zone <small class="muted">(pick any number)</small></h3>${mseg("zone", [...new Set(S.sites.map(p => zoneShort(p.zone)))].sort().map(z => [z, z]))}</div>
+    <div class="fgroup"><h3>Property type</h3>${mseg("ptype", [["House", "House"], ["Townhouse", "Townhouse"], ["Unit", "Unit"], ["Apartment", "Apartment"], ["Section", "Section"]])}</div>
     <div class="fgroup"><h3>Land size from</h3>${seg("lmin", [["", "Any"], ["300", "300 m²+"], ["400", "400 m²+"], ["500", "500 m²+"], ["600", "600 m²+"], ["800", "800 m²+"], ["1000", "1000 m²+"]])}</div>
     <div class="fgroup"><h3>Land size under</h3>${seg("lmax", [["", "Any"], ["400", "400 m²"], ["600", "600 m²"], ["800", "800 m²"], ["1000", "1000 m²"], ["2000", "2000 m²"]])}</div>
     <div class="fgroup"><h3>Bedrooms</h3>${seg("bmin", [["", "Any"], ["1", "1+"], ["2", "2+"], ["3", "3+"], ["4", "4+"], ["5", "5+"]])}</div>
-    <div class="fgroup"><h3>Rating</h3>${seg("label", [["", "Any"], ["Strong", "Strong"], ["Worth a look", "Worth a look"], ["Marginal", "Marginal"]])}</div>
+    <div class="fgroup"><h3>Rating</h3>${mseg("label", [["Strong", "Strong"], ["Worth a look", "Worth a look"], ["Marginal", "Marginal"]])}</div>
     <div class="fgroup"><h3>Rental yield</h3>${seg("ymin", [["", "Any"], ["3", "3%+"], ["3.5", "3.5%+"], ["4", "4%+"], ["5", "5%+"]])}</div>
     <div class="fgroup"><h3>Handy filters</h3><div class="seg" data-tg>
-      ${S.budget.max ? `<button type="button" data-t="inBudget" aria-pressed="${F.inBudget}">Within my budget</button>` : ""}${CITY === "akl" ? `<button type="button" data-t="train" aria-pressed="${F.train}">Near a train (1.2 km)</button><button type="button" data-t="topzone" aria-pressed="${F.topzone}">Top-10 school zone</button>` : ""}<button type="button" data-t="isNew" aria-pressed="${F.isNew}">New today</button></div>
-      ${S.budget.max ? "" : `<p class="muted" style="font-size:12.5px;margin:8px 0 0"><a href="#/account">Set your budget</a> to filter to sites within it.</p>`}</div>
+      ${CITY === "akl" ? `<button type="button" data-t="train" aria-pressed="${F.train}">Near a train (1.2 km)</button><button type="button" data-t="topzone" aria-pressed="${F.topzone}">Top-10 school zone</button>` : ""}<button type="button" data-t="isNew" aria-pressed="${F.isNew}">New today</button></div></div>
     <div class="fgroup"><h3>Flood</h3>${seg("flood", [["", "Any"], ["none", "No flood overlay"], ["yes", "Flood overlay"]])}</div>
     <div class="fgroup"><h3>Power lines</h3>${seg("power", [["", "Any"], ["none", "None nearby"], ["near", "Near or over site"]])}</div>
-    <div class="fgroup"><h3>Land and title</h3><div class="row2"><label class="f">Position${sel("pos", [["", "Any"], ["front", "Road front"], ["corner", "Corner site"], ["rear", "Rear site"]])}</label><label class="f">Title${sel("title", [["", "Any"], ...titles.map(t => [t, t])])}</label></div></div>
+    <div class="fgroup"><h3>Land and title</h3><div class="row2"><label class="f">Position${sel("pos", [["", "Any"], ["front", "Road front"], ["corner", "Corner site"], ["rear", "Rear site"]])}</label></div><h3 style="margin-top:12px">Title</h3>${mseg("title", titles.map(t => [t, t]))}</div>
     <div class="fgroup"><h3>Schools and neighbourhood</h3><div class="row2">
       <label class="f">Secondary school${sel("sec", [["", "Any"], ["High", "High"], ["Medium", "Medium"], ["Low", "Low"], ["HM", "High or Medium"]])}</label>
       <label class="f">Primary school${sel("pri", [["", "Any"], ["High", "High"], ["Medium", "Medium"], ["Low", "Low"], ["HM", "High or Medium"]])}</label>
@@ -582,9 +594,16 @@ function openDrawer() {
   dr.addEventListener("click", e => {
     const t = e.target;
     if (t.closest("[data-close]")) return closeDrawer();
-    if (t.closest("[data-clear]")) { F = Object.assign({}, DEF); saveF(); closeDrawer(); return search(new URLSearchParams()); }
+    if (t.closest("[data-clear]")) { F = normF({}); saveF(); closeDrawer(); return search(new URLSearchParams()); }
     if (t.classList.contains("tog")) { const s = $(".sub", t.closest(".dgrp")); s.hidden = !s.hidden; t.textContent = t.textContent.replace(/[▸▾]/, s.hidden ? "▸" : "▾"); return; }
     const sb = t.closest("[data-seg] button"); if (sb) { F[sb.parentElement.dataset.seg] = sb.dataset.v; $$("button", sb.parentElement).forEach(b => b.setAttribute("aria-pressed", String(b === sb))); return changed(); }
+    const mb = t.closest("[data-mseg] button");
+    if (mb) {
+      const key = mb.parentElement.dataset.mseg, v = mb.dataset.v;
+      F[key] = !v ? [] : F[key].includes(v) ? F[key].filter(x => x !== v) : F[key].concat([v]);
+      $$("button", mb.parentElement).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v ? F[key].includes(b.dataset.v) : !F[key].length)));
+      return changed();
+    }
     const tb = t.closest("[data-t]"); if (tb) { F[tb.dataset.t] = !F[tb.dataset.t]; tb.setAttribute("aria-pressed", String(F[tb.dataset.t])); return changed(); }
   });
   dr.addEventListener("change", e => {
@@ -630,7 +649,6 @@ function sitePage(id) {
         <div><span>Expected price</span><b class="num">${money(pr.expected || p.price_used)}</b><small>${esc(p.price_basis || "")}</small></div>
         <div><span>Low case</span><b class="num">${money(pr.low_case)}</b><small>bottom quarter of sales vs CV here</small></div>
         <div><span>Typical sale vs CV</span><b class="num">${pr.ratio_likely ? Math.round(pr.ratio_likely * 100) + "%" : "—"}</b><small>${esc(pr.ratio_basis || "")}</small></div>
-        <div><span>Your budget</span>${S.budget.max ? `<b style="font-size:16px">${esc(fitOf(p))}</b><small>your max ${k(S.budget.max)}${S.budget.ideal ? " · ideal under " + k(S.budget.ideal) : ""} · <a href="#/account">change</a></small>` : `<b style="font-size:16px">Not set</b><small><a href="#/account">Set your budget</a> to see if this fits</small>`}</div>
         <div><span>Council valuation (CV)</span><b class="num">${money(p.cv)}</b><small>land ${k(p.land_value)}${p.estimate ? " · estimate " + k(p.estimate.low) + "–" + k(p.estimate.high) : ""}</small></div>
         <div><span>Rent you could get</span><b class="num">${rentOf(p) ? money(rentOf(p)) + "/wk" : "—"}</b><small>${rentOf(p) ? "estimate for the current house" : "no rent estimate"}</small></div>
         <div><span>Gross rental yield</span><b class="num">${yieldOf(p) ? yieldOf(p).toFixed(1) + "%" : "—"}</b><small>yearly rent ÷ expected price</small></div></div></section>
@@ -795,7 +813,9 @@ function feasPage(id) {
     <div class="crumbs"><a href="#/site/${encodeURIComponent(p.id)}">← Back to ${esc(street(p))}</a></div>
     <h1 style="font-size:clamp(24px,3.4vw,32px)">Feasibility study</h1><p class="muted" style="margin:6px 0 20px">${esc(p.address)} · free, quick screening (not a QS or planner's report). Your LIM is read on this device and never uploaded.</p>
     <section class="panel"><h2>1 · The LIM report</h2>
-      <label class="drop" id="drop"><input type="file" id="limFile" accept="application/pdf" multiple hidden><b>Choose the LIM PDF</b> or drop it here<br><small class="muted">You can add the record of title too. Scanned (photo) PDFs can't be read.</small></label>
+      <label class="drop" id="drop"><input type="file" id="limFile" accept="application/pdf" multiple hidden>
+        <span class="dropbtn">Choose the LIM PDF</span><span class="droptxt">or drag the file here. You can add the record of title too.</span>
+        <small class="muted">Works with the PDF the council emails you. A LIM that was printed and scanned, or a photo of one, has no text to read, so it won't work.</small></label>
       <div id="limOut" style="margin-top:14px"></div></section>
     <section class="panel"><h2>2 · Your numbers</h2><p class="muted" style="margin:-6px 0 12px;font-size:13.5px">Pre-filled from the site. Change anything; it's remembered on this device. <b>End value</b> matters most: use recent sales of new homes in ${esc(p.suburb)}.</p>
       <div class="fin">${num("vPrice", "Purchase price ($)", v.price, 10000)}${num("vLand", "Land (m²)", v.land, 1)}
@@ -809,7 +829,7 @@ function feasPage(id) {
   const showLim = () => {
     if (!lim) { $("#limOut").innerHTML = ""; return; }
     const ord = { bad: 0, warn: 1, info: 2 };
-    $("#limOut").innerHTML = `<p style="margin:0 0 10px"><b>${esc(lim.name)}</b> · ${lim.chars < 400 ? `<span class="chip bad">No readable text: it may be scanned</span>` : `${lim.out.length} topic${lim.out.length === 1 ? "" : "s"} mentioned${lim.zone ? ` · zone in LIM: <b>${esc(lim.zone)}</b>` : ""}`}</p>
+    $("#limOut").innerHTML = `<p style="margin:0 0 10px"><b>${esc(lim.name)}</b> · ${lim.chars < 400 ? `<span class="chip bad">Can't read this file</span></p><p class="muted" style="margin:0 0 10px;font-size:13.5px">It has almost no text, which usually means it was scanned or photographed. Ask the council (or your lawyer) for the original emailed LIM PDF and try that. The numbers below still work without it.` : `${lim.out.length} topic${lim.out.length === 1 ? "" : "s"} mentioned${lim.zone ? ` · zone in LIM: <b>${esc(lim.zone)}</b>` : ""}`}</p>
       ${lim.out.length ? `<ul class="finds">${lim.out.sort((a, b) => ord[a.sev] - ord[b.sev]).map(f => `<li class="${f.sev === "info" ? "" : f.sev}"><b>${esc(f.label)}</b> <small class="muted">· mentioned ${f.n}×</small><q>${esc(f.snip)}</q></li>`).join("")}</ul>
       <p class="muted" style="font-size:12.5px;margin:10px 0 0">A mention isn't always a problem ("no flood hazard identified" also matches). Read each quote, and have your lawyer check the full LIM and title.</p>` : lim.chars >= 400 ? `<p class="authok">None of the usual red flags were mentioned.</p>` : ""}`;
   };
@@ -929,11 +949,6 @@ function accountPage() {
     <section class="panel" style="margin-top:18px"><h2>${esc(ME.name)}</h2>${dl([["Username", esc(ME.username)], ["Role", ME.admin ? "Admin" : "Member"]])}
       <form id="eForm" class="authform" style="margin-top:14px"><label class="f">Email, for password resets<input id="eMail" type="email" maxlength="120" autocomplete="email" value="${esc(ME.email || "")}"></label>
         <p class="authok" id="eMsg" role="status" hidden></p><button class="btn" type="submit">Save email</button></form></section>
-    <section class="panel"><h2>My budget</h2><p class="muted" style="margin:-6px 0 12px;font-size:13.5px">Only you see this. Each property then shows whether it fits your budget, and you can filter to sites within it.</p>
-      <form id="bForm" class="authform"><div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <label class="f">Ideal price, up to<input id="bIdeal" type="number" min="0" step="10000" inputmode="numeric" placeholder="e.g. 900000" value="${S.budget.ideal || ""}"></label>
-        <label class="f">Maximum price<input id="bMax" type="number" min="0" step="10000" inputmode="numeric" placeholder="e.g. 1100000" value="${S.budget.max || ""}"></label></div>
-        <p class="authok" id="bMsg" role="status" hidden></p><button class="btn primary" type="submit">Save budget</button></form></section>
     <section class="panel"><h2>Change password</h2><form id="pwForm" class="authform">
       <label class="f">Current password<input id="pOld" type="password" autocomplete="current-password" required></label>
       <label class="f">New password (8+ characters)<input id="pNew" type="password" minlength="8" autocomplete="new-password" required></label>
@@ -942,12 +957,6 @@ function accountPage() {
   $("#eForm").addEventListener("submit", async e => {
     e.preventDefault(); const m = $("#eMsg");
     try { ME = (await api("auth.php", { op: "email", email: $("#eMail").value })).user; m.textContent = "Email saved."; m.className = "authok"; }
-    catch (ex) { m.textContent = ex.message; m.className = "autherr"; }
-    m.hidden = false;
-  });
-  $("#bForm").addEventListener("submit", async e => {
-    e.preventDefault(); const m = $("#bMsg");
-    try { await postStore({ op: "set", col: "prefs", id: "budget", data: { ideal: +$("#bIdeal").value || 0, max: +$("#bMax").value || 0 } }); m.textContent = "Budget saved."; m.className = "authok"; }
     catch (ex) { m.textContent = ex.message; m.className = "autherr"; }
     m.hidden = false;
   });
@@ -1040,7 +1049,7 @@ async function start() {
 }
 function setCity(c) {
   if (!CITIES[c] || c === CITY) return;
-  CITY = c; ls.set("aps-city", c); PARTS.clear(); F = Object.assign({}, DEF, ls.get("aps-f-" + c, {})); Q = "";
+  CITY = c; ls.set("aps-city", c); PARTS.clear(); F = normF(ls.get("aps-f-" + c, {})); Q = "";
   S.data = null; S.sites = []; S.byId = new Map(); location.hash = "#/"; start();
 }
 $("#citySel").addEventListener("change", e => setCity(e.target.value));
