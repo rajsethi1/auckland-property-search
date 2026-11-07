@@ -75,6 +75,11 @@ Tick *weekly* to also refresh sale/CV ratios (it does this automatically on Sund
 
 ## Notes
 
+- The hunt keeps every listing (no land, price, bedroom or type limits); people filter on the site. Each run checks
+  at most 500 new listings (config `max_new_per_run`), newest first, so a big backlog fills in over several days.
+- The site data is split: `api/data/data.json` is a light list of every site, and `api/data/parts/00-63.json`
+  (`parts-chc/` for Christchurch) hold the full details, loaded when someone opens a property.
+
 - Saved lists and budgets live on Hostinger (`public_html/api/data/lists.json`), one set per person.
 - Slope (LiDAR) isn't checked in the cloud; new sites show slope as Unknown.
 - If realestate.co.nz starts blocking GitHub's servers, the run's log will show the search finding 0 listings.
