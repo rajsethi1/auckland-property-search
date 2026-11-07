@@ -24,6 +24,11 @@ function GetHtml($u) { for ($i = 0; $i -lt 3; $i++) { try { return (Invoke-WebRe
 function ToHash($o) { $h = @{}; if ($o) { $o.PSObject.Properties | ForEach-Object { $h[$_.Name] = $_.Value } }; $h }
 
 $cfg = ReadJson "$root\config.json"
+# Region: config "region" = "chc" switches the search, site checks (check-site reads HUNT_REGION) and wording to Christchurch.
+$CHC = "$($cfg.region)" -eq 'chc'; $env:HUNT_REGION = $(if ($CHC) { 'chc' } else { '' })
+$searchPath = if ($cfg.search_path) { "$($cfg.search_path)" } else { 'auckland' }
+$apiRegion = if ($cfg.api_region) { [int]$cfg.api_region } else { 35 }
+$cityName = if ($CHC) { 'Christchurch' } else { 'Auckland' }
 $seen = ToHash (ReadJson "$root\seen.json")
 $ratios = ReadJson "$root\market-ratios.json"
 $slopes = ToHash (ReadJson "$root\slopes.json")
@@ -50,6 +55,17 @@ if ($Weekly) {
     $since = (Get-Date $Date).AddDays(-365).ToString('yyyy-MM-dd'); $sales = @{}
     $suburbDistrict = @{}; foreach ($s in $subs) { $suburbDistrict[$s] = 'auckland-city' }
     foreach ($s in 'botany-downs', 'sunnyhills', 'cockle-bay', 'half-moon-bay', 'mellons-bay', 'somerville') { $suburbDistrict[$s] = 'manukau-city' }
+    if ($CHC) {
+        # Christchurch: one city-wide pass over recent sales, grouped by each property's own suburb.
+        $ids = New-Object System.Collections.Generic.HashSet[string]
+        for ($p = 1; $p -le 40; $p++) { $h = GetHtml "https://www.realestate.co.nz/residential/sold/${searchPath}?page=$p"; $m = [regex]::Matches($h, '/property/[a-z0-9-]+/([a-z0-9]{6,12})'); if (-not $m.Count) { break }; foreach ($x in $m) { [void]$ids.Add($x.Groups[1].Value) } }
+        foreach ($id in $ids) { $a = (GetJson "$API/properties/$id").data.attributes; $sl = $a.'latest-sale'; $cv = $a.'council-information'.'capital-value'
+            if ($sl -and $sl.'sale-price' -and $cv -and $sl.'sale-date' -ge $since -and "$($sl.category)" -match 'Residence|Home and Income') {
+                $sk2 = ("$($a.address.suburb)".ToLower() -replace '^st\.? ', 'saint ' -replace '^mt\.? ', 'mount ' -replace '[^a-z]+', '-').Trim('-')
+                if (-not $sales.ContainsKey($sk2)) { $sales[$sk2] = @() }
+                $sales[$sk2] += [pscustomobject]@{ r = $sl.'sale-price' / $cv; land = [double]$a.'land-area' } } }
+        $subs = @()
+    }
     foreach ($s in ($subs | Where-Object { $_ -notmatch '^st-' } | Select-Object -Unique)) {
         $ids = New-Object System.Collections.Generic.HashSet[string]
         for ($p = 1; $p -le 4; $p++) { $h = GetHtml "https://www.realestate.co.nz/residential/sold/auckland/$($suburbDistrict[$s])/${s}?page=$p"; $m = [regex]::Matches($h, '/property/[a-z0-9-]+/([a-z0-9]{6,12})'); if (-not $m.Count) { break }; foreach ($x in $m) { [void]$ids.Add($x.Groups[1].Value) } }
@@ -72,13 +88,13 @@ if (-not $SkipSearch) {
     $areas = if ($cfg.auckland_wide) { @('') } else { @($cfg.districts | ForEach-Object { "/$_" }) }
     foreach ($d in $areas) {
         for ($p = 1; $p -le 250; $p++) {
-            $h = GetHtml "https://www.realestate.co.nz/residential/sale/auckland${d}?by=latest&minla=500&scat=1%2C6&page=$p"
+            $h = GetHtml "https://www.realestate.co.nz/residential/sale/$searchPath${d}?by=latest&minla=500&scat=1%2C6&page=$p"
             $m = [regex]::Matches($h, '/(\d{8})/residential/sale/([a-z0-9-]+)'); if (-not $m.Count) { break }
             $newHere = 0; foreach ($x in $m) { $id = $x.Groups[1].Value; if (-not $found.Contains($id)) { $found[$id] = $x.Groups[2].Value; if (-not $seen.ContainsKey($id)) { $newHere++ } } }
             if ($p -gt 2 -and $newHere -eq 0 -and $seen.Count -gt 200) { break }   # caught up with what we've already screened
         }
     }
-    $mg = GetJson "$API/listings?filter%5Bcategory%5D%5B%5D=res_sale&filter%5Bregion%5D%5B%5D=35&filter%5BisMortgageeSale%5D=true&page%5Blimit%5D=50"
+    $mg = GetJson "$API/listings?filter%5Bcategory%5D%5B%5D=res_sale&filter%5Bregion%5D%5B%5D=$apiRegion&filter%5BisMortgageeSale%5D=true&page%5Blimit%5D=50"
     foreach ($x in $mg.data) { $slug = ("$($x.attributes.'website-slug')" -split '/')[-1]; if ($slug -and -not $found.Contains("$($x.id)")) { $found["$($x.id)"] = $slug } }
 }
 $inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -or ($subs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0) -and $s -notmatch '^\d+-\d+-|^lot-' })
@@ -87,7 +103,7 @@ $zoneOnly = @($found.Keys | Where-Object { $s = $found[$_]; $inArea -notcontains
 if ($SkipSearch) { foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'candidate' -and -not $found.Contains($k)) { $found[$k] = ("$($seen[$k].url)" -split '/')[-1] } } }
 $inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -or ($subs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0) -and $s -notmatch '^\d+-\d+-|^lot-' })
 $newIds = @(@($inArea) + @($zoneOnly) | Where-Object { -not $seen.ContainsKey($_) -or $seen[$_].outcome -eq 'candidate' })
-Log "Search: $($found.Count) listings, $($inArea.Count) in $(if ($cfg.auckland_wide) { 'Auckland' } else { 'your suburbs' }), $($zoneOnly.Count) in top-school-zone suburbs, $($newIds.Count) new"
+Log "Search: $($found.Count) listings, $($inArea.Count) in $(if ($cfg.auckland_wide) { $cityName } else { 'your suburbs' }), $($zoneOnly.Count) in top-school-zone suburbs, $($newIds.Count) new"
 
 # ---------- 3. Facts for new listings + pre-screen ----------
 function Get-Ratios([string]$slug, [double]$land) {
@@ -105,7 +121,8 @@ foreach ($id in $newIds) {
     $desc = (("$($l.description)") -replace '<[^>]+>', ' ' -replace '\s+', ' ')
     $land = [double]$l.'land-area'; $beds = [int]$l.'bedroom-count'; $sub = "$($l.address.suburb)"
     # Listing-only checks first: skip the property lookup for sites that fail on land, beds or type.
-    $quick = if ($land -lt [double]$cfg.min_land_m2) { 'Under 600 m²' } elseif ($beds -lt [int]$cfg.min_beds) { 'Under 2 bedrooms' } elseif ("$($l.'listing-sub-type')" -match 'Apartment|Unit|Townhouse|Section|Studio') { "Not a house ($($l.'listing-sub-type'))" } else { $null }
+    # Region-wide mortgagee sales can be outside the city (e.g. Selwyn): keep only the configured district.
+    $quick = if ($cfg.district_name -and "$($l.address.district)" -ne "$($cfg.district_name)") { "Outside $($cfg.district_name)" } elseif ($land -lt [double]$cfg.min_land_m2) { 'Under 600 m²' } elseif ($beds -lt [int]$cfg.min_beds) { 'Under 2 bedrooms' } elseif ("$($l.'listing-sub-type')" -match 'Apartment|Unit|Townhouse|Section|Studio') { "Not a house ($($l.'listing-sub-type'))" } else { $null }
     if ($quick) { $seen[$id] = [ordered]@{ address = "$($l.address.'full-address')"; url = "$($l.'website-full-url')"; first_seen = $Date; last_seen = $Date; price_text = "$($l.'price-display')"; outcome = 'screened_out'; reason = $quick }; $screenedOut++; continue }
     $p = if ($l.'property-short-id') { (GetJson "$API/properties/$($l.'property-short-id')").data.attributes } else { $null }
     $slug = ($sub.ToLower() -replace '^st\.? ', 'saint ' -replace '^mt\.? ', 'mount ' -replace '[^a-z]+', '-').Trim('-')
@@ -127,7 +144,7 @@ foreach ($id in $newIds) {
     if ($desc -match 'must (be )?sell|motivated|instructions? to sell|overseas vendor|moving overseas|relocat') { $types += 'Motivated vendor' }
     $age = "$($p.'building-age')"
     $cands += [pscustomobject]@{ id = $id; address = (("$($l.address.'full-address')" -split ',')[0..1] -join ',').Trim(); suburb = $sub; url = "$($l.'website-full-url')"; source = 'realestate.co.nz'; status = 'new'
-        price_text = ("$($l.'price-display')" + $(if ($l.'auction-date') { ' ' + "$($l.'auction-date')".Substring(0, 10) })); asking = $(if ($ask) { $ask } else { $null })
+        price_text = ("$($l.'price-display')" + $(if ($l.'auction-date') { ' ' + ("$($l.'auction-date')" + '          ').Substring(0, 10).Trim() })); asking = $(if ($ask) { $ask } else { $null })
         beds = $beds; baths = $l.'bathroom-count'; land_m2 = $land; floor_m2 = $p.'floor-area'; decade_built = $(if ($age -and $age -ne '0') { "${age}s" } else { '' })
         cv = $cv; land_value = $p.'council-information'.'land-value'; estimate = $(if ($est) { [ordered]@{ low = $est.'value-low'; mid = $est.'value-mid'; high = $est.'value-high' } } else { $null })
         lat = $p.address.latitude; lon = $p.address.longitude; sale_type = $types
@@ -148,7 +165,7 @@ if ($todo.Count) {
     $nW = [math]::Min(6, $todo.Count); $procs = @()
     for ($w = 0; $w -lt $nW; $w++) {
         $csv = "$env:TEMP\hunt-sites-$w.csv"
-        @(for ($i = $w; $i -lt $todo.Count; $i += $nW) { $t = $todo[$i]; [pscustomobject]@{ id = $t.id; address = "$($t.address), Auckland"; lat = $t.lat; lon = $t.lon } }) | Export-Csv $csv -NoTypeInformation -Encoding UTF8
+        @(for ($i = $w; $i -lt $todo.Count; $i += $nW) { $t = $todo[$i]; [pscustomobject]@{ id = $t.id; address = "$($t.address), $cityName"; lat = $t.lat; lon = $t.lon } }) | Export-Csv $csv -NoTypeInformation -Encoding UTF8
         $procs += Start-Process powershell -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$sk\check-site.ps1`"", '-InputCsv', "`"$csv`"", '-JsonLines', "`"$root\site-checks-$w.jsonl`"" -WindowStyle Hidden -PassThru
     }
     $procs | Wait-Process
@@ -160,7 +177,8 @@ Log "Site checks: $($todo.Count) run today, $(@($cands | Where-Object { $checked
 # Flood: worst layer that touches the whole parcel (flood_site, % of site area), else the old address-point test.
 function FloodText($c) {
     $fs = $c.flood_site
-    foreach ($k in @(@('plain', 'Flood plain', $c.flood_plain), @('prone', 'Flood prone', $c.flood_prone), @('sensitive', 'Flood sensitive', $c.flood_sensitive))) {
+    $names = if ($CHC) { 'High flood hazard', 'Flood management area', 'Fixed floor level area' } else { 'Flood plain', 'Flood prone', 'Flood sensitive' }
+    foreach ($k in @(@('plain', $names[0], $c.flood_plain), @('prone', $names[1], $c.flood_prone), @('sensitive', $names[2], $c.flood_sensitive))) {
         $pct = if ($fs -and $fs -isnot [string] -and "$($fs.($k[0]))" -match '^\d+$') { [int]$fs.($k[0]) } else { $null }
         if ($pct -gt 0) { return "$($k[1]) ($pct% of site)" }
         if ($k[2] -eq $true) { return $k[1] }
@@ -197,7 +215,8 @@ foreach ($p in $cands) {
     $p | Add-Member rule_fails @($fails) -Force
     $p | Add-Member school ([ordered]@{ name = $(if ($names) { $names } else { 'No state secondary zone' }); band = $(if ($best) { $best.band } else { 'Unknown' }) }) -Force
     $p | Add-Member flood (FloodText $c) -Force
-    if ($c.special_character -eq $true) { $flags += 'Special Character Area overlay: demolition needs consent' }
+    if ($c.special_character -eq $true) { $flags += $(if ($CHC) { 'Residential Character Area: demolition and new building need consent' } else { 'Special Character Area overlay: demolition needs consent' }) }
+    if ($c.historic_heritage -eq $true) { $flags += 'Heritage setting or item on the site: check the District Plan schedule' }
     $ww = $c.services.wastewater; if ($ww -isnot [string] -and ($null -eq $ww.distance_m -or $ww.distance_m -gt 50)) { $flags += 'Public wastewater more than 50 m away: may need an extension or easement' }
     if ($c.state_housing.level -eq 'High') { $flags += "High state-housing concentration: $($c.state_housing.within_100m) Kāinga Ora parcels within 100 m" }
     if ($c.land -isnot [string] -and $null -ne $c.land.access_width_m -and $c.land.access_width_m -lt 3.5) { $flags += "Access only $($c.land.access_width_m) m wide: 1 rear dwelling only under the 3.5 m rule" }
@@ -206,17 +225,20 @@ foreach ($p in $cands) {
     # Auto-written summary (no model prose needed).
     $zs = ("$($c.zone)" -replace 'Residential - ', '' -replace ' Zone', '' -replace 'Terrace Housing and Apartment Building', 'THAB')
     $ld = $c.land; $shape = if ($ld -isnot [string]) { "$($ld.shape)".ToLower() } else { 'site' }
-    $front = if ($ld -isnot [string] -and $ld.position -match '^Road front') { "$($ld.frontage_m) m frontage$(if ($ld.position -match 'corner') { ', corner site' })$(if ($ld.path_frontage_m) { ", also $($ld.path_frontage_m) m beside a walkway" })" } elseif ($ld -isnot [string] -and $ld.access_width_m) { "rear site, $($ld.access_width_m) m access" } else { 'rear site' }
+    $front = if ($ld -isnot [string] -and $ld.position -match '^Road front') { "$($ld.frontage_m) m frontage$(if ($ld.position -match 'corner') { ', corner site' })$(if ($ld.path_frontage_m -is [ValueType] -and $ld.path_frontage_m -gt 0) { ", also $($ld.path_frontage_m) m beside a walkway" })" } elseif ($ld -isnot [string] -and $ld.access_width_m) { "rear site, $($ld.access_width_m) m access" } else { 'rear site' }
     $p | Add-Member dev_angle "$([math]::Round($p.land_m2)) m² $zs, $shape, $front$(if ($p.consent) { '; listing mentions a resource consent' })." -Force
     $tr = $c.transport
-    $p | Add-Member why ("{0} km to the CBD, {1} station {2}; {3}." -f $tr.cbd_km, $tr.train.name, $(if ($tr.train.distance_m -ge 1000) { "$([math]::Round($tr.train.distance_m / 1000, 1)) km away" } else { "$($tr.train.distance_m) m away" }), $(if (@($p.sale_type).Count) { ($p.sale_type -join ', ') } else { 'standard agency sale' })) -Force
+    $near = if ($tr.train) { "$($tr.train.name) station $(if ($tr.train.distance_m -ge 1000) { "$([math]::Round($tr.train.distance_m / 1000, 1)) km away" } else { "$($tr.train.distance_m) m away" })" }
+            elseif ($tr.bus -and $null -ne $tr.bus.distance_m) { "bus stop $($tr.bus.distance_m) m away" } else { 'no bus stop within 800 m' }
+    $p | Add-Member why ("{0} km to the {1}, {2}; {3}." -f $tr.cbd_km, $(if ($CHC) { 'central city' } else { 'CBD' }), $near, $(if (@($p.sale_type).Count) { ($p.sale_type -join ', ') } else { 'standard agency sale' })) -Force
     $qs = @('What is the vendor''s price expectation?', 'Is the title freehold with no covenants limiting dwellings?')
     if ($ld -isnot [string] -and $ld.position -match '^Rear') { $qs += 'How wide is the driveway / access leg along its whole length?' }
     if ($p.flood) { $qs += 'What does the LIM say about flooding and overland flow?' }
     if ($p.consent) { $qs += 'Can you share the resource consent, conditions and lapse date?' }
     if ($p.decade_built -match '^199|^200') { $qs += 'What is the cladding, and is there a cavity / CCC?' }
     $p | Add-Member questions $qs -Force
-    $p | Add-Member weekly_rent $(switch ([int]$p.beds) { 2 { 600 } 3 { 700 } 4 { 800 } default { 850 } }) -Force
+    # Rough weekly rent by bedrooms (2026 market medians for houses).
+    $p | Add-Member weekly_rent $(if ($CHC) { switch ([int]$p.beds) { 2 { 500 } 3 { 590 } 4 { 690 } default { 760 } } } else { switch ([int]$p.beds) { 2 { 600 } 3 { 700 } 4 { 800 } default { 850 } } }) -Force
     $p | Add-Member flags @($flags | Select-Object -Unique) -Force
     $seen[$p.id].outcome = $(if ($fails.Count) { 'listed_fails_rules' } else { 'shortlisted' }); if ($fails.Count) { $seen[$p.id].reason = $fails -join '; ' }
     $newItems += $p
@@ -224,10 +246,10 @@ foreach ($p in $cands) {
 
 # ---------- 6. Carry forward the previous shortlist (status + price changes) ----------
 $carried = @(); $gone = @(); $soldOut = ToHash (ReadJson "$root\sold-outcomes.json").sold
-foreach ($p in @($prev.shortlist)) {
+foreach ($p in @($prev.shortlist | Where-Object { $_ -and $_.id })) {
     $l = (GetJson "$API/listings/$($p.id)").data.attributes
     if ($l -and $l.'listing-status' -eq 'active') {
-        $pt = "$($l.'price-display')" + $(if ($l.'auction-date') { ' ' + "$($l.'auction-date')".Substring(0, 10) })
+        $pt = "$($l.'price-display')" + $(if ($l.'auction-date') { ' ' + ("$($l.'auction-date')" + '          ').Substring(0, 10).Trim() })
         if ($pt -ne "$($p.price_text)" -and $p.price_text -notmatch 'was asking') { $p.status = 'price_change'; $p | Add-Member price_text_prev $p.price_text -Force; $p.price_text = $pt
             $mm = [regex]::Match("$($l.'price-display')", '\$([\d,]+)'); $p.asking = $(if ($mm.Success) { [double]($mm.Groups[1].Value -replace ',', '') } else { $null }) }
         else { $p.status = 'still_listed' }

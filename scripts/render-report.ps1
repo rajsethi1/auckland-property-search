@@ -17,7 +17,7 @@ $enc = New-Object Text.UTF8Encoding($false)
 $compact = [IO.File]::ReadAllText($json, [Text.Encoding]::UTF8) | ConvertFrom-Json | ConvertTo-Json -Depth 20 -Compress
 [IO.File]::WriteAllText((Join-Path $reports 'data.json'), $compact, $enc)
 # Auckland districts -> suburbs (from realestate.co.nz's location list) for the page's grouped Suburbs filter.
-$subsSrc = "$(HuntRoot)\auckland-suburbs.json"
+$subsSrc = @("$(HuntRoot)\auckland-suburbs.json", "$(HuntRoot)\christchurch-suburbs.json") | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (Test-Path $subsSrc) { Copy-Item $subsSrc (Join-Path $reports 'suburbs.json') -Force }
 $html = [IO.File]::ReadAllText((Resolve-Path (Join-Path $PSScriptRoot '..\assets\report-template.html')), [Text.Encoding]::UTF8)
 $out = Join-Path $reports 'report.html'

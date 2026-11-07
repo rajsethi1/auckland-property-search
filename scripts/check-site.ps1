@@ -12,6 +12,14 @@ param([string]$Address, [double]$Lat = 0, [double]$Lon = 0, [string]$InputCsv, [
 
 $ErrorActionPreference = 'Stop'
 $base = 'https://services1.arcgis.com/n4yPwebTjJCmXB6W/arcgis/rest/services'
+# HUNT_REGION=chc: Christchurch City Council's District Plan, flood and pipe layers instead of Auckland's.
+$CHC = $env:HUNT_REGION -eq 'chc'
+$ccc = 'https://gis.ccc.govt.nz/server/rest/services/OpenData'
+# Same keys as Auckland, so the rest of the pipeline is unchanged: plain = High Flood Hazard Management Area,
+# prone = Flood Management Area, sensitive = Fixed Floor Level area (Christchurch District Plan chapter 5).
+$floodLayers = if ($CHC) { [ordered]@{ plain = "$ccc/DistrictPlanB/FeatureServer/25"; prone = "$ccc/DistrictPlanB/FeatureServer/30"; sensitive = "$ccc/DistrictPlan/FeatureServer/89" } }
+               else { [ordered]@{ plain = 'Flood_Plains'; prone = 'Flood_Prone_Areas'; sensitive = 'Flood_Sensitive_Areas' } }
+function Svc([string]$s) { if ($s -match '^https?://') { $s } else { "$base/$s/FeatureServer/0" } }
 $cacheFile = Join-Path $PSScriptRoot 'zone-codes.json'
 
 function Get-ZoneNames {
@@ -27,8 +35,8 @@ function Get-ZoneNames {
 }
 
 # Returns a wrapper (not the bare array) so PowerShell doesn't unroll an empty result into $null.
-function Test-Layer([string]$service, [double]$x, [double]$y) {
-    $url = "$base/$service/FeatureServer/0/query?geometry=$x,$y&geometryType=esriGeometryPoint&inSR=4326" +
+function Test-Layer([string]$service, [double]$x, [double]$y, [string]$where = '1=1') {
+    $url = "$(Svc $service)/query?geometry=$x,$y&geometryType=esriGeometryPoint&inSR=4326&where=$([uri]::EscapeDataString($where))" +
            "&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=false&f=json"
     try {
         $r = Invoke-RestMethod $url
@@ -44,11 +52,11 @@ $zones = Get-ZoneNames
 
 # ---- Title + parcel (LINZ property titles, NZTM metres) and underground services ----
 $titleSvc = 'https://services.arcgis.com/xdsHIIxuCWByZiCB/arcgis/rest/services/LINZ_NZ_Property_Titles/FeatureServer/0'
-$pipeSvcs = [ordered]@{
+$pipeSvcs = if ($CHC) { [ordered]@{ stormwater = "$ccc/StormWater/FeatureServer/1"; wastewater = "$ccc/WasteWater/FeatureServer/1" } } else { [ordered]@{
     stormwater = 'https://services1.arcgis.com/n4yPwebTjJCmXB6W/arcgis/rest/services/Stormwater_Pipe/FeatureServer/0'
     # Watercare's own network (includes local 150 mm reticulation; the council's public layer only has trunk mains).
     wastewater = 'https://services5.arcgis.com/PnnKqtqi3qfxnaPc/arcgis/rest/services/Wastewater_Network/FeatureServer/5'
-}
+} }
 
 function Get-Title([double]$x, [double]$y) {
     $url = "$titleSvc/query?geometry=$x,$y&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects" +
@@ -82,10 +90,10 @@ function Get-FloodShare($parcel) {
     $x0 = ($xs | Measure-Object -Min).Minimum; $x1 = ($xs | Measure-Object -Max).Maximum; $y0 = ($ys | Measure-Object -Min).Minimum; $y1 = ($ys | Measure-Object -Max).Maximum
     $step = [math]::Max(1, [math]::Sqrt(($x1 - $x0) * ($y1 - $y0) / 400))
     $pts = @(for ($x = $x0 + $step / 2; $x -lt $x1; $x += $step) { for ($y = $y0 + $step / 2; $y -lt $y1; $y += $step) { if (Test-Inside $x $y $ring) { , @($x, $y) } } })
-    $out = [ordered]@{}; $layers = [ordered]@{ plain = 'Flood_Plains'; prone = 'Flood_Prone_Areas'; sensitive = 'Flood_Sensitive_Areas' }
+    $out = [ordered]@{}; $layers = $floodLayers
     foreach ($k in $layers.GetEnumerator()) {
         try {
-            $r = Invoke-RestMethod "$base/$($k.Value)/FeatureServer/0/query?where=1%3D1&geometry=$x0,$y0,$x1,$y1&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outSR=2193&f=json"
+            $r = Invoke-RestMethod "$(Svc $k.Value)/query?where=1%3D1&geometry=$x0,$y0,$x1,$y1&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outSR=2193&f=json"
             if ($r.error) { $out[$k.Key] = 'lookup-failed'; continue }
             $rings = @($r.features | ForEach-Object { $_.geometry.rings } | ForEach-Object { , $_ })
             if (-not $rings.Count -or -not $pts.Count) { $out[$k.Key] = 0; continue }
@@ -107,7 +115,7 @@ function Get-Services($parcel) {
     $out = [ordered]@{}
     foreach ($k in $pipeSvcs.Keys) {
         # Watercare's layer also holds connection links (UNITTYPE NA, diameter 999); keep operational pipes only.
-        $where = if ($k -eq 'wastewater') { [uri]::EscapeDataString("STATUS='OP' AND UNITTYPE LIKE 'PIPE%'") } else { '1%3D1' }
+        $where = if ($CHC) { [uri]::EscapeDataString("ServiceStatus='In Service' AND Ownership='CCC'") } elseif ($k -eq 'wastewater') { [uri]::EscapeDataString("STATUS='OP' AND UNITTYPE LIKE 'PIPE%'") } else { '1%3D1' }
         $url = "$($pipeSvcs[$k])/query?geometry=$env&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects" +
                "&where=$where&outFields=*&returnGeometry=true&outSR=2193&f=json"
         try { $feats = @((Invoke-RestMethod $url).features) } catch { $out[$k] = 'lookup-failed'; continue }
@@ -128,7 +136,7 @@ function Get-Services($parcel) {
                             }
                         }
                     }
-                    if ($d -lt $best) { $best = $d; $dia = $(if ($f.attributes.SW_DIAMETER_MM) { $f.attributes.SW_DIAMETER_MM } else { $f.attributes.NOM_DIA_MM }) }
+                    if ($d -lt $best) { $best = $d; $dia = $(if ($f.attributes.SW_DIAMETER_MM) { $f.attributes.SW_DIAMETER_MM } elseif ($f.attributes.NominalDiameter) { $f.attributes.NominalDiameter } else { $f.attributes.NOM_DIA_MM }) }
                 }
             }
         }
@@ -162,6 +170,20 @@ function Get-Stations {
     $script:stations
 }
 function Get-Transport([double]$lat, [double]$lon) {
+    if ($CHC) {
+        # Christchurch: no suburban trains; Metro bus stops; CBD = Cathedral Square.
+        $bus = $null
+        try {
+            $q = Invoke-RestMethod ('https://services1.arcgis.com/ISqEHdhr3detVO9I/arcgis/rest/services/Metro_Bus_Stops/FeatureServer/0/query?geometry=' + "$lon,$lat" +
+                '&geometryType=esriGeometryPoint&inSR=4326&distance=800&units=esriSRUnit_Meter&spatialRel=esriSpatialRelIntersects&outFields=PlatformNa&returnGeometry=true&outSR=4326&f=json')
+            foreach ($f in $q.features) { $d = Get-Metres $lat $lon $f.geometry.y $f.geometry.x; if (-not $bus -or $d -lt $bus.d) { $bus = @{ n = $f.attributes.PlatformNa; d = $d } } }
+        } catch { }
+        return [ordered]@{
+            train  = $null
+            bus    = $(if ($bus) { [ordered]@{ name = $bus.n; distance_m = [math]::Round($bus.d) } } else { [ordered]@{ name = $null; distance_m = $null; note = 'none within 800 m' } })
+            cbd_km = [math]::Round((Get-Metres $lat $lon -43.5310 172.6366) / 1000, 1)
+        }
+    }
     $best = $null
     foreach ($s in Get-Stations) { $d = Get-Metres $lat $lon $s.lat $s.lon; if (-not $best -or $d -lt $best.d) { $best = @{ n = $s.name; d = $d } } }
     $bus = $null
@@ -180,6 +202,7 @@ function Get-Transport([double]$lat, [double]$lon) {
 # ---- Motorway access: nearest on-ramp and off-ramp (NZTA carriageway data, cached in motorway-ramps.json) ----
 $script:ramps = $null
 function Get-Motorway([double]$lat, [double]$lon) {
+    if ($CHC) { return [ordered]@{ on_ramp = $null; off_ramp = $null; note = 'Not checked for Christchurch' } }
     if (-not $script:ramps) { $p = Join-Path $PSScriptRoot 'motorway-ramps.json'; $script:ramps = if (Test-Path $p) { Get-Content $p -Raw | ConvertFrom-Json } else { @() } }
     $best = @{}
     foreach ($r in $script:ramps) {
@@ -218,7 +241,7 @@ function Get-Corners($ring) {
 function Get-RoadPolys($ring, [double]$pad, $lines) {
     $xs = $ring | ForEach-Object { $_[0] }; $ys = $ring | ForEach-Object { $_[1] }
     $env = '{0},{1},{2},{3}' -f (($xs | Measure-Object -Min).Minimum - $pad), (($ys | Measure-Object -Min).Minimum - $pad), (($xs | Measure-Object -Max).Maximum + $pad), (($ys | Measure-Object -Max).Maximum + $pad)
-    $url = "$base/Unitary_Plan_Base_Zone/FeatureServer/0/query?where=ZONE%3D27&geometry=$env&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outSR=2193&f=json"
+    $url = $(if ($CHC) { "$ccc/DistrictPlan/FeatureServer/78/query?where=Type%3D'Transport'" } else { "$base/Unitary_Plan_Base_Zone/FeatureServer/0/query?where=ZONE%3D27" }) + "&geometry=$env&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outSR=2193&f=json"
     # Each road-zone polygon is tagged by the AT centrelines running inside it: only walkway/path lines = a path strip, not a road.
     $list = New-Object System.Collections.ArrayList
     try { foreach ($f in (Invoke-RestMethod $url).features) {
@@ -241,6 +264,8 @@ function Get-RoadPolys($ring, [double]$pad, $lines) {
 $atRoads = 'https://services2.arcgis.com/JkPEgZJGxhSjYOo0/arcgis/rest/services/RoadingService/FeatureServer/3'
 $pathName = '(\bSUP$|WWAY|WALKWAY|ACCESSWAY|SHARED PATH|CYWAY|CYCLEWAY|PATHWAY|PEDESTRIAN|\bTRACK( \(|$))'
 function Get-Centrelines($ring, [double]$pad) {
+    # Auckland Transport data only; in Christchurch every Transport-zone strip counts as road.
+    if ($CHC) { return , (New-Object System.Collections.ArrayList) }
     $xs = $ring | ForEach-Object { $_[0] }; $ys = $ring | ForEach-Object { $_[1] }
     $env = '{0},{1},{2},{3}' -f (($xs | Measure-Object -Min).Minimum - $pad), (($ys | Measure-Object -Min).Minimum - $pad), (($xs | Measure-Object -Max).Maximum + $pad), (($ys | Measure-Object -Max).Maximum + $pad)
     $list = New-Object System.Collections.ArrayList
@@ -314,7 +339,7 @@ function Get-SiteShape($parcel, [double]$lat, [double]$lon) {
         shape = $shape; rectangularity = [math]::Round($rect, 2); corners = $corners
         width_m = $(if ($mr) { [math]::Round($mr.b, 1) }); depth_m = $(if ($mr) { [math]::Round($mr.a, 1) })
         frontage_m = $front; position = $position; access_width_m = $access; access_note = $accessNote; driveway_rule = $driveRule
-        path_frontage_m = $(if ($fr.path_m -gt 0.5) { [math]::Round($fr.path_m, 1) }); path_names = $(if ($fr.path_m -gt 0.5) { $fr.path_names -join ', ' })
+        path_frontage_m = $(if ($fr.path_m -gt 0.5) { [math]::Round($fr.path_m, 1) } else { $null }); path_names = $(if ($fr.path_m -gt 0.5) { $fr.path_names -join ', ' } else { $null })
     }
 }
 
@@ -461,8 +486,22 @@ function Check-Site([string]$id, [string]$addr, [double]$lat, [double]$lon) {
         $lon = $c.location.x; $lat = $c.location.y; $matched = $c.address; $score = $c.score
     }
     $t = Get-Title $lon $lat
-    $zoneHits = Test-Layer 'Unitary_Plan_Base_Zone' $lon $lat
-    $zoneName = if (-not $zoneHits.ok) { 'lookup-failed' } elseif ($zoneHits.count) { $zones["$($zoneHits.first.ZONE)"] } else { 'none (road/unzoned?)' }
+    if ($CHC) {
+        # District Plan zone still in force (Plan Change 14 zones carry a CreatedByPlanChange and replace older ones).
+        $zoneHits = Test-Layer "$ccc/DistrictPlan/FeatureServer/78" $lon $lat 'RemovedByPlanChangeIdentifier IS NULL'
+        $zoneName = if (-not $zoneHits.ok) { 'lookup-failed' } elseif ($zoneHits.count) {
+            $zt = "$($zoneHits.first.Type)"
+            switch -Regex ($zt) { '^Medium density residential' { 'Residential Medium Density' } '^High density residential' { 'Residential High Density' } default { $zt } }
+        } else { 'none (road/unzoned?)' }
+        $fl = $floodLayers
+        $chk = [ordered]@{ plain = Hit $fl.plain $lon $lat; prone = Hit $fl.prone $lon $lat; sensitive = Hit $fl.sensitive $lon $lat
+            sc = Hit "$ccc/DistrictPlan/FeatureServer/59" $lon $lat; hh = Hit "$ccc/DistrictPlanB/FeatureServer/32" $lon $lat }
+    } else {
+        $zoneHits = Test-Layer 'Unitary_Plan_Base_Zone' $lon $lat
+        $zoneName = if (-not $zoneHits.ok) { 'lookup-failed' } elseif ($zoneHits.count) { $zones["$($zoneHits.first.ZONE)"] } else { 'none (road/unzoned?)' }
+        $chk = [ordered]@{ plain = Hit 'Flood_Plains' $lon $lat; prone = Hit 'Flood_Prone_Areas' $lon $lat; sensitive = Hit 'Flood_Sensitive_Areas' $lon $lat
+            sc = Hit 'Special_Character_Areas_Overlay_Residential_and_Business' $lon $lat; hh = Hit 'Historic_Heritage_Overlay_Extent_of_Place' $lon $lat }
+    }
     [ordered]@{
         id                = $id
         address           = $addr
@@ -471,11 +510,11 @@ function Check-Site([string]$id, [string]$addr, [double]$lat, [double]$lon) {
         lat               = $lat
         lon               = $lon
         zone              = $zoneName
-        flood_plain       = Hit 'Flood_Plains' $lon $lat
-        flood_prone       = Hit 'Flood_Prone_Areas' $lon $lat
-        flood_sensitive   = Hit 'Flood_Sensitive_Areas' $lon $lat
-        special_character = Hit 'Special_Character_Areas_Overlay_Residential_and_Business' $lon $lat
-        historic_heritage = Hit 'Historic_Heritage_Overlay_Extent_of_Place' $lon $lat
+        flood_plain       = $chk.plain
+        flood_prone       = $chk.prone
+        flood_sensitive   = $chk.sensitive
+        special_character = $chk.sc
+        historic_heritage = $chk.hh
         schools           = Get-Schools $lon $lat
         title             = $(if ($t) { [ordered]@{ title_no = $t.attributes.title_no; type = $t.attributes.type; estate = $t.attributes.estate_description; owners = $t.attributes.number_owners; shared_extent = $t.attributes.spatial_extents_shared } } else { 'not found' })
         services          = $(if ($t) { Get-Services $t } else { 'no parcel' })

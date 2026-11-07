@@ -74,8 +74,9 @@ function Get-Growth([string]$slug, $transport) {
         outlook_5y_pct = [math]::Round($outlook, 1)
         outlook_low_pct = [math]::Round($outlook - $m.range_pct, 1)
         outlook_high_pct = [math]::Round($outlook + $m.range_pct, 1)
-        suburb_12m_pct = $(if ($hist) { $hist.chg_12m_pct }); suburb_10y_pct = $(if ($hist) { $hist.chg_10y_pct })
-        suburb_from_peak_pct = $(if ($hist) { $hist.from_2021_peak_pct }); suburb_median = $(if ($hist) { $hist.median_last12 })
+        # An empty $() serialises as {} in PS 5.1, so missing history must be an explicit $null.
+        suburb_12m_pct = $(if ($hist) { $hist.chg_12m_pct } else { $null }); suburb_10y_pct = $(if ($hist) { $hist.chg_10y_pct } else { $null })
+        suburb_from_peak_pct = $(if ($hist) { $hist.from_2021_peak_pct } else { $null }); suburb_median = $(if ($hist) { $hist.median_last12 } else { $null })
         drivers = @($drivers | Select-Object -Unique)
     }
 }
@@ -155,7 +156,9 @@ foreach ($p in $run.shortlist) {
 
     # ---- Score (raw points, then scaled to 0-100) ----
     $zone = "$($p.zone)"
-    $sZone = if ($zone -match 'Terrace Housing') { 25 } elseif ($zone -match 'Mixed Housing Urban') { 20 } elseif ($zone -match 'Mixed Housing Suburban') { 14 } else { 0 }
+    # Auckland Unitary Plan zones, then the Christchurch District Plan equivalents.
+    $sZone = if ($zone -match 'Terrace Housing|High Density') { 25 } elseif ($zone -match 'Mixed Housing Urban|Medium Density') { 20 }
+             elseif ($zone -match 'Mixed Housing Suburban|Suburban Density Transition') { 14 } elseif ($zone -match '^Residential Suburban$') { 10 } else { 0 }
     $land = [double]$p.land_m2
     $sLand = if ($land -ge 850) { 20 } elseif ($land -ge 750) { 17 } elseif ($land -ge 650) { 14 } elseif ($land -ge 600) { 10 } else { 4 }
     $sPrice = switch -Wildcard ($fit) { 'Ideal*' { 20 } 'In budget' { 14 } 'Possible*' { 8 } 'Stretch*' { 5 } default { 0 } }
@@ -197,7 +200,7 @@ foreach ($p in $run.shortlist) {
     $sMat = switch ($p.construction.risk) { 'High' { -5 } 'Medium' { -2 } default { 0 } }
     # Flood and state-housing concentration are shown, not hidden, but cost points.
     $sh = "$($p.state_housing.level)"
-    $penalty = 3 * @($p.flags).Count + $(if ($p.flood -match 'plain|prone') { 6 } else { 0 }) + $(switch ($sh) { 'High' { 8 } 'Medium' { 3 } default { 0 } })
+    $penalty = 3 * @($p.flags).Count + $(if ($p.flood -match 'plain|prone|hazard|management') { 6 } else { 0 }) + $(switch ($sh) { 'High' { 8 } 'Medium' { 3 } default { 0 } })
     # High-voltage lines: over the site or in the grid corridor limits where you can build.
     $penalty += switch ("$($p.power_lines.level)") { 'Over site' { 10 } 'In grid corridor' { 8 } 'Within 40 m' { 3 } default { 0 } }
     $raw = $sZone + $sLand + $sPrice + $sSchool + $sLv + $sServices + $sCbd + $sTrain + $sBus + $sGrowth + $sSlope + $sSale + $sLand2 + $sMw + $sMat - $penalty
@@ -208,7 +211,8 @@ foreach ($p in $run.shortlist) {
     $p | Add-Member -NotePropertyName price_basis -NotePropertyValue $basis -Force
     $p | Add-Member -NotePropertyName numbers -NotePropertyValue $numbers -Force
     $p | Add-Member -NotePropertyName score -NotePropertyValue ([int]$score) -Force
-    $p | Add-Member -NotePropertyName label -NotePropertyValue $(if (@($p.rule_fails | Where-Object { $_ }).Count) { 'Outside your rules' } elseif ($fit -match 'Stretch|Over') { 'Stretch' } elseif ($score -ge 60) { 'Strong' } elseif ($score -ge 45) { 'Worth a look' } else { 'Marginal' }) -Force
+    # Shared site: the rating comes from the score only (no personal rules or budget).
+    $p | Add-Member -NotePropertyName label -NotePropertyValue $(if ($score -ge 60) { 'Strong' } elseif ($score -ge 45) { 'Worth a look' } else { 'Marginal' }) -Force
 }
 
 $run | Add-Member -NotePropertyName run_date -NotePropertyValue $Date -Force
