@@ -52,7 +52,7 @@ const C = () => CITIES[CITY];
 
 // ---------- State ----------
 const S = { data: null, sites: [], byId: new Map(), subs: {}, subDistrict: new Map(), zones: {}, saved: new Map(), lists: [], api: false, budget: {} };
-const DEF = { ymin: "", inBudget: false, pmin: "", pmax: "", label: "", zone: "", title: "", flood: "", power: "", sh: "", sec: "", pri: "", pos: "", train: false, isNew: false, topzone: false, list: "", subs: [] };
+const DEF = { lmin: "", lmax: "", bmin: "", ptype: "", ymin: "", inBudget: false, pmin: "", pmax: "", label: "", zone: "", title: "", flood: "", power: "", sh: "", sec: "", pri: "", pos: "", train: false, isNew: false, topzone: false, list: "", subs: [] };
 let F = Object.assign({}, DEF, ls.get("aps-f-" + CITY, CITY === "akl" ? ls.get("aps-f", {}) : {}));
 let Q = "", SORT = ls.get("aps-sort", "score");
 const saveF = () => ls.set("aps-f-" + CITY, F);
@@ -66,6 +66,10 @@ const listName = id => (allLists().find(l => l.id === id) || { name: "Shortlist"
 function match(p, f = F, q = Q) {
   if (q) return (p.address + " " + p.suburb).toLowerCase().replace(/[,\s]+/g, " ").includes(q.toLowerCase().replace(/[,\s]+/g, " ").trim());
   const price = priceOf(p);
+  if (f.lmin && !((+p.land_m2 || 0) >= +f.lmin)) return false;
+  if (f.lmax && !((+p.land_m2 || 0) < +f.lmax)) return false;
+  if (f.bmin && !((+p.beds || 0) >= +f.bmin)) return false;
+  if (f.ptype && typeOf(p) !== f.ptype) return false;
   if (f.ymin && yieldOf(p) < +f.ymin) return false;
   if (f.inBudget && S.budget.max && !/Ideal|In budget|Possible/.test(fitOf(p))) return false;
   if ((f.pmin || f.pmax) && !price) return false;
@@ -105,7 +109,16 @@ const SORTS = {
 };
 const results = () => S.sites.filter(p => match(p)).sort(SORTS[SORT]?.[1] || SORTS.score[1]);
 const activeCount = () => Object.keys(DEF).filter(key => key === "subs" ? F.subs.length : F[key] !== DEF[key]).length;
-const PRICE_STEPS = (() => { const s = []; for (let v = 300000; v <= 1500000; v += 100000) s.push(v); for (let v = 1750000; v <= 3000000; v += 250000) s.push(v); return s; })();
+const PRICE_STEPS = (() => { const s = []; for (let v = 100000; v <= 1500000; v += 100000) s.push(v); for (let v = 1750000; v <= 3000000; v += 250000) s.push(v); s.push(3500000, 4000000, 5000000); return s; })();
+// Listing type from realestate.co.nz's sub-type; older records (houses only) have none.
+function typeOf(p) {
+  const t = String(p.ptype || "");
+  if (/apartment|studio/i.test(t)) return "Apartment";
+  if (/townhouse/i.test(t)) return "Townhouse";
+  if (/unit|flat/i.test(t)) return "Unit";
+  if (/section|land/i.test(t)) return "Section";
+  return "House";
+}
 const opts = (list, cur) => list.map(([v, t]) => `<option value="${esc(v)}"${String(v) === String(cur) ? " selected" : ""}>${esc(t)}</option>`).join("");
 
 // ---------- Cards ----------
@@ -270,6 +283,63 @@ const popup = p => `<div class="mpop">${p.lat ? `<img alt="" src="${aerial(p.lat
 // ---------- Server ----------
 // GET without a body, POST with one. The X-Requested-With header is what the PHP side checks against forged requests.
 let ME = null;
+// ---------- Saved searches (per person, stored with their lists) ----------
+// A saved search = name + city + sort + every filter value, so each person can keep several (e.g. one per suburb group).
+function toast(msg) {
+  let el = $("#toast"); if (!el) { el = document.createElement("div"); el.id = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
+  el.textContent = msg; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), 2500);
+}
+function renderMySearches() {
+  const sel = $("#mySel"); if (!sel) return;
+  const list = S.searches || [];
+  $("#saveS").hidden = !S.api; sel.hidden = !S.api || !list.length;
+  const cityTag = s => s.city === CITY ? "" : ` (${CITIES[s.city].name})`;
+  sel.innerHTML = `<option value="">Saved searches (${list.length})</option>` + list.map(s => `<option value="${esc(s.id)}">${esc(s.name + cityTag(s))}</option>`).join("")
+    + (list.length ? `<optgroup label="Delete">${list.map(s => `<option value="del:${esc(s.id)}">Delete "${esc(s.name)}"</option>`).join("")}</optgroup>` : "");
+}
+async function saveSearch() {
+  if (!activeCount()) { alert("Set some filters first (area, price, land size...), then save them."); return; }
+  const area = F.subs.length ? (Object.entries(S.subs).find(([, l]) => l.length === F.subs.length && l.every(s => F.subs.includes(norm(s))))?.[0] || `${F.subs.length} suburbs`) : C().name;
+  const name = (prompt("Name this search (for example: North Shore under $1m)", area) || "").trim();
+  if (!name) return;
+  const same = (S.searches || []).find(s => s.name.toLowerCase() === name.toLowerCase() && s.city === CITY);
+  if (same && !confirm(`Replace your saved search "${same.name}" with these filters?`)) return;
+  const id = same ? same.id : "s" + Date.now().toString(36);
+  try { await postStore({ op: "set", col: "searches", id, data: { name, city: CITY, sort: SORT, at: new Date().toISOString(), f: F } }); toast(`Saved "${name}"`); }
+  catch (e) { alert(e.message); }
+}
+function applySearch(id) {
+  const s = (S.searches || []).find(x => x.id === id); if (!s) return;
+  const f = Object.assign({}, DEF, s.f); f.subs = Array.isArray(f.subs) ? f.subs : [];
+  if (s.sort && SORTS[s.sort]) { SORT = s.sort; ls.set("aps-sort", SORT); }
+  Q = "";
+  if (s.city !== CITY) { ls.set("aps-f-" + s.city, f); location.hash = "#/search"; setCity(s.city); return; }
+  F = f; saveF();
+  if (location.hash.startsWith("#/search")) search(new URLSearchParams()); else location.hash = "#/search";
+  toast(`Showing "${s.name}"`);
+}
+async function deleteSearch(id) {
+  const s = (S.searches || []).find(x => x.id === id); if (!s || !confirm(`Delete your saved search "${s.name}"?`)) return;
+  try { await postStore({ op: "delete", col: "searches", id }); } catch (e) { alert(e.message); }
+}
+
+// The site list holds a light record per site; the full one (schools, services, title, questions...) comes from one of
+// 64 detail parts, loaded when a property or feasibility page opens. Same bucket hash as scripts/split-data.ps1.
+const PARTS = new Map();
+const partOf = id => { let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) % 1000003; return String(h % 64).padStart(2, "0"); };
+async function withFull(id, render) {
+  const p = S.byId.get(String(id));
+  if (!p || p._full || !S.data?.parts) return render(id);
+  const hash = location.hash, part = partOf(id);
+  $("#app").innerHTML = `<div class="container"><div class="empty"><p>Loading the site details…</p></div></div>`;
+  try {
+    if (!PARTS.has(part)) PARTS.set(part, api("data.php?" + (CITY === "akl" ? "" : "city=" + CITY + "&") + "part=" + part));
+    const rec = (await PARTS.get(part))[String(id)];
+    if (rec) Object.assign(p, rec);
+    p._full = true;
+  } catch (e) { PARTS.delete(part); }   // show what the list has; the next visit tries again
+  if (location.hash === hash) render(id);
+}
 async function api(path, body) {
   const r = await fetch("api/" + path, body ? { method: "POST", headers: { "Content-Type": "application/json", "X-Requested-With": "aps" }, body: JSON.stringify(body) } : { cache: "no-store" });
   const j = await r.json().catch(() => ({}));
@@ -284,6 +354,9 @@ async function postStore(body) { applyStore(await api("lists.php", body)); }
 function applyStore(s) {
   S.saved = new Map(Object.entries(s.shortlist || {}).map(([id, d]) => [id, Array.isArray(d.lists) && d.lists.length ? d.lists.map(String) : ["main"]]));
   const bd = s.prefs?.budget || {}; S.budget = { max: +bd.max || 0, ideal: +bd.ideal || 0 };
+  S.searches = Object.entries(s.searches || {}).filter(([, d]) => d && typeof d === "object").map(([id, d]) => ({ id, name: String(d.name || "My search"), city: d.city === "chc" ? "chc" : "akl", sort: String(d.sort || ""), at: String(d.at || ""), f: d.f || {} }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  if ($("#mySel")) renderMySearches();
   S.lists = Object.entries(s.lists || {}).map(([id, d]) => ({ id, name: String(d.name || "Untitled"), at: String(d.at || "") }))
     .sort((a, b) => a.id === "main" ? -1 : b.id === "main" ? 1 : a.at.localeCompare(b.at));
   const n = $("#savedCount"); n.hidden = !S.saved.size; n.textContent = S.saved.size;
@@ -350,7 +423,7 @@ function home() {
   <section class="hero" style="background-image:url('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${C().hero}&bboxSR=4326&imageSR=3857&size=1600,800&format=jpg&f=image')">
     <div class="container">
       <h1>Find ${C().name}'s next development site</h1>
-      <p>Every house on 600 m²+ for sale across ${C().name}, checked each morning for zoning, flood, title, schools, services and real sale prices.</p>
+      <p>Every home and section for sale across ${C().name}, checked each morning for zoning, flood, title, schools, services and real sale prices.</p>
       <form class="bigsearch" id="homeSearch"><input id="homeQ" type="search" placeholder="Search an address, suburb or district" aria-label="Search an address, suburb or district" autocomplete="off"><button class="btn primary" type="submit">Search</button></form>
       <div class="quick">
         <a href="#/search?preset=ideal">Under $900k</a><a href="#/search?preset=strong">Strong sites</a>${CITY === "akl" ? `<a href="#/search?preset=train">Near a train</a>` : ""}
@@ -398,6 +471,7 @@ function search(params) {
     <select class="fsel desk" id="f-zone" aria-label="Zone">${opts([["", "Any zone"], ...zonesList.map(z => [z, z])], F.zone)}</select>
     <select class="fsel" id="f-sort" aria-label="Sort">${opts(Object.entries(SORTS).map(([key, v]) => [key, v[0]]), SORT)}</select>
     <button class="btn sm" id="moreF" type="button">Filters</button>
+    <button class="btn sm" id="saveS" type="button" hidden>Save search</button><select class="fsel" id="mySel" aria-label="Saved searches" hidden></select>
     <button class="btn sm viewtoggle" id="vt" type="button">Map</button>
   </div></div>
   <div class="split" id="split">
@@ -411,6 +485,9 @@ function search(params) {
   $("#f-sort").addEventListener("change", e => { SORT = e.target.value; ls.set("aps-sort", SORT); renderResults(); });
   $("#fq").addEventListener("input", e => { Q = e.target.value; renderResults(); });
   $("#moreF").addEventListener("click", openDrawer);
+  $("#saveS").addEventListener("click", saveSearch);
+  $("#mySel").addEventListener("change", e => { const v = e.target.value; e.target.value = ""; if (v.startsWith("del:")) deleteSearch(v.slice(4)); else if (v) applySearch(v); });
+  renderMySearches();
   $("#clearF").addEventListener("click", () => { F = Object.assign({}, DEF); Q = ""; saveF(); search(new URLSearchParams()); });
   $("#vt").addEventListener("click", () => { const s = $("#split"); s.classList.toggle("show-map"); $("#vt").textContent = s.classList.contains("show-map") ? "List" : "Map"; sMap?.invalidateSize(); });
   $("#moreBtn").addEventListener("click", () => { shown += 24; renderResults(false); });
@@ -474,6 +551,10 @@ function openDrawer() {
     <div class="fgroup"><h3>Area</h3><input type="search" id="dq" placeholder="Find a suburb"><div class="dlist">${area}</div></div>
     <div class="fgroup mob"><h3>Price and zone</h3><div class="row2"><label class="f">From${sel("pmin", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label><label class="f">Up to${sel("pmax", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label>
       <label class="f">Zone${sel("zone", [["", "Any zone"], ...[...new Set(S.sites.map(p => zoneShort(p.zone)))].sort().map(z => [z, z])])}</label></div></div>
+    <div class="fgroup"><h3>Property type</h3>${seg("ptype", [["", "Any"], ["House", "House"], ["Townhouse", "Townhouse"], ["Unit", "Unit"], ["Apartment", "Apartment"], ["Section", "Section"]])}</div>
+    <div class="fgroup"><h3>Land size from</h3>${seg("lmin", [["", "Any"], ["300", "300 m²+"], ["400", "400 m²+"], ["500", "500 m²+"], ["600", "600 m²+"], ["800", "800 m²+"], ["1000", "1000 m²+"]])}</div>
+    <div class="fgroup"><h3>Land size under</h3>${seg("lmax", [["", "Any"], ["400", "400 m²"], ["600", "600 m²"], ["800", "800 m²"], ["1000", "1000 m²"], ["2000", "2000 m²"]])}</div>
+    <div class="fgroup"><h3>Bedrooms</h3>${seg("bmin", [["", "Any"], ["1", "1+"], ["2", "2+"], ["3", "3+"], ["4", "4+"], ["5", "5+"]])}</div>
     <div class="fgroup"><h3>Rating</h3>${seg("label", [["", "Any"], ["Strong", "Strong"], ["Worth a look", "Worth a look"], ["Marginal", "Marginal"]])}</div>
     <div class="fgroup"><h3>Rental yield</h3>${seg("ymin", [["", "Any"], ["3", "3%+"], ["3.5", "3.5%+"], ["4", "4%+"], ["5", "5%+"]])}</div>
     <div class="fgroup"><h3>Handy filters</h3><div class="seg" data-tg>
@@ -918,8 +999,8 @@ function route() {
   document.querySelector("footer.site").hidden = page === "search";
   if (!ME || !S.data) return;
   if (page === "search") search(new URLSearchParams(qs || ""));
-  else if (page === "site") sitePage(decodeURIComponent(parts[1] || ""));
-  else if (page === "feas") feasPage(decodeURIComponent(parts[1] || ""));
+  else if (page === "site") withFull(decodeURIComponent(parts[1] || ""), sitePage);
+  else if (page === "feas") withFull(decodeURIComponent(parts[1] || ""), feasPage);
   else if (page === "saved") savedPage();
   else if (page === "account") accountPage();
   else if (page === "admin") adminPage();
@@ -959,7 +1040,7 @@ async function start() {
 }
 function setCity(c) {
   if (!CITIES[c] || c === CITY) return;
-  CITY = c; ls.set("aps-city", c); F = Object.assign({}, DEF, ls.get("aps-f-" + c, {})); Q = "";
+  CITY = c; ls.set("aps-city", c); PARTS.clear(); F = Object.assign({}, DEF, ls.get("aps-f-" + c, {})); Q = "";
   S.data = null; S.sites = []; S.byId = new Map(); location.hash = "#/"; start();
 }
 $("#citySel").addEventListener("change", e => setCity(e.target.value));
