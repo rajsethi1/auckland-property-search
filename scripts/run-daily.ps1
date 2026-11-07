@@ -30,6 +30,8 @@ $searchPath = if ($cfg.search_path) { "$($cfg.search_path)" } else { 'auckland' 
 $apiRegion = if ($cfg.api_region) { [int]$cfg.api_region } else { 35 }
 $cityName = if ($CHC) { 'Christchurch' } else { 'Auckland' }
 $seen = ToHash (ReadJson "$root\seen.json")
+# The old hunt dropped listings under 600 m², under 2 bedrooms, non-houses and over the price ceiling: forget those so they are checked now.
+foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'screened_out' -and "$($seen[$k].reason)" -notmatch '^Outside ') { $seen.Remove($k) } }
 $ratios = ReadJson "$root\market-ratios.json"
 $slopes = ToHash (ReadJson "$root\slopes.json")
 # Windows PowerShell returns a JSON array as one object; piping it enumerates the ids.
@@ -87,8 +89,8 @@ if (-not $SkipSearch) {
     # auckland_wide: one region-level search covers every district; otherwise the listed districts.
     $areas = if ($cfg.auckland_wide) { @('') } else { @($cfg.districts | ForEach-Object { "/$_" }) }
     foreach ($d in $areas) {
-        for ($p = 1; $p -le 250; $p++) {
-            $h = GetHtml "https://www.realestate.co.nz/residential/sale/$searchPath${d}?by=latest&minla=500&scat=1%2C6&page=$p"
+        for ($p = 1; $p -le 800; $p++) {
+            $h = GetHtml "https://www.realestate.co.nz/residential/sale/$searchPath${d}?by=latest&page=$p"
             $m = [regex]::Matches($h, '/(\d{8})/residential/sale/([a-z0-9-]+)'); if (-not $m.Count) { break }
             $newHere = 0; foreach ($x in $m) { $id = $x.Groups[1].Value; if (-not $found.Contains($id)) { $found[$id] = $x.Groups[2].Value; if (-not $seen.ContainsKey($id)) { $newHere++ } } }
             if ($p -gt 2 -and $newHere -eq 0 -and $seen.Count -gt 200) { break }   # caught up with what we've already screened
@@ -97,11 +99,11 @@ if (-not $SkipSearch) {
     $mg = GetJson "$API/listings?filter%5Bcategory%5D%5B%5D=res_sale&filter%5Bregion%5D%5B%5D=$apiRegion&filter%5BisMortgageeSale%5D=true&page%5Blimit%5D=50"
     foreach ($x in $mg.data) { $slug = ("$($x.attributes.'website-slug')" -split '/')[-1]; if ($slug -and -not $found.Contains("$($x.id)")) { $found["$($x.id)"] = $slug } }
 }
-$inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -or ($subs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0) -and $s -notmatch '^\d+-\d+-|^lot-' })
+$inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -or ($subs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0) })
 $zoneOnly = @($found.Keys | Where-Object { $s = $found[$_]; $inArea -notcontains $_ -and ($zoneSubs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0 -and $s -notmatch '^\d+-\d+-|^lot-' })
 # 'candidate' = passed the first screen but its site checks never finished (a stopped run): screen it again.
 if ($SkipSearch) { foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'candidate' -and -not $found.Contains($k)) { $found[$k] = ("$($seen[$k].url)" -split '/')[-1] } } }
-$inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -or ($subs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0) -and $s -notmatch '^\d+-\d+-|^lot-' })
+$inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -or ($subs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0) })
 $newIds = @(@($inArea) + @($zoneOnly) | Where-Object { -not $seen.ContainsKey($_) -or $seen[$_].outcome -eq 'candidate' })
 Log "Search: $($found.Count) listings, $($inArea.Count) in $(if ($cfg.auckland_wide) { $cityName } else { 'your suburbs' }), $($zoneOnly.Count) in top-school-zone suburbs, $($newIds.Count) new"
 
@@ -115,14 +117,17 @@ function Get-Ratios([string]$slug, [double]$land) {
 }
 $CLAD = [ordered]@{ 'Monolithic plaster/stucco' = '\b(plaster(ed)?|stucco|monolithic|EIFS|polystyrene)\b'; 'Harditex / fibre-cement sheet' = '\b(harditex|hardiflex|fibre[- ]?cement (sheet|board))\b'; 'Linea / fibre-cement weatherboard' = '\b(linea|hardiplank)\b'; 'Fibrolite (asbestos-era)' = '\b(fibrolite|super six|asbestos)\b'; 'Brick' = '\b(brick|clinker)\b'; 'Weatherboard (timber)' = '\b(weatherboards?|bevel[- ]?back|rusticated|cedar)\b'; 'Block / concrete' = '\b(concrete block|blockwork|solid concrete)\b'; 'Roughcast' = '\broughcast\b'; 'Board and batten' = '\bboard (and|&) batten\b' }
 $ROOF = [ordered]@{ 'Tile (concrete/clay)' = '\b(tile roof|tiled roof|(brick|block|weatherboard) (and|&) tile|terracotta|concrete tiles?)\b'; 'Long-run iron / Colorsteel' = '\b(iron roof|corrugated|long[- ]?run|colou?rsteel|metal roof|(brick|weatherboard) (and|&) iron)\b'; 'Decramastic (pressed metal tile)' = '\b(decramastic|pressed metal tile)\b'; 'Butynol / membrane (flat roof)' = '\b(butynol|membrane roof|flat roof)\b' }
-$cands = @(); $screenedOut = 0
+$cands = @(); $screenedOut = 0; $deferred = 0
+# Site checks take ~20 s each, so each run checks at most max_new_per_run new listings (newest first) to stay inside the time limit.
+$maxNew = if ($cfg.max_new_per_run) { [int]$cfg.max_new_per_run } else { 500 }
 foreach ($id in $newIds) {
+    if ($cands.Count -ge $maxNew) { $deferred++; continue }   # the rest are checked on the next runs (not marked seen)
     $l = (GetJson "$API/listings/$id").data.attributes; if (-not $l) { continue }
     $desc = (("$($l.description)") -replace '<[^>]+>', ' ' -replace '\s+', ' ')
     $land = [double]$l.'land-area'; $beds = [int]$l.'bedroom-count'; $sub = "$($l.address.suburb)"
     # Listing-only checks first: skip the property lookup for sites that fail on land, beds or type.
     # Region-wide mortgagee sales can be outside the city (e.g. Selwyn): keep only the configured district.
-    $quick = if ($cfg.district_name -and "$($l.address.district)" -ne "$($cfg.district_name)") { "Outside $($cfg.district_name)" } elseif ($land -lt [double]$cfg.min_land_m2) { 'Under 600 m²' } elseif ($beds -lt [int]$cfg.min_beds) { 'Under 2 bedrooms' } elseif ("$($l.'listing-sub-type')" -match 'Apartment|Unit|Townhouse|Section|Studio') { "Not a house ($($l.'listing-sub-type'))" } else { $null }
+    $quick = if ($cfg.district_name -and "$($l.address.district)" -ne "$($cfg.district_name)") { "Outside $($cfg.district_name)" } else { $null }
     if ($quick) { $seen[$id] = [ordered]@{ address = "$($l.address.'full-address')"; url = "$($l.'website-full-url')"; first_seen = $Date; last_seen = $Date; price_text = "$($l.'price-display')"; outcome = 'screened_out'; reason = $quick }; $screenedOut++; continue }
     $p = if ($l.'property-short-id') { (GetJson "$API/properties/$($l.'property-short-id')").data.attributes } else { $null }
     $slug = ($sub.ToLower() -replace '^st\.? ', 'saint ' -replace '^mt\.? ', 'mount ' -replace '[^a-z]+', '-').Trim('-')
@@ -132,18 +137,14 @@ foreach ($id in $newIds) {
     $expected = if ($ask) { $ask } elseif ($est.'value-mid' -and $cv) { ($est.'value-mid' + $cv * $r[0]) / 2 } elseif ($cv) { $cv * $r[0] } else { 0 }
     $low = if ($cv) { $cv * $r[1] } else { $expected }
     $why = $null
-    if ($land -lt [double]$cfg.min_land_m2) { $why = 'Under 600 m²' } elseif ($beds -lt [int]$cfg.min_beds) { $why = 'Under 2 bedrooms' }
-    elseif ("$($l.'listing-sub-type')" -match 'Apartment|Unit|Townhouse|Section|Studio') { $why = "Not a house ($($l.'listing-sub-type'))" }
-    elseif ($desc -match 'leasehold|cross[- ]?lease|body corp') { $why = 'Leasehold, cross-lease or body corporate in listing' }
-    elseif ($expected -gt $keepMax -and $low -gt $max) { $why = "Over the search ceiling (expected ~$([math]::Round($expected/1000))k)" }
-    elseif ($ask -gt $keepMax) { $why = "Asking over the $([math]::Round($keepMax/1000))k search ceiling" }
+    # No land, bedroom, type or price limits: every listing is kept, and people filter on the site.
     $seen[$id] = [ordered]@{ address = "$($l.address.'full-address')"; url = "$($l.'website-full-url')"; first_seen = $Date; last_seen = $Date; price_text = "$($l.'price-display')"; outcome = $(if ($why) { 'screened_out' } else { 'candidate' }); reason = $why }
     if ($why) { $screenedOut++; continue }
     $types = @(); if ($l.'is-mortgagee-sale' -or $desc -match 'mortgagee') { $types += 'Mortgagee sale' }; if ($l.'is-private-listing') { $types += 'Private sale' }
     if ($desc -match 'deceased estate|estate sale|executors?\b|estate of the late') { $types += 'Estate sale' }; if ($desc -match 'ex[- ]state|former state|state house|kainga ora|kāinga ora|housing new zealand') { $types += 'Ex-state home' }
     if ($desc -match 'must (be )?sell|motivated|instructions? to sell|overseas vendor|moving overseas|relocat') { $types += 'Motivated vendor' }
     $age = "$($p.'building-age')"
-    $cands += [pscustomobject]@{ id = $id; address = (("$($l.address.'full-address')" -split ',')[0..1] -join ',').Trim(); suburb = $sub; url = "$($l.'website-full-url')"; source = 'realestate.co.nz'; status = 'new'
+    $cands += [pscustomobject]@{ id = $id; address = (("$($l.address.'full-address')" -split ',')[0..1] -join ',').Trim(); suburb = $sub; url = "$($l.'website-full-url')"; source = 'realestate.co.nz'; status = 'new'; ptype = "$($l.'listing-sub-type')"
         price_text = ("$($l.'price-display')" + $(if ($l.'auction-date') { ' ' + ("$($l.'auction-date')" + '          ').Substring(0, 10).Trim() })); asking = $(if ($ask) { $ask } else { $null })
         beds = $beds; baths = $l.'bathroom-count'; land_m2 = $land; floor_m2 = $p.'floor-area'; decade_built = $(if ($age -and $age -ne '0') { "${age}s" } else { '' })
         cv = $cv; land_value = $p.'council-information'.'land-value'; estimate = $(if ($est) { [ordered]@{ low = $est.'value-low'; mid = $est.'value-mid'; high = $est.'value-high' } } else { $null })
@@ -151,7 +152,7 @@ foreach ($id in $newIds) {
         materials = [ordered]@{ c = @($CLAD.Keys | Where-Object { $desc -match $CLAD[$_] }); r = @($ROOF.Keys | Where-Object { $desc -match $ROOF[$_] }); reclad = $desc -match 're-?clad'; ccc = $desc -match '\bCCC\b|code compliance' }
         consent = $(if ($desc -match 'resource consent|consented for|RC (approved|granted)') { $true } else { $false }); desc_flags = @() }
 }
-Log "New listings: $($cands.Count) passed the first screen, $screenedOut screened out"
+Log "New listings: $($cands.Count) to check, $screenedOut outside the area$(if ($deferred) { ", $deferred left for the next runs" })"
 
 # ---------- 4. Site checks for new candidates ----------
 # Results are cached one JSON line per site in site-checks.jsonl, so a stopped run resumes where it left off.
