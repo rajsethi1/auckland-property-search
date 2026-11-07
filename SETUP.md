@@ -76,7 +76,7 @@ Tick *weekly* to also refresh sale/CV ratios (it does this automatically on Sund
 ## Notes
 
 - The hunt keeps every listing (no land, price, bedroom or type limits); people filter on the site. Each run checks
-  at most 500 new listings (config `max_new_per_run`), newest first, so a big backlog fills in over several days.
+  at most 300 new listings (config `max_new_per_run`), newest first, so a big backlog fills in over several days.
 - The site data is split: `api/data/data.json` is a light list of every site, and `api/data/parts/00-63.json`
   (`parts-chc/` for Christchurch) hold the full details, loaded when someone opens a property.
 
