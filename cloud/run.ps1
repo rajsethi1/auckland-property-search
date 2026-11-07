@@ -1,4 +1,4 @@
-﻿<#
+<#
   The daily cloud run (GitHub Actions, Windows PowerShell 5.1):
     1. pull the hunt's state (seen listings, site-check cache, market data, last report) from Hostinger by FTP
        — on the very first run, from this repo's seed-state folder instead;
@@ -23,7 +23,10 @@ $hostName = [regex]::Match($hostRaw, '[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+(:\d+)?').V
 "FTP_HOST shape: '$($hostRaw -replace '[0-9]', '9' -replace '[A-Za-z]', 'a' -replace "`r|`n", '<newline>')' -> using a $($hostName.Length)-character host"
 if (-not $hostName) { throw 'FTP_HOST does not contain a host name or IP address' }
 $ftp = "ftp://$hostName"; $cred = "$($env:FTP_USER):$($env:FTP_PASS)"
-$stateDir = if ($env:FTP_STATE_DIR) { $env:FTP_STATE_DIR.Trim('/') } else { 'hunt-state' }
+# REGION=chc runs the Christchurch hunt: its own state folder, seed and data file; the pages are uploaded by the Auckland run.
+$CHC = $env:REGION -eq 'chc'
+$stateDir = if ($CHC) { 'hunt-state-chc' } elseif ($env:FTP_STATE_DIR) { $env:FTP_STATE_DIR.Trim('/') } else { 'hunt-state' }
+$seedDir = if ($CHC) { "$repo\seed-state-chc" } else { "$repo\seed-state" }
 # Check the FTP login before the long hunt, so a bad host or password fails in seconds, not after 25 minutes.
 # Encrypted FTP (FTPS). Hostinger's certificate names its server, not the IP, so if it can't be verified (curl 60)
 # keep the encryption but skip the name check.
@@ -81,10 +84,14 @@ if (FtpGet "$stateDir/manifest.txt" "$root\manifest.txt") {
     $oldReport = $files | Where-Object { $_ -match '^reports/' } | Select-Object -First 1
     "State: $($files.Count) files from Hostinger"
 } else {
-    Copy-Item "$repo\seed-state\*" $root -Recurse -Force
-    $oldReport = Get-ChildItem "$root\reports\*.json" | Select-Object -First 1 | ForEach-Object { "reports/$($_.Name)" }
+    Copy-Item "$seedDir\*" $root -Recurse -Force
+    $oldReport = Get-ChildItem "$root\reports\*.json" -ErrorAction SilentlyContinue | Select-Object -First 1 | ForEach-Object { "reports/$($_.Name)" }
     "State: first run, seeded from the repo"
 }
+
+# No sale/CV ratios yet (a new region's first run): do the weekly refresh now so prices have a basis.
+if (-not (Test-Path "$root\market-ratios.json")) { $weekly = $true; 'No market ratios yet: running the weekly refresh' }
+New-Item -ItemType Directory -Force "$root\reports" | Out-Null
 
 # ---- 2. Saved lists -> shortlist.json ----
 # Each user has their own lists; the hunt tracks what the admins have saved (and any pre-login shared lists).
@@ -120,12 +127,13 @@ if (-not (Test-Path "$root\reports\data.json")) { throw 'No data.json was produc
 # ---- 4. Website, then state ----
 $site = Join-Path $repo 'site'
 $pages = 'index.html', 'app.js', 'zone-codes.json', 'robots.txt', 'api/data/.htaccess', 'api/common.php', 'api/auth.php', 'api/admin.php', 'api/lists.php', 'api/data.php'
-foreach ($f in $pages) { FtpPut (Join-Path $site $f) "$siteDir/$f" }
-FtpPut "$root\reports\suburbs.json" "$siteDir/suburbs.json"
+$sfx = if ($CHC) { '-chc' } else { '' }
+if (-not $CHC) { foreach ($f in $pages) { FtpPut (Join-Path $site $f) "$siteDir/$f" } }
+FtpPut "$root\reports\suburbs.json" "$siteDir/suburbs$sfx.json"
 # The sites go in the closed api/data folder; api/data.php serves them to signed-in users only.
-FtpPut "$root\reports\data.json" "$siteDir/api/data/data.json" -Atomic
+FtpPut "$root\reports\data.json" "$siteDir/api/data/data$sfx.json" -Atomic
 # Remove the public copy older versions uploaded (no error if it's already gone).
-FtpDel "$siteDir/data.json"
+if (-not $CHC) { FtpDel "$siteDir/data.json" }
 "Website files staged"
 
 # Keep only today's report in the state, written compact (the indented form is ~4x bigger).
@@ -133,7 +141,7 @@ $rep = "reports/$Date.json"
 $compact = [IO.File]::ReadAllText("$root\$rep", $utf8) | ConvertFrom-Json | ConvertTo-Json -Depth 20 -Compress
 [IO.File]::WriteAllText("$root\$rep", $compact, $utf8)
 $stateFiles = @('config.json', 'seen.json', 'site-checks.jsonl', 'market-ratios.json', 'market-growth.json', 'school-zones.json',
-    'slopes.json', 'sold-outcomes.json', 'auckland-suburbs.json', $rep) | Where-Object { Test-Path (Join-Path $root $_) }
+    'slopes.json', 'sold-outcomes.json', 'auckland-suburbs.json', 'christchurch-suburbs.json', $rep) | Where-Object { Test-Path (Join-Path $root $_) }
 foreach ($f in $stateFiles) { FtpPut (Join-Path $root $f) "$stateDir/$f" }
 [IO.File]::WriteAllText("$root\manifest.txt", ($stateFiles -join "`n"), $utf8)
 FtpPut "$root\manifest.txt" "$stateDir/manifest.txt"
@@ -149,7 +157,7 @@ if ($i -ge 0) { $m = $lftp[$i]; $lftp.RemoveAt($i); $lftp.Add($m) }
 
 # ---- 5. Email (optional) ----
 $mail = "$root\reports\email-$Date.html"
-if ($env:SMTP_HOST -and $env:SMTP_USER -and $env:SMTP_PASS -and (Test-Path $mail)) {
+if (-not $CHC -and $env:SMTP_HOST -and $env:SMTP_USER -and $env:SMTP_PASS -and (Test-Path $mail)) {
     $cfg = [IO.File]::ReadAllText("$root\config.json", $utf8) | ConvertFrom-Json
     $pw = ConvertTo-SecureString $env:SMTP_PASS -AsPlainText -Force
     $c = New-Object Management.Automation.PSCredential($env:SMTP_USER, $pw)
