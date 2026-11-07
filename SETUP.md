@@ -1,4 +1,4 @@
-# Auckland Property Search — setup
+# PropertyHunte — setup
 
 How it works: every morning at about 6am NZ time, GitHub (free) runs the hunt in the cloud, then uploads the
 website and today's data to your Hostinger hosting by FTP. Nothing runs on your PC.
@@ -36,18 +36,46 @@ GitHub Actions (6am)  ──FTP──►  Hostinger
 After that it runs by itself every morning. To run it on demand: Actions → Daily property hunt → Run workflow.
 Tick *weekly* to also refresh sale/CV ratios (it does this automatically on Sundays).
 
+## Sign-in and accounts
+
+- The first person to open the site after the sign-in update gets **"Set up your site"** and becomes the **admin**.
+  Do this yourself straight away, while the hPanel password is still on.
+- Then remove the hPanel password (Advanced → Password Protect Directories → delete the `public_html` entry),
+  so people only see the site's own sign-in.
+- **Admin** page (top menu): the invite code to send people, *New code* (stops the old one working),
+  *Close sign-up*, reset someone's password (shows a temporary one to send them), make or remove admins, remove users.
+- Everyone has their own saved lists. The daily run tracks the admins' saved sites.
+- Accounts and lists live in `public_html/api/data/` (`users.json`, `lists.json`), which the web can't read directly.
+  Passwords are stored hashed.
+
 ## 3. Later
 
-- **Real domain:** register `aucklandpropertysearch.co.nz` in hPanel → Domains (about $30 NZD/yr), connect it to the
-  website, then change the `SITE_URL` variable.
+- **Domain propertyhunte.com:** in hPanel → Websites → this site → **Change domain** (or Domains → connect it to this
+  website) so the same files and `public_html` keep working. Turn on SSL for it, then change the repo variable
+  `SITE_URL` to `https://propertyhunte.com`. If hPanel gives the site a new FTP host, update the `FTP_HOST` secret too.
+- **Forgot password emails** are sent by the site itself (PHP mail) from `noreply@<your domain>`. They arrive
+  reliably once the domain is on Hostinger with its email (SPF/DKIM) set up; until then they may land in spam.
+  People without an email on their account show a red "Forgot password" tag on the Admin page instead.
 - **Daily email from the cloud:** once the domain has a mailbox (hPanel → Emails), add secrets `SMTP_HOST`
   (`smtp.hostinger.com`), `SMTP_USER` (the mailbox address) and `SMTP_PASS`. Without them the run skips the email.
 - **Turn off the Claude morning task** (`property-hunt-morning`) once the cloud run has worked for a few days, so it
   stops using Claude tokens.
 
+## Christchurch
+
+- The daily workflow runs two hunts side by side: `akl` (Auckland, also uploads the website pages) and `chc`
+  (Christchurch). Each has its own saved state on Hostinger (`hunt-state` and `hunt-state-chc`); Christchurch
+  writes `api/data/data-chc.json` and `suburbs-chc.json`. If one city fails, the other still updates.
+- Christchurch's first run starts from `seed-state-chc` and does the weekly price refresh straight away, so it
+  takes longer (roughly 30-60 minutes).
+- Christchurch checks use Christchurch City Council's District Plan (zones, High Flood Hazard, Flood Management,
+  Fixed Floor Level, Residential Character, heritage settings), council stormwater/wastewater pipes, and Metro bus
+  stops. No train or motorway checks, and no suburb growth history yet.
+- People switch city with the selector at the top of the site.
+
 ## Notes
 
-- Saved lists live on Hostinger (`public_html/api/data/lists.json`); anyone with the site login can change them.
+- Saved lists and budgets live on Hostinger (`public_html/api/data/lists.json`), one set per person.
 - Slope (LiDAR) isn't checked in the cloud; new sites show slope as Unknown.
 - If realestate.co.nz starts blocking GitHub's servers, the run's log will show the search finding 0 listings.
 - `seed-state` is only used for the very first run. After that the state lives on Hostinger.
