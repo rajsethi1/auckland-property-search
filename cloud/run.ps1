@@ -116,6 +116,8 @@ if (FtpGet "$siteDir/api/data/lists.json" "$root\lists.json") {
 if ($env:SITE_URL) {
     $cfg = [IO.File]::ReadAllText("$root\config.json", $utf8) | ConvertFrom-Json
     $cfg.report_url = $env:SITE_URL
+    # Christchurch hunt covers the whole Canterbury region (saved state from before Nov 2026 was city-only).
+    if ($CHC) { $cfg.search_path = 'canterbury'; $cfg.region_label = 'Canterbury'; $cfg.district_name = '' }
     [IO.File]::WriteAllText("$root\config.json", ($cfg | ConvertTo-Json -Depth 8), $utf8)
 }
 
