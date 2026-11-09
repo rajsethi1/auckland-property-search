@@ -36,7 +36,7 @@ function aerial(lat, lon, w = 480, h = 300, half = 0.0008) {
 // Each city has its own daily data (api/data.php?city=) and suburb groups; the choice is remembered per browser.
 const CITIES = {
   akl: { name: "Auckland", center: [-36.88, 174.76], zoom: 10, subs: "suburbs.json", hero: "174.66,-36.93,174.86,-36.83" },
-  chc: { name: "Christchurch", center: [-43.53, 172.62], zoom: 11, subs: "suburbs-chc.json", hero: "172.55,-43.57,172.72,-43.49" }
+  chc: { name: "Canterbury", center: [-43.6, 172.3], zoom: 9, subs: "suburbs-chc.json", hero: "172.55,-43.57,172.72,-43.49" }
 };
 let CITY = CITIES[ls.get("aps-city", "akl")] ? ls.get("aps-city", "akl") : "akl";
 const C = () => CITIES[CITY];
@@ -1062,6 +1062,10 @@ async function start() {
     S.data = d; S.byId = new Map((d.shortlist || []).filter(p => p && p.id).map(p => [String(p.id), p]));
     S.subs = subs || {}; S.zones = zones || {}; S.subDistrict.clear();
     Object.entries(S.subs).forEach(([dname, list]) => list.forEach(s => S.subDistrict.set(norm(s), dname)));
+    // Towns not in the suburb groups (e.g. Canterbury outside Christchurch City) go under their own district.
+    S.sites.forEach(p => { const s = norm(p.suburb); if (!s || S.subDistrict.has(s)) return;
+      const g = String(p.district || "Other areas").replace(/ District$/, "").trim() || "Other areas";
+      (S.subs[g] = S.subs[g] || []).push(p.suburb); S.subDistrict.set(s, g); });
     route(); loadStore();
   } catch (e) { if (ME) $("#app").innerHTML = `<div class="loading">${esc(e.message)}${CITY !== "akl" ? `<p><button class="btn" type="button" onclick="setCity('akl')">Switch to Auckland</button></p>` : ". Try reloading the page."}</div>`; }
 }
