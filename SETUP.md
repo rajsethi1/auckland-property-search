@@ -72,6 +72,9 @@ Tick *weekly* to also refresh sale/CV ratios (it does this automatically on Sund
   Fixed Floor Level, Residential Character, heritage settings), council stormwater/wastewater pipes, and Metro bus
   stops. No train or motorway checks, and no suburb growth history yet.
 - People switch city with the selector at the top of the site.
+- Since Nov 2026 the `chc` hunt covers the whole **Canterbury** region (Selwyn, Waimakariri, Ashburton, Timaru, etc.).
+  Full zone/flood/pipe checks only inside Christchurch City; elsewhere those show "Not checked". Towns are grouped by
+  district in the area picker automatically.
 
 ## Notes
 
