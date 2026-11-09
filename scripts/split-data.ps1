@@ -18,7 +18,7 @@ function Bucket([string]$id) { [long]$h = 0; foreach ($c in $id.ToCharArray()) {
 function SlimSchools($list) { @(@($list) | Where-Object { $_ } | ForEach-Object { [ordered]@{ id = $_.id; band = $_.band } }) }
 function Num($v) { if ($v -is [ValueType]) { $v } else { $null } }
 
-$keep = 'id', 'address', 'suburb', 'lat', 'lon', 'status', 'label', 'score', 'price_text', 'price_used', 'land_m2', 'beds',
+$keep = 'id', 'address', 'suburb', 'district', 'lat', 'lon', 'status', 'label', 'score', 'price_text', 'price_used', 'land_m2', 'beds',
         'zone', 'title', 'flood', 'sale_type', 'ptype', 'url', 'starred'
 $slim = New-Object Collections.Generic.List[object]
 $parts = @{}; for ($i = 0; $i -lt 64; $i++) { $parts[$i] = [ordered]@{} }

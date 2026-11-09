@@ -32,10 +32,10 @@ $cfg = ReadJson "$root\config.json"
 $CHC = "$($cfg.region)" -eq 'chc'; $env:HUNT_REGION = $(if ($CHC) { 'chc' } else { '' })
 $searchPath = if ($cfg.search_path) { "$($cfg.search_path)" } else { 'auckland' }
 $apiRegion = if ($cfg.api_region) { [int]$cfg.api_region } else { 35 }
-$cityName = if ($CHC) { 'Christchurch' } else { 'Auckland' }
+$cityName = if ($cfg.region_label) { "$($cfg.region_label)" } elseif ($CHC) { 'Canterbury' } else { 'Auckland' }
 $seen = ToHash (ReadJson "$root\seen.json")
 # The old hunt dropped listings under 600 m², under 2 bedrooms, non-houses and over the price ceiling: forget those so they are checked now.
-foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'screened_out' -and "$($seen[$k].reason)" -notmatch '^Outside ') { $seen.Remove($k) } }
+foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'screened_out' -and ("$($seen[$k].reason)" -notmatch '^Outside ' -or -not $cfg.district_name)) { $seen.Remove($k) } }
 $ratios = ReadJson "$root\market-ratios.json"
 $slopes = ToHash (ReadJson "$root\slopes.json")
 # Windows PowerShell returns a JSON array as one object; piping it enumerates the ids.
@@ -150,7 +150,7 @@ foreach ($id in $newIds) {
     if ($desc -match 'deceased estate|estate sale|executors?\b|estate of the late') { $types += 'Estate sale' }; if ($desc -match 'ex[- ]state|former state|state house|kainga ora|kāinga ora|housing new zealand') { $types += 'Ex-state home' }
     if ($desc -match 'must (be )?sell|motivated|instructions? to sell|overseas vendor|moving overseas|relocat') { $types += 'Motivated vendor' }
     $age = "$($p.'building-age')"
-    $cands += [pscustomobject]@{ id = $id; address = (("$($l.address.'full-address')" -split ',')[0..1] -join ',').Trim(); suburb = $sub; url = "$($l.'website-full-url')"; source = 'realestate.co.nz'; status = 'new'; ptype = "$($l.'listing-sub-type')"
+    $cands += [pscustomobject]@{ id = $id; address = (("$($l.address.'full-address')" -split ',')[0..1] -join ',').Trim(); suburb = $sub; district = "$($l.address.district)"; url = "$($l.'website-full-url')"; source = 'realestate.co.nz'; status = 'new'; ptype = "$($l.'listing-sub-type')"
         price_text = ("$($l.'price-display')" + $(if ($l.'auction-date') { ' ' + ("$($l.'auction-date')" + '          ').Substring(0, 10).Trim() })); asking = $(if ($ask) { $ask } else { $null })
         beds = $beds; baths = $l.'bathroom-count'; land_m2 = $land; floor_m2 = $p.'floor-area'; decade_built = $(if ($age -and $age -ne '0') { "${age}s" } else { '' })
         cv = $cv; land_value = $p.'council-information'.'land-value'; estimate = $(if ($est) { [ordered]@{ low = $est.'value-low'; mid = $est.'value-mid'; high = $est.'value-high' } } else { $null })
@@ -217,14 +217,17 @@ foreach ($p in $cands) {
         if ($c.title.type -ne 'Freehold' -or $share -or "$($c.title.estate)" -match 'Leasehold|Stratum|Unit') { $fails += "Title: $($c.title.type), $($lines[0])" }
         elseif ($lines.Count -gt 1) { $flags += 'Title includes a share of a shared lot (likely a common driveway): check rights and costs' }
     } else { $flags += 'Title not found in LINZ data: confirm with agent' }
-    if ("$($c.zone)" -notmatch 'Mixed Housing|Terrace Housing') { $fails += "Zone: $($c.zone)" }
+    # Canterbury outside Christchurch City: the council zone layers only cover the city, so the zone isn't known.
+    $outside = $CHC -and $p.district -and $p.district -ne 'Christchurch City'
+    if ($outside) { $c.zone = 'Not checked (outside Christchurch City)'; $p.zone = $c.zone; $flags += "Outside Christchurch City ($($p.district)): zone, flood and pipes not checked; see the district council's plan maps" }
+    elseif ("$($c.zone)" -notmatch 'Mixed Housing|Terrace Housing') { $fails += "Zone: $($c.zone)" }
     $sec = @($c.schools.secondary | Where-Object { $_ -and $_.name -and $_.authority -notmatch 'Integrated' })
     $best = $sec | Sort-Object { - $bandRank["$($_.band)"] } | Select-Object -First 1
     $names = ($sec | ForEach-Object { $_.name }) -join ', '
     if ($best -and $best.band -eq 'Low') { $fails += "School: $names (NCEA L3 $($best.ncea_l3_pct)%)" }
     $p | Add-Member rule_fails @($fails) -Force
     $p | Add-Member school ([ordered]@{ name = $(if ($names) { $names } else { 'No state secondary zone' }); band = $(if ($best) { $best.band } else { 'Unknown' }) }) -Force
-    $p | Add-Member flood (FloodText $c) -Force
+    $p | Add-Member flood $(if ($outside) { 'Not checked (outside Christchurch City)' } else { FloodText $c }) -Force
     if ($c.special_character -eq $true) { $flags += $(if ($CHC) { 'Residential Character Area: demolition and new building need consent' } else { 'Special Character Area overlay: demolition needs consent' }) }
     if ($c.historic_heritage -eq $true) { $flags += 'Heritage setting or item on the site: check the District Plan schedule' }
     $ww = $c.services.wastewater; if ($ww -isnot [string] -and ($null -eq $ww.distance_m -or $ww.distance_m -gt 50)) { $flags += 'Public wastewater more than 50 m away: may need an extension or easement' }
