@@ -1,9 +1,9 @@
 {
     "region": "chc",
-    "region_label": "Christchurch",
-    "search_path": "canterbury/christchurch-city",
+    "region_label": "Canterbury",
+    "search_path": "canterbury",
     "api_region": 45,
-    "district_name": "Christchurch City",
+    "district_name": "",
     "report_url": "",
     "email_to": [],
     "max_price": 1100000,
