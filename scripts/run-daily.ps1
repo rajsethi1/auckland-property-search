@@ -35,11 +35,6 @@ $apiRegion = if ($cfg.api_region) { [int]$cfg.api_region } else { 35 }
 $cityName = if ($cfg.region_label) { "$($cfg.region_label)" } elseif ($CHC) { 'Canterbury' } else { 'Auckland' }
 $seen = ToHash (ReadJson "$root\seen.json")
 # The old hunt dropped listings under 600 m², under 2 bedrooms, non-houses and over the price ceiling: forget those so they are checked now.
-# Before Nov 2026 the site checks used the listing's map pin, which can sit on the neighbour's title (45 Avondale Rd read a
-# next-door cross lease), so title, zone and flood could all be wrong. Re-check those rule failures once (still-listed ones
-# only; overflow waits for the next runs); the checks now use LINZ's address point and mark it in addr_point.
-$linzDone = @{}; foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName)) { if ($ln -match '"addr_check":2' -and $ln -match '^\{"id":"([^"]+)"') { $linzDone[$Matches[1]] = 1 } } }
-$recheck = @{}; foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'listed_fails_rules' -and -not $linzDone[$k]) { $seen[$k].outcome = 'candidate'; $recheck[$k] = 1 } }
 foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'screened_out' -and ("$($seen[$k].reason)" -notmatch '^Outside ' -or -not $cfg.district_name)) { $seen.Remove($k) } }
 $ratios = ReadJson "$root\market-ratios.json"
 $slopes = ToHash (ReadJson "$root\slopes.json")
@@ -58,6 +53,14 @@ $zoneSubs = @(); if ($cfg.zone_search -and $zones) { $zoneSubs = @($zones.school
 # Latest report up to and including today (a same-day re-run builds on today's report).
 $prevFile = Get-ChildItem "$root\reports\*.json" | Where-Object { $_.Name -match '^\d{4}-\d{2}-\d{2}\.json$' -and $_.BaseName -le $Date } | Sort-Object Name | Select-Object -Last 1
 $prev = if ($prevFile) { ReadJson $prevFile.FullName } else { $null }
+# Before Nov 2026 the site checks used the listing's map pin, which can sit on the neighbour's title (45 Avondale Rd read a
+# next-door cross lease), so title, zone and flood could all be wrong. Re-check those rule failures once (still-listed ones
+# only; overflow waits for the next runs); the checks now use LINZ's address point and mark it in addr_point.
+$linzDone = @{}; foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName)) { if ($ln -match '"addr_check":2' -and $ln -match '^\{"id":"([^"]+)"') { $linzDone[$Matches[1]] = 1 } } }
+$onList = @{}; foreach ($x in @($prev.shortlist)) { if ($x.id) { $onList["$($x.id)"] = 1 } }
+# Also the old code's drops ('rejected', 'school_reject'), school-zone drops, and 'shortlisted' sites no longer on the list.
+$recheck = @{}; foreach ($k in @($seen.Keys)) { $o = $seen[$k].outcome
+    if (-not $linzDone[$k] -and ($o -in 'listed_fails_rules', 'rejected', 'school_reject', 'outside_top_zone' -or ($o -eq 'shortlisted' -and $prev -and -not $onList[$k]))) { $seen[$k].outcome = 'candidate'; $recheck[$k] = 1 } }
 $log = New-Object System.Collections.ArrayList
 function Log($s) { [void]$log.Add($s) }
 
@@ -116,6 +119,8 @@ $zoneOnly = @($found.Keys | Where-Object { $s = $found[$_]; $inArea -notcontains
 if ($SkipSearch) { foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'candidate' -and -not $found.Contains($k)) { $found[$k] = ("$($seen[$k].url)" -split '/')[-1] } } }
 $inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -or ($subs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0) })
 $newIds = @(@($inArea) + @($zoneOnly) | Where-Object { -not $seen.ContainsKey($_) -or $seen[$_].outcome -eq 'candidate' })
+# Brand-new listings first, then re-checks of title failures (most likely read from a wrong map pin), then other re-checks.
+$newIds = @(@($newIds | Where-Object { -not $recheck[$_] }) + @($newIds | Where-Object { $recheck[$_] -and "$($seen[$_].reason)" -match '(^|; )Title:' }) + @($newIds | Where-Object { $recheck[$_] -and "$($seen[$_].reason)" -notmatch '(^|; )Title:' }))
 Log "Search: $($found.Count) listings, $($inArea.Count) in $(if ($cfg.auckland_wide) { $cityName } else { 'your suburbs' }), $($zoneOnly.Count) in top-school-zone suburbs, $($newIds.Count) new"
 
 # ---------- 3. Facts for new listings + pre-screen ----------
