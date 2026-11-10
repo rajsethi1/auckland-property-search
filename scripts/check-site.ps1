@@ -546,13 +546,13 @@ function Check-Site([string]$id, [string]$addr, [double]$lat, [double]$lon) {
         $lon = $c.location.x; $lat = $c.location.y; $matched = $c.address; $score = $c.score
     }
     # Listing pins can sit on the neighbour (45 Avondale Rd read a next-door cross lease), so prefer LINZ's official
-    # address point when "number street, suburb" matches one within 1 km of the pin.
+    # address point when "number street, suburb" matches one within 5 km of the pin (that pin was 1.8 km out).
     $parts = @("$addr" -split ',\s*' | Select-Object -First 2)
     if ($addr -and $parts.Count -eq 2 -and $parts[0] -match '^\d') {
         try {
             $w = [uri]::EscapeDataString("full_address LIKE '$(("$($parts[0]), $($parts[1])") -replace "'", "''"),%'")
             $a = @((Invoke-RestMethod "https://services.arcgis.com/xdsHIIxuCWByZiCB/arcgis/rest/services/LINZ_NZ_Addresses/FeatureServer/0/query?where=$w&outFields=full_address&returnGeometry=true&outSR=4326&f=json").features)
-            if ($a.Count -eq 1 -and (Get-Metres $lat $lon $a[0].geometry.y $a[0].geometry.x) -lt 1000) {
+            if ($a.Count -eq 1 -and (Get-Metres $lat $lon $a[0].geometry.y $a[0].geometry.x) -lt 5000) {
                 $lat = $a[0].geometry.y; $lon = $a[0].geometry.x; $matched = $a[0].attributes.full_address; $score = 'linz' }
         } catch { }
     }
@@ -588,6 +588,7 @@ function Check-Site([string]$id, [string]$addr, [double]$lat, [double]$lon) {
         address           = $addr
         matched_address   = $matched
         geocode_score     = $score
+        addr_check        = 2   # bump to make run-daily re-check old rule failures once more
         addr_point        = $(if ($score -eq 'linz') { 'linz' } elseif ($matched) { 'geocoder' } else { 'listing' })
         lat               = $lat
         lon               = $lon

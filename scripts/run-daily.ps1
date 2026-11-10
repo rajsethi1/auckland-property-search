@@ -38,7 +38,7 @@ $seen = ToHash (ReadJson "$root\seen.json")
 # Before Nov 2026 the site checks used the listing's map pin, which can sit on the neighbour's title (45 Avondale Rd read a
 # next-door cross lease), so title, zone and flood could all be wrong. Re-check those rule failures once (still-listed ones
 # only; overflow waits for the next runs); the checks now use LINZ's address point and mark it in addr_point.
-$linzDone = @{}; foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName)) { if ($ln -match '"addr_point"' -and $ln -match '^\{"id":"([^"]+)"') { $linzDone[$Matches[1]] = 1 } } }
+$linzDone = @{}; foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName)) { if ($ln -match '"addr_check":2' -and $ln -match '^\{"id":"([^"]+)"') { $linzDone[$Matches[1]] = 1 } } }
 $recheck = @{}; foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'listed_fails_rules' -and -not $linzDone[$k]) { $seen[$k].outcome = 'candidate'; $recheck[$k] = 1 } }
 foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'screened_out' -and ("$($seen[$k].reason)" -notmatch '^Outside ' -or -not $cfg.district_name)) { $seen.Remove($k) } }
 $ratios = ReadJson "$root\market-ratios.json"
@@ -169,7 +169,7 @@ Log "New listings: $($cands.Count) to check, $screenedOut outside the area$(if (
 # Results are cached one JSON line per site in site-checks.jsonl, so a stopped run resumes where it left off.
 # Uncached sites are split across 6 parallel check-site workers (~18 s per site each).
 $checked = @{}; $cacheF = "$root\site-checks.jsonl"
-function LoadChecks { foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName, $utf8)) { if ($ln.Trim()) { try { $x = $ln | ConvertFrom-Json; if (-not $x.error -and ($x.addr_point -or -not $recheck["$($x.id)"])) { $checked["$($x.id)"] = $x } } catch {} } } } }
+function LoadChecks { foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName, $utf8)) { if ($ln.Trim()) { try { $x = $ln | ConvertFrom-Json; if (-not $x.error -and ($x.addr_check -ge 2 -or -not $recheck["$($x.id)"])) { $checked["$($x.id)"] = $x } } catch {} } } } }
 LoadChecks
 $todo = @($cands | Where-Object { -not $checked.ContainsKey("$($_.id)") })
 if ($todo.Count) {
