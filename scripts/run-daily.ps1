@@ -35,6 +35,11 @@ $apiRegion = if ($cfg.api_region) { [int]$cfg.api_region } else { 35 }
 $cityName = if ($cfg.region_label) { "$($cfg.region_label)" } elseif ($CHC) { 'Canterbury' } else { 'Auckland' }
 $seen = ToHash (ReadJson "$root\seen.json")
 # The old hunt dropped listings under 600 m², under 2 bedrooms, non-houses and over the price ceiling: forget those so they are checked now.
+# Before Nov 2026 the site checks used the listing's map pin, which can sit on the neighbour's title (45 Avondale Rd read a
+# next-door cross lease), so title, zone and flood could all be wrong. Re-check those rule failures once (still-listed ones
+# only; overflow waits for the next runs); the checks now use LINZ's address point and mark it in addr_point.
+$linzDone = @{}; foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName)) { if ($ln -match '"addr_point"' -and $ln -match '^\{"id":"([^"]+)"') { $linzDone[$Matches[1]] = 1 } } }
+$recheck = @{}; foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'listed_fails_rules' -and -not $linzDone[$k]) { $seen[$k].outcome = 'candidate'; $recheck[$k] = 1 } }
 foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'screened_out' -and ("$($seen[$k].reason)" -notmatch '^Outside ' -or -not $cfg.district_name)) { $seen.Remove($k) } }
 $ratios = ReadJson "$root\market-ratios.json"
 $slopes = ToHash (ReadJson "$root\slopes.json")
@@ -164,7 +169,7 @@ Log "New listings: $($cands.Count) to check, $screenedOut outside the area$(if (
 # Results are cached one JSON line per site in site-checks.jsonl, so a stopped run resumes where it left off.
 # Uncached sites are split across 6 parallel check-site workers (~18 s per site each).
 $checked = @{}; $cacheF = "$root\site-checks.jsonl"
-function LoadChecks { foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName, $utf8)) { if ($ln.Trim()) { try { $x = $ln | ConvertFrom-Json; if (-not $x.error) { $checked["$($x.id)"] = $x } } catch {} } } } }
+function LoadChecks { foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName, $utf8)) { if ($ln.Trim()) { try { $x = $ln | ConvertFrom-Json; if (-not $x.error -and ($x.addr_point -or -not $recheck["$($x.id)"])) { $checked["$($x.id)"] = $x } } catch {} } } } }
 LoadChecks
 $todo = @($cands | Where-Object { -not $checked.ContainsKey("$($_.id)") })
 if ($todo.Count) {
@@ -201,6 +206,7 @@ $great = 'High'; $bandRank = @{ High = 3; Medium = 2; Low = 1 }
 $newItems = @(); $rejected = [Collections.ArrayList]@(); $schoolRej = [Collections.ArrayList]@()
 foreach ($p in $cands) {
     $c = $checked[$p.id]; if (-not $c) { continue }
+    if ($c.addr_point -eq 'linz') { $p.lat = $c.lat; $p.lon = $c.lon }   # map pin on the right parcel
     $flags = @()
     foreach ($k in 'zone', 'schools', 'services', 'transport', 'state_housing', 'motorway', 'land', 'power_lines') { $p | Add-Member $k $c.$k -Force }
     if ($zoneOnly -contains $p.id) {
