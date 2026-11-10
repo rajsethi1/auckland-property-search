@@ -15,6 +15,24 @@ $base = 'https://services1.arcgis.com/n4yPwebTjJCmXB6W/arcgis/rest/services'
 # HUNT_REGION=chc: Christchurch City Council's District Plan, flood and pipe layers instead of Auckland's.
 $CHC = $env:HUNT_REGION -eq 'chc'
 $ccc = 'https://gis.ccc.govt.nz/server/rest/services/OpenData'
+# Canterbury beyond the city: Selwyn (Partially Operative District Plan, ArcGIS Online) and Waimakariri (2025 decisions plan).
+$sdc = 'https://services6.arcgis.com/Aa15joGcFNhhKYEJ/arcgis/rest/services'
+$wdc = 'https://gisservices.waimakariri.govt.nz/arcgis/rest/services'
+$linzRoads = "https://services.arcgis.com/xdsHIIxuCWByZiCB/arcgis/rest/services/LINZ_NZ_Primary_Parcels/FeatureServer/0/query?where=parcel_intent%3D'Road'"
+$wdcZones = @{ GRZ = 'General Residential'; MRZ = 'Medium Density Residential'; LLRZ = 'Large Lot Residential'; SETZ = 'Settlement'; RLZ = 'Rural Lifestyle'
+    GRUZ = 'General Rural'; TCZ = 'Town Centre'; LCZ = 'Local Centre'; NCZ = 'Neighbourhood Centre'; LFRZ = 'Large Format Retail'; MUZ = 'Mixed Use'
+    GIZ = 'General Industrial'; HIZ = 'Heavy Industrial'; LIZ = 'Light Industrial'; OSZ = 'Open Space'; NOSZ = 'Natural Open Space'; SARZ = 'Sport and Active Recreation' }
+$councilSrc = @{
+    sdc = @{ flood = [ordered]@{ plain = "$sdc/PDP_Layers/FeatureServer/8"; prone = "$sdc/PDP_Layers/FeatureServer/9"; sensitive = "$sdc/PDP_Layers/FeatureServer/6" }
+             names = @('Plains flood management area', 'Waimakariri River flood management area', 'Coastal inundation area')
+             pipes = [ordered]@{ stormwater = "$sdc/Stormwater_Network/FeatureServer/1"; wastewater = "$sdc/Sewer_Network/FeatureServer/2" }
+             where = @{ stormwater = "STATUS='In Service'"; wastewater = "STATUS='In Service' AND AMS2<>'Lateral'" } }
+    wdc = @{ flood = [ordered]@{ plain = "$wdc/District_Plan_2021/Urban_Flood_Assessment_Area/MapServer/36"; prone = "$wdc/District_Plan_2021/Non_Urban_Flood_Assessment/MapServer/0"; sensitive = "$wdc/District_Plan_2021/Urban_Flood_Assessment_Area/MapServer/0" }
+             names = @('Urban flood assessment area', 'Non-urban flood assessment area', 'Coastal flood assessment area')
+             pipes = [ordered]@{ stormwater = "$wdc/3Waters/Assets_Stormwater/MapServer/12"; wastewater = "$wdc/3Waters/Assets_Wastewater/MapServer/12" }
+             where = @{ stormwater = '1=1'; wastewater = '1=1' } }
+}
+$script:council = 'ccc'
 # Same keys as Auckland, so the rest of the pipeline is unchanged: plain = High Flood Hazard Management Area,
 # prone = Flood Management Area, sensitive = Fixed Floor Level area (Christchurch District Plan chapter 5).
 $floodLayers = if ($CHC) { [ordered]@{ plain = "$ccc/DistrictPlanB/FeatureServer/25"; prone = "$ccc/DistrictPlanB/FeatureServer/30"; sensitive = "$ccc/DistrictPlan/FeatureServer/89" } }
@@ -82,6 +100,32 @@ function Test-Inside($px, $py, $ring) {
     $inside
 }
 
+$cccFlood = $floodLayers; $cccPipes = $pipeSvcs   # Christchurch City defaults; Check-Site swaps in Selwyn/Waimakariri per site
+
+# Counts grid points inside a set of polygon rings (even-odd). Only edges that can cross a rightward ray from inside the box are kept.
+Add-Type -TypeDefinition @"
+using System; using System.Collections.Generic;
+public static class FloodGeo {
+    static object U(object o) { var ps = o as System.Management.Automation.PSObject; return ps != null ? ps.BaseObject : o; }
+    static object[] A(object o) { return (object[])U(o); }
+    static double D(object o) { return Convert.ToDouble(U(o)); }
+    public static int CountInside(object[] pts, object[] rings, double x0, double y0, double x1, double y1) {
+        var e = new List<double[]>();
+        foreach (object ro in rings) { var r = A(ro); int n = r.Length; if (n == 0) continue;
+            for (int i = 0, j = n - 1; i < n; j = i++) {
+                var a = A(r[i]); var b = A(r[j]);
+                double ax = D(a[0]), ay = D(a[1]), bx = D(b[0]), by = D(b[1]);
+                if ((ay < y0 && by < y0) || (ay > y1 && by > y1) || (ax < x0 && bx < x0)) continue;
+                e.Add(new[] { ax, ay, bx, by }); } }
+        int count = 0;
+        foreach (object po in pts) { var p = A(po); double px = D(p[0]), py = D(p[1]); bool odd = false;
+            foreach (var s in e) if (((s[1] > py) != (s[3] > py)) && (px < (s[2] - s[0]) * (py - s[1]) / (s[3] - s[1]) + s[0])) odd = !odd;
+            if (odd) count++; }
+        return count;
+    }
+}
+"@
+
 # Share of the whole title parcel (not just the address point) inside each flood layer, in % of site area.
 # Fetches the flood polygons around the parcel once per layer and tests a ~400-point grid locally.
 function Get-FloodShare($parcel) {
@@ -93,12 +137,28 @@ function Get-FloodShare($parcel) {
     $out = [ordered]@{}; $layers = $floodLayers
     foreach ($k in $layers.GetEnumerator()) {
         try {
-            $r = Invoke-RestMethod "$(Svc $k.Value)/query?where=1%3D1&geometry=$x0,$y0,$x1,$y1&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outSR=2193&f=json"
+            # One flood area covering the whole parcel box (e.g. Selwyn's plains-wide overlay) = 100%, without downloading its huge outline.
+            $whole = Invoke-RestMethod "$(Svc $k.Value)/query?where=1%3D1&geometry=$x0,$y0,$x1,$y1&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelWithin&returnCountOnly=true&f=json"
+            if ($whole.count -gt 0) { $out[$k.Key] = 100; continue }
+            # Outline length first: past ~3,000 km (Waimakariri's rural flood area is 20,000 km, a 65 MB download)
+            # sample 12 points of the site with point queries instead of downloading the shape.
+            $info = Invoke-RestMethod "$(Svc $k.Value)/query?where=1%3D1&geometry=$x0,$y0,$x1,$y1&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects&returnGeometry=false&outFields=*&f=json"
+            if ($info.error) { $out[$k.Key] = 'lookup-failed'; continue }
+            if (-not @($info.features).Count -or -not $pts.Count) { $out[$k.Key] = 0; continue }
+            $len = 0; foreach ($f in $info.features) { foreach ($pr in $f.attributes.PSObject.Properties) { if ($pr.Name -match '(?i)^shape.*len' -and $pr.Value) { $len += [double]$pr.Value } } }
+            if ($len -gt 3e6) {
+                $n = [math]::Min(12, $pts.Count); $hits = 0
+                for ($i = 0; $i -lt $n; $i++) { $p = $pts[[int][math]::Floor(($i + 0.5) * $pts.Count / $n)]
+                    $q = Invoke-RestMethod "$(Svc $k.Value)/query?where=1%3D1&geometry=$($p[0]),$($p[1])&geometryType=esriGeometryPoint&inSR=2193&spatialRel=esriSpatialRelIntersects&returnCountOnly=true&f=json"
+                    if ($q.error) { throw 'point query failed' }; if ($q.count -gt 0) { $hits++ } }
+                $out[$k.Key] = [math]::Round(100 * $hits / $n); continue
+            }
+            $r = Invoke-RestMethod "$(Svc $k.Value)/query?where=1%3D1&geometry=$x0,$y0,$x1,$y1&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects&returnGeometry=true&maxAllowableOffset=1&outSR=2193&f=json"
             if ($r.error) { $out[$k.Key] = 'lookup-failed'; continue }
             $rings = @($r.features | ForEach-Object { $_.geometry.rings } | ForEach-Object { , $_ })
             if (-not $rings.Count -or -not $pts.Count) { $out[$k.Key] = 0; continue }
-            # Even-odd across all rings handles holes in the flood polygons.
-            $in = @($pts | Where-Object { $p = $_; (@($rings | Where-Object { Test-Inside $p[0] $p[1] $_ }).Count % 2) -eq 1 }).Count
+            # Even-odd across all rings (handles holes); compiled because district-wide outlines run to 200k+ vertices.
+            $in = [FloodGeo]::CountInside($pts, $rings, $x0, $y0, $x1, $y1)
             $out[$k.Key] = [math]::Round(100 * $in / $pts.Count)
         } catch { $out[$k.Key] = 'lookup-failed' }
     }
@@ -115,7 +175,7 @@ function Get-Services($parcel) {
     $out = [ordered]@{}
     foreach ($k in $pipeSvcs.Keys) {
         # Watercare's layer also holds connection links (UNITTYPE NA, diameter 999); keep operational pipes only.
-        $where = if ($CHC) { [uri]::EscapeDataString("ServiceStatus='In Service' AND Ownership='CCC'") } elseif ($k -eq 'wastewater') { [uri]::EscapeDataString("STATUS='OP' AND UNITTYPE LIKE 'PIPE%'") } else { '1%3D1' }
+        $where = if ($script:council -ne 'ccc' -and $CHC) { [uri]::EscapeDataString($councilSrc[$script:council].where[$k]) } elseif ($CHC) { [uri]::EscapeDataString("ServiceStatus='In Service' AND Ownership='CCC'") } elseif ($k -eq 'wastewater') { [uri]::EscapeDataString("STATUS='OP' AND UNITTYPE LIKE 'PIPE%'") } else { '1%3D1' }
         $url = "$($pipeSvcs[$k])/query?geometry=$env&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects" +
                "&where=$where&outFields=*&returnGeometry=true&outSR=2193&f=json"
         try { $feats = @((Invoke-RestMethod $url).features) } catch { $out[$k] = 'lookup-failed'; continue }
@@ -136,7 +196,7 @@ function Get-Services($parcel) {
                             }
                         }
                     }
-                    if ($d -lt $best) { $best = $d; $dia = $(if ($f.attributes.SW_DIAMETER_MM) { $f.attributes.SW_DIAMETER_MM } elseif ($f.attributes.NominalDiameter) { $f.attributes.NominalDiameter } else { $f.attributes.NOM_DIA_MM }) }
+                    if ($d -lt $best) { $best = $d; $dia = $(if ($f.attributes.SW_DIAMETER_MM) { $f.attributes.SW_DIAMETER_MM } elseif ($f.attributes.NominalDiameter) { $f.attributes.NominalDiameter } elseif ($f.attributes.DIAMPIPE) { $f.attributes.DIAMPIPE } else { $f.attributes.NOM_DIA_MM }) }
                 }
             }
         }
@@ -241,7 +301,7 @@ function Get-Corners($ring) {
 function Get-RoadPolys($ring, [double]$pad, $lines) {
     $xs = $ring | ForEach-Object { $_[0] }; $ys = $ring | ForEach-Object { $_[1] }
     $env = '{0},{1},{2},{3}' -f (($xs | Measure-Object -Min).Minimum - $pad), (($ys | Measure-Object -Min).Minimum - $pad), (($xs | Measure-Object -Max).Maximum + $pad), (($ys | Measure-Object -Max).Maximum + $pad)
-    $url = $(if ($CHC) { "$ccc/DistrictPlan/FeatureServer/78/query?where=Type%3D'Transport'" } else { "$base/Unitary_Plan_Base_Zone/FeatureServer/0/query?where=ZONE%3D27" }) + "&geometry=$env&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outSR=2193&f=json"
+    $url = $(if ($CHC -and $script:council -ne 'ccc') { $linzRoads } elseif ($CHC) { "$ccc/DistrictPlan/FeatureServer/78/query?where=Type%3D'Transport'" } else { "$base/Unitary_Plan_Base_Zone/FeatureServer/0/query?where=ZONE%3D27" }) + "&geometry=$env&geometryType=esriGeometryEnvelope&inSR=2193&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outSR=2193&f=json"
     # Each road-zone polygon is tagged by the AT centrelines running inside it: only walkway/path lines = a path strip, not a road.
     $list = New-Object System.Collections.ArrayList
     try { foreach ($f in (Invoke-RestMethod $url).features) {
@@ -493,9 +553,19 @@ function Check-Site([string]$id, [string]$addr, [double]$lat, [double]$lon) {
             $zt = "$($zoneHits.first.Type)"
             switch -Regex ($zt) { '^Medium density residential' { 'Residential Medium Density' } '^High density residential' { 'Residential High Density' } default { $zt } }
         } else { 'none (road/unzoned?)' }
-        $fl = $floodLayers
+        # Not in the city plan: try Selwyn, then Waimakariri. Their flood, pipe and road layers then replace the city's for this site.
+        $script:council = 'ccc'; $script:floodLayers = $cccFlood; $script:pipeSvcs = $cccPipes; $floodNames = $null
+        if ($zoneHits.ok -and -not $zoneHits.count) {
+            $sz = Test-Layer "$sdc/PDP_Layers/FeatureServer/80" $lon $lat
+            if ($sz.count) { $script:council = 'sdc'; $zoneName = (Get-Culture).TextInfo.ToTitleCase(("$($sz.first.Zone_Name)" -replace '(?i)\s*zone\b', '').Trim().ToLower()) }
+            else { $wz = Test-Layer "$wdc/District_Plan_2025/District_Plan_Decisions_Zones_2025/MapServer/11" $lon $lat
+                if ($wz.count) { $script:council = 'wdc'; $code = "$($wz.first.NAME)"; $zoneName = if ($wdcZones[$code]) { $wdcZones[$code] } elseif ($code -match '^SPZ') { "Special Purpose $code" } else { $code } } }
+            if ($script:council -ne 'ccc') { $src = $councilSrc[$script:council]; $script:floodLayers = $src.flood; $script:pipeSvcs = $src.pipes; $floodNames = $src.names }
+        }
+        $fl = $script:floodLayers
         $chk = [ordered]@{ plain = Hit $fl.plain $lon $lat; prone = Hit $fl.prone $lon $lat; sensitive = Hit $fl.sensitive $lon $lat
-            sc = Hit "$ccc/DistrictPlan/FeatureServer/59" $lon $lat; hh = Hit "$ccc/DistrictPlanB/FeatureServer/32" $lon $lat }
+            sc = $false; hh = $(if ($script:council -eq 'sdc') { Hit "$sdc/PDP_Layers/FeatureServer/16" $lon $lat } elseif ($script:council -eq 'wdc') { $null } else { Hit "$ccc/DistrictPlanB/FeatureServer/32" $lon $lat }) }
+        if ($script:council -eq 'ccc') { $chk.sc = Hit "$ccc/DistrictPlan/FeatureServer/59" $lon $lat }
     } else {
         $zoneHits = Test-Layer 'Unitary_Plan_Base_Zone' $lon $lat
         $zoneName = if (-not $zoneHits.ok) { 'lookup-failed' } elseif ($zoneHits.count) { $zones["$($zoneHits.first.ZONE)"] } else { 'none (road/unzoned?)' }
@@ -510,6 +580,8 @@ function Check-Site([string]$id, [string]$addr, [double]$lat, [double]$lon) {
         lat               = $lat
         lon               = $lon
         zone              = $zoneName
+        council           = $(if ($CHC) { $script:council } else { $null })
+        flood_names       = $(if ($CHC) { $floodNames } else { $null })
         flood_plain       = $chk.plain
         flood_prone       = $chk.prone
         flood_sensitive   = $chk.sensitive

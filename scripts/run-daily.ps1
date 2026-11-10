@@ -187,7 +187,7 @@ Log "Site checks: $($todo.Count) queued today ($([math]::Round(((Get-Date) - $st
 # Flood: worst layer that touches the whole parcel (flood_site, % of site area), else the old address-point test.
 function FloodText($c) {
     $fs = $c.flood_site
-    $names = if ($CHC) { 'High flood hazard', 'Flood management area', 'Fixed floor level area' } else { 'Flood plain', 'Flood prone', 'Flood sensitive' }
+    $names = if (@($c.flood_names).Count -eq 3) { @($c.flood_names) } elseif ($CHC) { 'High flood hazard', 'Flood management area', 'Fixed floor level area' } else { 'Flood plain', 'Flood prone', 'Flood sensitive' }
     foreach ($k in @(@('plain', $names[0], $c.flood_plain), @('prone', $names[1], $c.flood_prone), @('sensitive', $names[2], $c.flood_sensitive))) {
         $pct = if ($fs -and $fs -isnot [string] -and "$($fs.($k[0]))" -match '^\d+$') { [int]$fs.($k[0]) } else { $null }
         if ($pct -gt 0) { return "$($k[1]) ($pct% of site)" }
@@ -218,8 +218,9 @@ foreach ($p in $cands) {
         elseif ($lines.Count -gt 1) { $flags += 'Title includes a share of a shared lot (likely a common driveway): check rights and costs' }
     } else { $flags += 'Title not found in LINZ data: confirm with agent' }
     # Canterbury outside Christchurch City: the council zone layers only cover the city, so the zone isn't known.
-    $outside = $CHC -and $p.district -and $p.district -ne 'Christchurch City'
-    if ($outside) { $c.zone = 'Not checked (outside Christchurch City)'; $p.zone = $c.zone; $flags += "Outside Christchurch City ($($p.district)): zone, flood and pipes not checked; see the district council's plan maps" }
+    # Council layers are checked for Christchurch City, Selwyn and Waimakariri; the rest of Canterbury isn't covered yet.
+    $outside = $CHC -and $p.district -and $p.district -notmatch '^(Christchurch City|Selwyn|Waimakariri)'
+    if ($outside) { $c.zone = 'Not checked (council maps not covered)'; $p.zone = $c.zone; $flags += "$($p.district): zone, flood and pipes not checked yet; see the district council's plan maps" }
     elseif ("$($c.zone)" -notmatch 'Mixed Housing|Terrace Housing') { $fails += "Zone: $($c.zone)" }
     $sec = @($c.schools.secondary | Where-Object { $_ -and $_.name -and $_.authority -notmatch 'Integrated' })
     $best = $sec | Sort-Object { - $bandRank["$($_.band)"] } | Select-Object -First 1
@@ -227,7 +228,7 @@ foreach ($p in $cands) {
     if ($best -and $best.band -eq 'Low') { $fails += "School: $names (NCEA L3 $($best.ncea_l3_pct)%)" }
     $p | Add-Member rule_fails @($fails) -Force
     $p | Add-Member school ([ordered]@{ name = $(if ($names) { $names } else { 'No state secondary zone' }); band = $(if ($best) { $best.band } else { 'Unknown' }) }) -Force
-    $p | Add-Member flood $(if ($outside) { 'Not checked (outside Christchurch City)' } else { FloodText $c }) -Force
+    $p | Add-Member flood $(if ($outside) { 'Not checked (council maps not covered)' } else { FloodText $c }) -Force
     if ($c.special_character -eq $true) { $flags += $(if ($CHC) { 'Residential Character Area: demolition and new building need consent' } else { 'Special Character Area overlay: demolition needs consent' }) }
     if ($c.historic_heritage -eq $true) { $flags += 'Heritage setting or item on the site: check the District Plan schedule' }
     $ww = $c.services.wastewater; if ($ww -isnot [string] -and ($null -eq $ww.distance_m -or $ww.distance_m -gt 50)) { $flags += 'Public wastewater more than 50 m away: may need an extension or easement' }
