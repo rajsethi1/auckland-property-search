@@ -134,6 +134,11 @@ h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 1.15; le
 /* isolation keeps Leaflet's high z-index panes inside the map, so the filter panel and menus sit above it. */
 .mapcol { position: relative; border-left: 1px solid var(--line); isolation: isolate; z-index: 0 }
 .mapcol .map { position: absolute; inset: 0 }
+.leaflet-container.mapfull { position: fixed !important; inset: 0 !important; width: auto !important; height: auto !important; z-index: 5000; border-radius: 0 !important; margin: 0 !important }
+body.mapfull-on { overflow: hidden }
+body.mapfull-on :has(.mapfull) { z-index: auto !important; transform: none !important; isolation: auto !important }
+.fsbtn button { width: 34px; height: 34px; display: grid; place-items: center; background: #fff; color: #222; border: 0; border-radius: 4px; cursor: pointer; padding: 0 }
+.fsbtn button:hover { background: #f4f4f4 }
 .more { display: block; margin: 22px auto 0 }
 .empty { text-align: center; padding: 50px 20px; color: var(--muted) }
 .viewtoggle { display: none }
@@ -312,6 +317,6 @@ footer.site p { margin: 6px 0; max-width: 900px }
 <div class="savemenu" id="savemenu" role="dialog" aria-label="Save to a list" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

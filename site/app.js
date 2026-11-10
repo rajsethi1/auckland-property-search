@@ -71,8 +71,10 @@ function match(p, f = F, q = Q) {
   if (f.label.length && !f.label.includes(p.label)) return false;
   if (f.zone.length && !f.zone.includes(zoneShort(p.zone))) return false;
   if (f.title.length && !f.title.includes(p.title || "Unknown")) return false;
-  if (f.flood === "none" && p.flood) return false;
-  if (f.flood === "yes" && !p.flood) return false;
+  const fl = /^Not checked/.test(p.flood || "") ? null : p.flood;   // unknown flood matches neither choice
+  if (f.flood && fl === null && p.flood) return false;
+  if (f.flood === "none" && fl) return false;
+  if (f.flood === "yes" && !fl) return false;
   const pl = p.power_lines?.level;
   if (f.power === "none" && pl && pl !== "None nearby") return false;
   if (f.power === "near" && !/Over|corridor|Within/.test(pl || "")) return false;
@@ -117,7 +119,7 @@ const opts = (list, cur) => list.map(([v, t]) => `<option value="${esc(v)}"${Str
 // ---------- Cards ----------
 function chips(p) {
   const c = [];
-  if (/plain|prone|hazard|management/i.test(p.flood || "")) c.push(`<span class="chip blue">${esc(p.flood.replace(/ \(.*\)/, ""))}</span>`);
+  if (/plain|prone|hazard|management|assessment|inundation/i.test(p.flood || "")) c.push(`<span class="chip blue">${esc(p.flood.replace(/ \(.*\)/, ""))}</span>`);
   if ((p.transport?.train?.distance_m ?? 9e9) <= 1200) c.push(`<span class="chip accent">Train ${dist(p.transport.train.distance_m)}</span>`);
   if (topZones(p).length) c.push(`<span class="chip good">Top school zone</span>`);
   [].concat(p.sale_type || []).filter(t => /Mortgagee|Estate|Private/.test(t)).forEach(t => c.push(`<span class="chip bad">${esc(t)}</span>`));
@@ -150,10 +152,13 @@ const AC = "https://services1.arcgis.com/n4yPwebTjJCmXB6W/arcgis/rest/services/"
 const TITLES = "https://services.arcgis.com/xdsHIIxuCWByZiCB/arcgis/rest/services/LINZ_NZ_Property_Titles/FeatureServer/0";
 const CROSL = "https://services.arcgis.com/xdsHIIxuCWByZiCB/arcgis/rest/services/CRoSL_Layer_N/FeatureServer/0";
 const CCC = "https://gis.ccc.govt.nz/server/rest/services/OpenData/";
+const SDC = "https://services6.arcgis.com/Aa15joGcFNhhKYEJ/arcgis/rest/services/", WDC = "https://gisservices.waimakariri.govt.nz/arcgis/rest/services/";
 const SCHOOL_ZONES ="https://services.arcgis.com/XTtANUDT8Va4DLwI/arcgis/rest/services/NZ_School_Zone_boundaries/FeatureServer/0";
 const dotColor = l => ({ "Strong": "#1f7a4c", "Worth a look": "#c08000", "Marginal": "#8a9592" }[l] || "#75807d");
 const zoneColor = n => /Single House/.test(n) ? "#f3e2a9" : /Suburban/.test(n) ? "#f2c45a" : /Mixed Housing Urban/.test(n) ? "#e8964a" : /Terrace/.test(n) ? "#c0562f" : /Business|Centre/.test(n) ? "#8e6ac8" : /Rural|Countryside/.test(n) ? "#8fbf6b" : /Open Space/.test(n) ? "#4f9a5b" : /Large Lot/.test(n) ? "#e9dfc3" : "#9aa5a2";
 let maps = [];
+const FS_IN = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>`;
+const FS_OUT = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>`;
 function makeMap(el, { aerialFirst = false, floodOn = true } = {}) {
   if (!window.L || !L.esri) { el.innerHTML = `<div class="empty">The map couldn't load.</div>`; return null; }
   const map = L.map(el, { preferCanvas: true, zoomControl: true, maxZoom: 21 }).setView(C().center, C().zoom);
@@ -167,12 +172,20 @@ function makeMap(el, { aerialFirst = false, floodOn = true } = {}) {
   zoning.bindPopup(l => esc(S.zones[String(l.feature.properties.ZONE)] || "Zone"));
   // Christchurch: the City Council's District Plan layers, under the same names so the quick buttons work for both cities.
   const ccc = (path, color, minZoom, where) => L.esri.featureLayer({ url: CCC + path, minZoom, where, simplifyFactor: 0.5, precision: 6, interactive: false, style: () => ({ color, weight: 1, fillColor: color, fillOpacity: 0.35 }) });
+  // Selwyn and Waimakariri councils' layers join the city's under the same names (one layer group each).
+  const dl = (url, color, minZoom, where) => L.esri.featureLayer({ url, minZoom, where, simplifyFactor: 0.5, precision: 6, interactive: false, style: () => ({ color, weight: 1, fillColor: color, fillOpacity: 0.35 }) });
+  const grp = (...ls) => L.layerGroup(ls);
+  const nzc = t => /medium density|^MRZ/i.test(t) ? "#e8964a" : /general residential|^GRZ/i.test(t) ? "#f2c45a" : /residential|settlement|^(LLRZ|LRZ|SETZ)$/i.test(t) ? "#f3e2a9"
+    : /centre|mixed use|retail|^(TCZ|LCZ|NCZ|MUZ|LFRZ)$/i.test(t) ? "#8e6ac8" : /rural|^(GRUZ|RLZ)$/i.test(t) ? "#cfe3b4" : /industrial|^(GIZ|HIZ|LIZ)$/i.test(t) ? "#9e9e9e" : zoneColor(t);
+  const dz = (url, field) => L.esri.featureLayer({ url, minZoom: 15, simplifyFactor: 0.5, precision: 6, fields: ["OBJECTID", field],
+    style: f => { const c = nzc(String(f.properties[field] || "")); return { color: c, weight: 0.6, fillColor: c, fillOpacity: 0.3 }; } }).bindPopup(l => esc(l.feature.properties[field] || "Zone"));
   const overlays = CITY === "chc" ? {
-    "Flood plains": ccc("DistrictPlanB/FeatureServer/25", "#1f6fd1", 14), "Flood prone areas": ccc("DistrictPlanB/FeatureServer/30", "#4fa3e0", 14),
-    "Flood sensitive areas": ccc("DistrictPlan/FeatureServer/89", "#9ccff0", 14),
-    "Zoning (Unitary Plan)": L.esri.featureLayer({ url: CCC + "DistrictPlan/FeatureServer/78", minZoom: 15, where: "RemovedByPlanChangeIdentifier IS NULL", simplifyFactor: 0.5, precision: 6, fields: ["DPZoneID", "Type"],
+    "Flood plains": grp(ccc("DistrictPlanB/FeatureServer/25", "#1f6fd1", 14), dl(SDC + "PDP_Layers/FeatureServer/8", "#1f6fd1", 14), dl(WDC + "District_Plan_2021/Urban_Flood_Assessment_Area/MapServer/36", "#1f6fd1", 14)),
+    "Flood prone areas": grp(ccc("DistrictPlanB/FeatureServer/30", "#4fa3e0", 14), dl(SDC + "PDP_Layers/FeatureServer/9", "#4fa3e0", 14), dl(WDC + "District_Plan_2021/Non_Urban_Flood_Assessment/MapServer/0", "#4fa3e0", 14)),
+    "Flood sensitive areas": grp(ccc("DistrictPlan/FeatureServer/89", "#9ccff0", 14), dl(SDC + "PDP_Layers/FeatureServer/6", "#9ccff0", 14), dl(WDC + "District_Plan_2021/Urban_Flood_Assessment_Area/MapServer/0", "#9ccff0", 14)),
+    "Zoning (Unitary Plan)": grp(dz(SDC + "PDP_Layers/FeatureServer/80", "Zone_Name"), dz(WDC + "District_Plan_2025/District_Plan_Decisions_Zones_2025/MapServer/11", "NAME"), L.esri.featureLayer({ url: CCC + "DistrictPlan/FeatureServer/78", minZoom: 15, where: "RemovedByPlanChangeIdentifier IS NULL", simplifyFactor: 0.5, precision: 6, fields: ["DPZoneID", "Type"],
       style: f => { const t = String(f.properties.Type || ""), c = /High density/i.test(t) ? "#c0562f" : /Medium density|Medium Density/.test(t) ? "#e8964a" : /Density Transition/.test(t) ? "#f2c45a" : /Residential/.test(t) ? "#f3e2a9" : /Transport/.test(t) ? "#d9d9d9" : zoneColor(t); return { color: c, weight: 0.6, fillColor: c, fillOpacity: 0.3 }; } })
-      .bindPopup(l => esc(l.feature.properties.Type || "Zone")),
+      .bindPopup(l => esc(l.feature.properties.Type || "Zone"))),
     "Special Character Areas": ccc("DistrictPlan/FeatureServer/59", "#a05ac8", 14),
     "Historic heritage": ccc("DistrictPlanB/FeatureServer/32", "#b03a2e", 15)
   } : {
@@ -199,10 +212,15 @@ function makeMap(el, { aerialFirst = false, floodOn = true } = {}) {
   const pipeTip = (l, what, dia) => `<b>${what}</b>${dia && dia < 990 ? `<br>${dia} mm` : ""}`;
   if (CITY === "chc") {
     const cw = "ServiceStatus='In Service' AND Ownership='CCC'";
-    overlays["Stormwater pipes"] = L.esri.featureLayer({ url: CCC + "StormWater/FeatureServer/1", where: cw, minZoom: 16, precision: 6, fields: ["SwPipeID", "NominalDiameter"],
-      style: () => ({ color: "#1f9ad6", weight: 3, opacity: 0.9 }) }).bindPopup(l => pipeTip(l, "Stormwater pipe", l.feature.properties.NominalDiameter));
-    overlays["Wastewater pipes"] = L.esri.featureLayer({ url: CCC + "WasteWater/FeatureServer/1", where: cw, minZoom: 16, precision: 6, fields: ["WwPipeID", "NominalDiameter"],
-      style: () => ({ color: "#8a5a2b", weight: 3, opacity: 0.9, dashArray: "6 4" }) }).bindPopup(l => pipeTip(l, "Wastewater pipe", l.feature.properties.NominalDiameter));
+    const sw = { color: "#1f9ad6", weight: 3, opacity: 0.9 }, ww = { color: "#8a5a2b", weight: 3, opacity: 0.9, dashArray: "6 4" };
+    const dp = (url, where, dia, st, what) => L.esri.featureLayer({ url, where, minZoom: 16, precision: 6, fields: dia ? ["OBJECTID", dia] : ["OBJECTID"], style: () => st })
+      .bindPopup(l => pipeTip(l, what, dia ? l.feature.properties[dia] : null));
+    overlays["Stormwater pipes"] = grp(L.esri.featureLayer({ url: CCC + "StormWater/FeatureServer/1", where: cw, minZoom: 16, precision: 6, fields: ["SwPipeID", "NominalDiameter"],
+      style: () => sw }).bindPopup(l => pipeTip(l, "Stormwater pipe", l.feature.properties.NominalDiameter)),
+      dp(SDC + "Stormwater_Network/FeatureServer/1", "STATUS='In Service'", "DIAMPIPE", sw, "Stormwater pipe"), dp(WDC + "3Waters/Assets_Stormwater/MapServer/12", "1=1", "", sw, "Stormwater pipe"));
+    overlays["Wastewater pipes"] = grp(L.esri.featureLayer({ url: CCC + "WasteWater/FeatureServer/1", where: cw, minZoom: 16, precision: 6, fields: ["WwPipeID", "NominalDiameter"],
+      style: () => ww }).bindPopup(l => pipeTip(l, "Wastewater pipe", l.feature.properties.NominalDiameter)),
+      dp(SDC + "Sewer_Network/FeatureServer/2", "STATUS='In Service' AND AMS2<>'Lateral'", "DIAMPIPE", ww, "Wastewater pipe"), dp(WDC + "3Waters/Assets_Wastewater/MapServer/12", "1=1", "", ww, "Wastewater pipe"));
   } else {
   overlays["Stormwater pipes"] = L.esri.featureLayer({ url: AC + "Stormwater_Pipe/FeatureServer/0", minZoom: 16, precision: 6, fields: ["OBJECTID", "SW_DIAMETER_MM"],
     style: () => ({ color: "#1f9ad6", weight: 3, opacity: 0.9 }) }).bindPopup(l => pipeTip(l, "Stormwater pipe", l.feature.properties.SW_DIAMETER_MM));
@@ -248,6 +266,25 @@ function makeMap(el, { aerialFirst = false, floodOn = true } = {}) {
   };
   qc.addTo(map);
   map.on("overlayadd overlayremove", () => $$(".mapchips button", map.getContainer()).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.l.split("|").every(nm => map.hasLayer(overlays[nm]))))));
+  // Full-screen toggle: the browser's own full screen where allowed, else the map fills the window (iPhone).
+  const fs = L.control({ position: "topright" }), box = map.getContainer();
+  const isFull = () => box.classList.contains("mapfull");
+  const setFull = on => {
+    if (on === isFull()) return;
+    box.classList.toggle("mapfull", on); document.body.classList.toggle("mapfull-on", on);
+    try { if (on && box.requestFullscreen) box.requestFullscreen().catch(() => {}); else if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {}); } catch (e) { }
+    const b = fs.getContainer()?.querySelector("button"); if (b) { b.title = on ? "Exit full screen" : "Full screen"; b.setAttribute("aria-label", b.title); b.innerHTML = on ? FS_OUT : FS_IN; }
+    [120, 450].forEach(ms => setTimeout(() => map.invalidateSize(), ms));
+  };
+  fs.onAdd = () => {
+    const d = L.DomUtil.create("div", "leaflet-bar fsbtn"); L.DomEvent.disableClickPropagation(d);
+    d.innerHTML = `<button type="button" title="Full screen" aria-label="Full screen">${FS_IN}</button>`;
+    d.firstChild.addEventListener("click", () => setFull(!isFull()));
+    return d;
+  };
+  fs.addTo(map);
+  document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && isFull()) setFull(false); else map.invalidateSize(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && isFull()) setFull(false); });
   L.control.scale({ imperial: false }).addTo(map);
   const note = L.control({ position: "bottomleft" });
   note.onAdd = () => L.DomUtil.create("div", "zoomnote");
@@ -297,7 +334,7 @@ let ME = null;
 // The main housing zones first (the ones most sites are in), then other residential zones; business, rural, open space
 // and other non-housing zones are tucked under "Other zones".
 const MAIN_ZONES = { akl: ["Mixed Housing Suburban", "Mixed Housing Urban", "Terrace Housing (THAB)"],
-  chc: ["Residential Suburban", "Residential Suburban Density Transition", "Residential Medium Density", "Residential High Density"] };
+  chc: ["Residential Suburban", "Residential Suburban Density Transition", "Residential Medium Density", "Residential High Density", "Medium Density Residential", "General Residential"] };
 const isHousingZone = z => /Residential|House|Housing|Large Lot|Settlement|Neighbourhood|Hills|Character|Papakāinga|Papakainga/i.test(z) && !/Business|^Rural|Open Space|Special Purpose|Industrial|Commercial/i.test(z);
 function zoneGroups(mseg) {
   const all = [...new Set(S.sites.map(p => zoneShort(p.zone)))].sort();
