@@ -60,7 +60,7 @@ $linzDone = @{}; foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -Err
 $onList = @{}; foreach ($x in @($prev.shortlist)) { if ($x.id) { $onList["$($x.id)"] = 1 } }
 # Also the old code's drops ('rejected', 'school_reject'), school-zone drops, and 'shortlisted' sites no longer on the list.
 $recheck = @{}; foreach ($k in @($seen.Keys)) { $o = $seen[$k].outcome
-    if (-not $linzDone[$k] -and ($o -in 'listed_fails_rules', 'rejected', 'school_reject', 'outside_top_zone' -or ($o -eq 'shortlisted' -and $prev -and -not $onList[$k]))) { $seen[$k].outcome = 'candidate'; $recheck[$k] = 1 } }
+    if (-not $linzDone[$k] -and ($o -in 'listed_fails_rules', 'rejected', 'school_reject', 'outside_top_zone', 'candidate' -or ($o -eq 'shortlisted' -and $prev -and -not $onList[$k]))) { $seen[$k].outcome = 'candidate'; $recheck[$k] = 1 } }
 $log = New-Object System.Collections.ArrayList
 function Log($s) { [void]$log.Add($s) }
 
@@ -117,6 +117,8 @@ $inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -o
 $zoneOnly = @($found.Keys | Where-Object { $s = $found[$_]; $inArea -notcontains $_ -and ($zoneSubs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0 -and $s -notmatch '^\d+-\d+-|^lot-' })
 # 'candidate' = passed the first screen but its site checks never finished (a stopped run): screen it again.
 if ($SkipSearch) { foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'candidate' -and -not $found.Contains($k)) { $found[$k] = ("$($seen[$k].url)" -split '/')[-1] } } }
+# Re-checks are mostly older listings the newest-first search stops before reaching, so add them directly (off-market ones are dropped below).
+foreach ($k in @($recheck.Keys)) { if (-not $found.Contains($k) -and $seen[$k].url) { $found[$k] = ("$($seen[$k].url)" -split '/')[-1] } }
 $inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -or ($subs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0) })
 $newIds = @(@($inArea) + @($zoneOnly) | Where-Object { -not $seen.ContainsKey($_) -or $seen[$_].outcome -eq 'candidate' })
 # Brand-new listings first, then re-checks of title failures (most likely read from a wrong map pin), then other re-checks.
@@ -139,6 +141,7 @@ $maxNew = if ($cfg.max_new_per_run) { [int]$cfg.max_new_per_run } else { 300 }
 foreach ($id in $newIds) {
     if ($cands.Count -ge $maxNew -or (MinLeft) -lt 120) { $deferred++; continue }   # the rest are checked on the next runs (not marked seen)
     $l = (GetJson "$API/listings/$id").data.attributes; if (-not $l) { continue }
+    if ($recheck[$id] -and "$($l.'listing-status')" -ne 'active') { $seen[$id].outcome = 'off_market'; continue }
     $desc = (("$($l.description)") -replace '<[^>]+>', ' ' -replace '\s+', ' ')
     $land = [double]$l.'land-area'; $beds = [int]$l.'bedroom-count'; $sub = "$($l.address.suburb)"
     # Listing-only checks first: skip the property lookup for sites that fail on land, beds or type.
