@@ -59,7 +59,7 @@ $prev = if ($prevFile) { ReadJson $prevFile.FullName } else { $null }
 $linzDone = @{}; foreach ($cf in @(Get-ChildItem "$root\site-checks*.jsonl" -ErrorAction SilentlyContinue)) { foreach ($ln in [IO.File]::ReadAllLines($cf.FullName)) { if ($ln -match '"addr_check":2' -and $ln -match '^\{"id":"([^"]+)"') { $linzDone[$Matches[1]] = 1 } } }
 $onList = @{}; foreach ($x in @($prev.shortlist)) { if ($x.id) { $onList["$($x.id)"] = 1 } }
 # Also the old code's drops ('rejected', 'school_reject'), school-zone drops, and 'shortlisted' sites no longer on the list.
-$recheck = @{}; foreach ($k in @($seen.Keys)) { $o = $seen[$k].outcome
+$recheck = @{}; $started2 = @{}; foreach ($k in @($seen.Keys)) { $o = $seen[$k].outcome; if ($o -eq 'candidate') { $started2[$k] = 1 }
     if (-not $linzDone[$k] -and ($o -in 'listed_fails_rules', 'rejected', 'school_reject', 'outside_top_zone', 'candidate' -or ($o -eq 'shortlisted' -and $prev -and -not $onList[$k]))) { $seen[$k].outcome = 'candidate'; $recheck[$k] = 1 } }
 $log = New-Object System.Collections.ArrayList
 function Log($s) { [void]$log.Add($s) }
@@ -121,8 +121,8 @@ if ($SkipSearch) { foreach ($k in @($seen.Keys)) { if ($seen[$k].outcome -eq 'ca
 foreach ($k in @($recheck.Keys)) { if (-not $found.Contains($k) -and $seen[$k].url) { $found[$k] = ("$($seen[$k].url)" -split '/')[-1] } }
 $inArea = @($found.Keys | Where-Object { $s = $found[$_]; ($cfg.auckland_wide -or ($subs | Where-Object { $s.EndsWith("-$_") }).Count -gt 0) })
 $newIds = @(@($inArea) + @($zoneOnly) | Where-Object { -not $seen.ContainsKey($_) -or $seen[$_].outcome -eq 'candidate' })
-# Brand-new listings first, then re-checks of title failures (most likely read from a wrong map pin), then other re-checks.
-$newIds = @(@($newIds | Where-Object { -not $recheck[$_] }) + @($newIds | Where-Object { $recheck[$_] -and "$($seen[$_].reason)" -match '(^|; )Title:' }) + @($newIds | Where-Object { $recheck[$_] -and "$($seen[$_].reason)" -notmatch '(^|; )Title:' }))
+# Brand-new listings first, then re-checks already started (their record no longer has the old reason), then title failures (most likely read from a wrong map pin), then other re-checks.
+$newIds = @(@($newIds | Where-Object { -not $recheck[$_] }) + @($newIds | Where-Object { $recheck[$_] -and $started2[$_] }) + @($newIds | Where-Object { $recheck[$_] -and -not $started2[$_] -and "$($seen[$_].reason)" -match '(^|; )Title:' }) + @($newIds | Where-Object { $recheck[$_] -and -not $started2[$_] -and "$($seen[$_].reason)" -notmatch '(^|; )Title:' }))
 Log "Search: $($found.Count) listings, $($inArea.Count) in $(if ($cfg.auckland_wide) { $cityName } else { 'your suburbs' }), $($zoneOnly.Count) in top-school-zone suburbs, $($newIds.Count) new"
 
 # ---------- 3. Facts for new listings + pre-screen ----------
@@ -138,6 +138,8 @@ $ROOF = [ordered]@{ 'Tile (concrete/clay)' = '\b(tile roof|tiled roof|(brick|blo
 $cands = @(); $screenedOut = 0; $deferred = 0
 # Site checks take ~20 s each, so each run checks at most max_new_per_run new listings (newest first) to stay inside the time limit.
 $maxNew = if ($cfg.max_new_per_run) { [int]$cfg.max_new_per_run } else { 300 }
+# One-off backlog of re-checks (see $recheck): allow it all in one run; the time limit below still stops checks safely.
+$maxNew = [math]::Max($maxNew, 300 + $recheck.Count)
 foreach ($id in $newIds) {
     if ($cands.Count -ge $maxNew -or (MinLeft) -lt 120) { $deferred++; continue }   # the rest are checked on the next runs (not marked seen)
     $l = (GetJson "$API/listings/$id").data.attributes; if (-not $l) { continue }
