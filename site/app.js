@@ -43,7 +43,7 @@ const C = () => CITIES[CITY];
 
 // ---------- State ----------
 const S = { data: null, sites: [], byId: new Map(), subs: {}, subDistrict: new Map(), zones: {}, saved: new Map(), lists: [], api: false };
-const DEF = { lmin: "", lmax: "", bmin: "", ptype: [], ymin: "", pmin: "", pmax: "", label: [], zone: [], title: [], flood: "", power: "", sh: "", sec: "", pri: "", pos: "", train: false, isNew: false, topzone: false, list: "", subs: [] };
+const DEF = { lmin: "", lmax: "", bmin: "", ptype: [], ymin: "", pmin: "", pmax: "", label: [], zone: [], title: [], flood: "", power: "", sh: "", sec: "", pri: "", pos: "", train: false, isNew: false, topzone: false, list: "", subs: [], dom: "", checks: "" };
 // Zone, property type, rating and title allow several choices (arrays); older saved filters held one string.
 const MULTI = ["zone", "ptype", "label", "title"];
 const normF = f => { const o = Object.assign({}, DEF, f || {}); MULTI.concat(["subs"]).forEach(key => { const v = o[key]; o[key] = Array.isArray(v) ? v.map(String) : v ? [String(v)] : []; }); return o; };
@@ -56,6 +56,9 @@ const topZones = p => { const tz = S.data?.top_zones || {}; return [].concat(p.s
 const listsOf = id => S.saved.get(String(id)) || [];
 const allLists = () => S.lists.length ? S.lists : [{ id: "main", name: "Shortlist", at: "" }];
 const listName = id => (allLists().find(l => l.id === id) || { name: "Shortlist" }).name;
+// Time on market, counted to the day of the data: from on_market_since (earlier listings of a relisted property) or the listing date.
+const domOf = p => { const s = p.on_market_since || p.listed; if (!s) return null; const ref = S.data?.run_date ? new Date(S.data.run_date) : new Date(); const d = Math.round((ref - new Date(s)) / 864e5); return isFinite(d) && d >= 0 ? d : null; };
+const domText = d => d == null ? "Unknown" : d < 60 ? d + (d === 1 ? " day" : " days") : Math.floor(d / 30.44) + " months";
 
 function match(p, f = F, q = Q) {
   if (q) return (p.address + " " + p.suburb).toLowerCase().replace(/[,\s]+/g, " ").includes(q.toLowerCase().replace(/[,\s]+/g, " ").trim());
@@ -88,6 +91,9 @@ function match(p, f = F, q = Q) {
   if (f.train && (p.transport?.train?.distance_m ?? 9e9) > 1200) return false;
   if (f.isNew && p.status !== "new") return false;
   if (f.topzone && !topZones(p).length) return false;
+  if (f.dom) { const d = domOf(p); if (d == null || (f.dom === "lt3" ? d >= 91 : f.dom === "3to6" ? d < 91 || d > 182 : d <= 182)) return false; }
+  if (f.checks === "done" && p.checks_pending) return false;
+  if (f.checks === "pending" && !p.checks_pending) return false;
   if (f.list === "any" ? !S.saved.has(String(p.id)) : f.list && !listsOf(p.id).includes(f.list)) return false;
   if (f.subs.length && !f.subs.includes(norm(p.suburb))) return false;
   return true;
@@ -100,7 +106,9 @@ const SORTS = {
   yield: ["Highest rental yield", (a, b) => yieldOf(b) - yieldOf(a)],
   land: ["Biggest land", (a, b) => (b.land_m2 || 0) - (a.land_m2 || 0)],
   cbd: ["Closest to the CBD", (a, b) => (a.transport?.cbd_km ?? 99) - (b.transport?.cbd_km ?? 99)],
-  growth: ["Future growth", (a, b) => (b.growth?.outlook_5y_pct ?? -99) - (a.growth?.outlook_5y_pct ?? -99)]
+  growth: ["Future growth", (a, b) => (b.growth?.outlook_5y_pct ?? -99) - (a.growth?.outlook_5y_pct ?? -99)],
+  domNew: ["Newest listings", (a, b) => (domOf(a) ?? 9e9) - (domOf(b) ?? 9e9)],
+  domOld: ["Longest on the market", (a, b) => (domOf(b) ?? -1) - (domOf(a) ?? -1)]
 };
 const results = () => S.sites.filter(p => match(p)).sort(SORTS[SORT]?.[1] || SORTS.score[1]);
 const activeCount = () => Object.keys(DEF).filter(key => Array.isArray(DEF[key]) ? (F[key] || []).length : F[key] !== DEF[key]).length;
@@ -122,6 +130,8 @@ function chips(p) {
   if (/plain|prone|hazard|management|assessment|inundation/i.test(p.flood || "")) c.push(`<span class="chip blue">${esc(p.flood.replace(/ \(.*\)/, ""))}</span>`);
   if ((p.transport?.train?.distance_m ?? 9e9) <= 1200) c.push(`<span class="chip accent">Train ${dist(p.transport.train.distance_m)}</span>`);
   if (topZones(p).length) c.push(`<span class="chip good">Top school zone</span>`);
+  if (p.checks_pending) c.push(`<span class="chip">Checks pending</span>`);
+  if ((domOf(p) ?? 0) > 182) c.push(`<span class="chip warn">6+ months on market</span>`);
   [].concat(p.sale_type || []).filter(t => /Mortgagee|Estate|Private/.test(t)).forEach(t => c.push(`<span class="chip bad">${esc(t)}</span>`));
   return c.slice(0, 4).join("");
 }
@@ -141,7 +151,7 @@ function card(p, variant = "") {
     <a class="cbody" href="${href}">
       <div class="cprice">${k(priceOf(p))} <small>expected · ${esc(p.price_text || "price not stated")}</small></div>
       <div class="caddr">${esc(street(p))}</div><div class="csub">${esc(p.suburb)}</div>
-      <div class="cfacts"><span><b>${p.land_m2 ? Math.round(p.land_m2) + " m²" : "—"}</b> land</span><span><b>${p.beds ?? "–"}</b> bd</span>${rentOf(p) ? `<span><b>$${rentOf(p)}</b>/wk · <b>${yieldOf(p).toFixed(1)}%</b> yield</span>` : ""}<span>${esc(zoneShort(p.zone))}</span></div>
+      <div class="cfacts"><span><b>${p.land_m2 ? Math.round(p.land_m2) + " m²" : "—"}</b> land</span><span><b>${p.beds ?? "–"}</b> bd</span>${rentOf(p) ? `<span><b>$${rentOf(p)}</b>/wk · <b>${yieldOf(p).toFixed(1)}%</b> yield</span>` : ""}<span>${esc(zoneShort(p.zone))}</span>${domOf(p) != null ? `<span>On market: <b>${domText(domOf(p))}</b></span>` : ""}</div>
       <div class="cchips">${chips(p)}</div>
     </a>
   </article>`;
@@ -627,6 +637,8 @@ function openDrawer() {
     <div class="fgroup"><h3>Rental yield</h3>${seg("ymin", [["", "Any"], ["3", "3%+"], ["3.5", "3.5%+"], ["4", "4%+"], ["5", "5%+"]])}</div>
     <div class="fgroup"><h3>Handy filters</h3><div class="seg" data-tg>
       ${CITY === "akl" ? `<button type="button" data-t="train" aria-pressed="${F.train}">Near a train (1.2 km)</button><button type="button" data-t="topzone" aria-pressed="${F.topzone}">Top-10 school zone</button>` : ""}<button type="button" data-t="isNew" aria-pressed="${F.isNew}">New today</button></div></div>
+    <div class="fgroup"><h3>Days on market</h3>${seg("dom", [["", "Any"], ["lt3", "Under 3 months"], ["3to6", "3–6 months"], ["gt6", "Over 6 months"]])}</div>
+    <div class="fgroup"><h3>Site checks</h3>${seg("checks", [["", "Any"], ["done", "Checked"], ["pending", "Checks pending"]])}</div>
     <div class="fgroup"><h3>Flood</h3>${seg("flood", [["", "Any"], ["none", "No flood overlay"], ["yes", "Flood overlay"]])}</div>
     <div class="fgroup"><h3>Power lines</h3>${seg("power", [["", "Any"], ["none", "None nearby"], ["near", "Near or over site"]])}</div>
     <div class="fgroup"><h3>Land and title</h3><div class="row2"><label class="f">Position${sel("pos", [["", "Any"], ["front", "Road front"], ["corner", "Corner site"], ["rear", "Rear site"]])}</label></div><h3 style="margin-top:12px">Title</h3>${mseg("title", titles.map(t => [t, t]))}</div>
@@ -711,8 +723,9 @@ function sitePage(id) {
         <div><span>Land</span><b class="num">${p.land_m2 ? Math.round(p.land_m2) + " m²" : "—"}</b></div><div><span>Floor</span><b class="num">${p.floor_m2 ? p.floor_m2 + " m²" : "—"}</b></div>
         <div><span>Beds / baths</span><b>${p.beds ?? "–"} / ${p.baths ?? "–"}</b></div><div><span>Built</span><b>${esc(p.decade_built || "Unknown")}</b></div>
         <div><span>Zone</span><b>${esc(zoneShort(p.zone))}</b></div><div><span>Title</span><b>${esc(p.title || "Unknown")}</b></div>
-        <div><span>Flood</span><b style="color:${p.flood ? "var(--bad)" : "var(--good)"}">${esc(p.flood || "None found")}</b></div><div><span>Slope</span><b>${p.slope && !p.slope.error ? esc(p.slope.class) + " · " + p.slope.fall_m + " m fall" : "Unknown"}</b></div>
-      </div></section>
+        <div><span>Flood</span><b style="color:${p.flood ? (/^Not checked/.test(p.flood) ? "inherit" : "var(--bad)") : "var(--good)"}">${esc(p.flood || "None found")}</b></div><div><span>Slope</span><b>${p.slope && !p.slope.error ? esc(p.slope.class) + " · " + p.slope.fall_m + " m fall" : "Unknown"}</b></div>
+        <div><span>On market</span><b>${domText(domOf(p))}</b>${p.on_market_since || p.listed ? `<small class="muted" style="display:block;font-size:12px">since ${esc(p.on_market_since || p.listed)}${p.on_market_since ? " (incl. earlier listings)" : ""}</small>` : ""}</div>
+      </div>${p.checks_pending ? `<p class="muted" style="font-size:13px;margin:12px 0 0">Site checks pending: zoning, title, flood, schools and services haven't been checked for this site yet. They're added in a coming daily run.</p>` : ""}</section>
       <section class="panel"><h2>Development potential</h2>${p.dev_angle ? `<div class="angle"><b>Development angle</b>${esc(p.dev_angle)}</div>` : ""}${p.why ? `<p>${esc(p.why)}</p>` : ""}
         ${(p.flags || []).length ? `<ul class="flags">${p.flags.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
         <p style="margin:14px 0 0"><a class="btn primary sm" href="#/feas/${encodeURIComponent(p.id)}">Feasibility study from the LIM →</a></p></section>
@@ -721,7 +734,7 @@ function sitePage(id) {
         ["Beside walkway", isNum(l.path_frontage_m) ? `${l.path_frontage_m} m${typeof l.path_names === "string" && l.path_names ? " · " + esc(l.path_names) : ""}` : null], ["Access width", l.access_width_m != null ? l.access_width_m + " m" : null], ["Driveway rule", esc(l.driveway_rule)],
         ["Title (LINZ)", esc(p.title_estate || p.title)], ["Cladding", c ? esc((c.cladding || []).join(", ") || "Not stated") : null], ["Roof", c ? esc((c.roof || []).join(", ") || "Not stated") : null],
         ["Building risk", c ? esc(c.risk) + ((c.issues || []).length ? " · " + esc(c.issues.join("; ")) : "") : null]])}</section>
-      <section class="panel"><h2>Schools</h2>${schoolRows ? `<table class="sch"><thead><tr><th>Zone</th><th>School</th><th>Rating</th><th>Results</th></tr></thead><tbody>${schoolRows}</tbody></table>` : `<p class="muted">No school zones found.</p>`}
+      <section class="panel"><h2>Schools</h2>${schoolRows ? `<table class="sch"><thead><tr><th>Zone</th><th>School</th><th>Rating</th><th>Results</th></tr></thead><tbody>${schoolRows}</tbody></table>` : `<p class="muted">${p.checks_pending ? "Not checked yet." : "No school zones found."}</p>`}
         ${topZones(p).map(z => `<p style="margin:12px 0 0"><span class="chip good">Top-10 zone</span> ${esc(z.name)} (NCEA L3 ${z.ncea_l3_pct}%)</p>`).join("")}</section>
       <section class="panel"><h2>Services, hazards and neighbourhood</h2>${dl([
         ["Wastewater", svc(p.services?.wastewater)], ["Stormwater", svc(p.services?.stormwater)], ["Flood", esc(p.flood || "No flood overlay on the site")],
@@ -739,7 +752,7 @@ function sitePage(id) {
     </div>
     <div class="sticky"><div class="pmap" id="pmap"></div>
       <section class="panel" style="margin-top:18px"><h2>Location</h2>${dl([["To the CBD", t.cbd_km != null ? t.cbd_km + " km" : null], ["Nearest train", t.train ? esc(t.train.name) + " · " + dist(t.train.distance_m) : null],
-        ["Nearest bus stop", t.bus && t.bus.distance_m != null ? dist(t.bus.distance_m) : "None within 800 m"], ["Motorway on-ramp", p.motorway?.on_ramp ? p.motorway.on_ramp.distance_km + " km" : null]])}</section></div>
+        ["Nearest bus stop", t.bus && t.bus.distance_m != null ? dist(t.bus.distance_m) : p.transport ? "None within 800 m" : null], ["Motorway on-ramp", p.motorway?.on_ramp ? p.motorway.on_ramp.distance_km + " km" : null]])}</section></div>
     </div></div>`;
   if (p.lat) {
     const m = makeMap($("#pmap"), { aerialFirst: true });
