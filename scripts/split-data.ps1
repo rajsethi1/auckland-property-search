@@ -19,7 +19,7 @@ function SlimSchools($list) { @(@($list) | Where-Object { $_ } | ForEach-Object 
 function Num($v) { if ($v -is [ValueType]) { $v } else { $null } }
 
 $keep = 'id', 'address', 'suburb', 'district', 'lat', 'lon', 'status', 'label', 'score', 'price_text', 'price_used', 'land_m2', 'beds',
-        'zone', 'title', 'flood', 'sale_type', 'ptype', 'url', 'starred'
+        'zone', 'title', 'flood', 'sale_type', 'ptype', 'url', 'starred', 'checks_pending', 'listed', 'on_market_since'
 $slim = New-Object Collections.Generic.List[object]
 $parts = @{}; for ($i = 0; $i -lt 64; $i++) { $parts[$i] = [ordered]@{} }
 foreach ($p in @($d.shortlist)) {
@@ -27,6 +27,8 @@ foreach ($p in @($d.shortlist)) {
     $parts[(Bucket "$($p.id)")]["$($p.id)"] = $p
     $s = [ordered]@{}
     foreach ($k in $keep) { if ($null -ne $p.$k) { $s[$k] = $p.$k } }
+    # ~1 m is plenty for the list and map (full precision stays in the detail part).
+    foreach ($k in 'lat', 'lon') { if ($s[$k] -is [ValueType]) { $s[$k] = [math]::Round([double]$s[$k], 5) } }
     if ($p.pricing) { $s.pricing = [ordered]@{ expected = Num $p.pricing.expected; low_case = Num $p.pricing.low_case } }
     if ($p.numbers) { $s.numbers = [ordered]@{ weekly_rent = Num $p.numbers.weekly_rent } }
     if ($p.growth) { $s.growth = [ordered]@{ outlook_5y_pct = Num $p.growth.outlook_5y_pct } }

@@ -74,7 +74,7 @@ function Row($p) {
 $rowHead = '<table border="1" cellpadding="4" cellspacing="0"><tr><th>Score</th><th>Address (listing)</th><th>Expected price</th><th>Land / zone</th><th>To CBD</th><th>Nearest train</th><th>Secondary school</th><th>State housing</th><th>Flood</th><th>Slope</th><th>Sale type</th><th>5-yr growth</th></tr>'
 
 # The page lists everything; the email sticks to sites that pass your rules and are at most 15% over budget.
-$sl = @($run.shortlist | Where-Object { -not @($_.rule_fails | Where-Object { $_ }).Count -and $_.pricing.expected -le 1100000 * 1.15 })
+$sl = @($run.shortlist | Where-Object { -not $_.checks_pending -and -not @($_.rule_fails | Where-Object { $_ }).Count -and $_.pricing.expected -le 1100000 * 1.15 })
 $detail = @($sl | Where-Object { $_.label -ne 'Marginal' } | Select-Object -First $Detailed)
 $rest = @($sl | Where-Object { $detail -notcontains $_ })
 $inBudget = @($detail | Where-Object { $_.pricing.expected -le 1100000 })

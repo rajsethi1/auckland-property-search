@@ -200,7 +200,8 @@ foreach ($p in $run.shortlist) {
     $sMat = switch ($p.construction.risk) { 'High' { -5 } 'Medium' { -2 } default { 0 } }
     # Flood and state-housing concentration are shown, not hidden, but cost points.
     $sh = "$($p.state_housing.level)"
-    $penalty = 3 * @($p.flags).Count + $(if ($p.flood -match 'plain|prone|hazard|management') { 6 } else { 0 }) + $(switch ($sh) { 'High' { 8 } 'Medium' { 3 } default { 0 } })
+    # The time-on-market flag is information only and costs no points.
+    $penalty = 3 * @(@($p.flags) | Where-Object { "$_" -notmatch '^On the market over' }).Count + $(if ($p.flood -match 'plain|prone|hazard|management') { 6 } else { 0 }) + $(switch ($sh) { 'High' { 8 } 'Medium' { 3 } default { 0 } })
     # High-voltage lines: over the site or in the grid corridor limits where you can build.
     $penalty += switch ("$($p.power_lines.level)") { 'Over site' { 10 } 'In grid corridor' { 8 } 'Within 40 m' { 3 } default { 0 } }
     $raw = $sZone + $sLand + $sPrice + $sSchool + $sLv + $sServices + $sCbd + $sTrain + $sBus + $sGrowth + $sSlope + $sSale + $sLand2 + $sMw + $sMat - $penalty
