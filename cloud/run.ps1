@@ -1,4 +1,4 @@
-<#
+﻿<#
   The daily cloud run (GitHub Actions, Windows PowerShell 5.1):
     1. pull the hunt's state (seen listings, site-check cache, market data, last report) from Hostinger by FTP
        — on the very first run, from this repo's seed-state folder instead;
@@ -33,7 +33,12 @@ $seedDir = if ($CHC) { "$repo\seed-state-chc" } else { "$repo\seed-state" }
 # Encrypted FTP (FTPS). Hostinger's certificate names its server, not the IP, so if it can't be verified (curl 60)
 # keep the encryption but skip the name check.
 $tls = @('--ssl-reqd')
-& curl.exe -s @tls -l -u $cred "$ftp/" -o NUL
+# Hostinger's FTP sometimes doesn't answer for a while (curl 28 = timed out): try up to 5 times over ~5 minutes.
+for ($try = 1; $try -le 5; $try++) {
+    & curl.exe -s @tls --connect-timeout 30 -l -u $cred "$ftp/" -o NUL
+    if ($LASTEXITCODE -notin 7, 28) { break }
+    "FTP didn't answer (curl $LASTEXITCODE), try $try of 5; waiting a minute"; if ($try -lt 5) { Start-Sleep -Seconds 60 }
+}
 if ($LASTEXITCODE -eq 60) {
     "FTPS certificate doesn't match '$hostName': connecting encrypted without the certificate name check"
     $tls = @('--ssl-reqd', '--insecure')
