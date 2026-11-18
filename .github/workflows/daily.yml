@@ -1,4 +1,4 @@
-name: Daily property hunt
+﻿name: Daily property hunt
 
 on:
   schedule:
@@ -41,6 +41,7 @@ jobs:
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
           WEEKLY: ${{ github.event.inputs.weekly }}
         run: powershell -NoProfile -ExecutionPolicy Bypass -File cloud\run.ps1
       - name: Hand the files to the upload job
