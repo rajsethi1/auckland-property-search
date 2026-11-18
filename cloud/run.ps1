@@ -174,8 +174,12 @@ if (-not $CHC -and $env:SMTP_HOST -and $env:SMTP_USER -and $env:SMTP_PASS -and (
     $cfg = [IO.File]::ReadAllText("$root\config.json", $utf8) | ConvertFrom-Json
     $pw = ConvertTo-SecureString $env:SMTP_PASS -AsPlainText -Force
     $c = New-Object Management.Automation.PSCredential($env:SMTP_USER, $pw)
+    # Recipients: the EMAIL_TO secret (comma-separated) keeps the addresses out of the public repo and logs;
+    # without it, the saved config's email_to.
+    $to = if ($env:EMAIL_TO) { @($env:EMAIL_TO -split '[,;\s]+' | Where-Object { $_ }) } else { @($cfg.email_to) }
     $summary = ([IO.File]::ReadAllText("$root\reports\$Date.json", $utf8) | ConvertFrom-Json).summary
-    Send-MailMessage -SmtpServer $env:SMTP_HOST -Port 587 -UseSsl -Credential $c -From $env:SMTP_USER -To @($cfg.email_to) `
+    if (-not $to.Count) { 'Email skipped (no recipients: add the EMAIL_TO secret)' } else {
+    Send-MailMessage -SmtpServer $env:SMTP_HOST -Port 587 -UseSsl -Credential $c -From $env:SMTP_USER -To $to `
         -Subject "Auckland sites $Date - $summary" -Body ([IO.File]::ReadAllText($mail, $utf8)) -BodyAsHtml -Encoding UTF8
-    "Email sent to $(@($cfg.email_to) -join ', ')"
+    "Email sent to $($to.Count) recipient(s)" }
 } else { 'Email skipped (no SMTP settings)' }
