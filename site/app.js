@@ -539,10 +539,7 @@ function search(params) {
   const zonesList = [...new Set(S.sites.map(p => zoneShort(p.zone)))].sort();
   $("#app").innerHTML = `
   <div class="fbar"><div class="container">
-    <label class="fsearch"><span aria-hidden="true">⌕</span><input id="fq" type="search" placeholder="Address or suburb" aria-label="Search an address or suburb" value="${esc(Q)}" autocomplete="off"></label>
-    <select class="fsel desk" id="f-pmin" aria-label="Minimum price">${opts([["", "Min price"], ...PRICE_STEPS.map(v => [v, k(v)])], F.pmin)}</select>
-    <select class="fsel desk" id="f-pmax" aria-label="Maximum price">${opts([["", "Max price"], ...PRICE_STEPS.map(v => [v, k(v)])], F.pmax)}</select>
-    <button class="fsel desk" id="f-zone" type="button" aria-label="Zones">Any zone</button>
+    <label class="fsearch"><span aria-hidden="true">⌕</span><input id="fq" type="search" placeholder="Address or suburb" aria-label="Search an address or suburb" value="${esc(Q)}" autocomplete="off"><button class="fclear" id="fqx" type="button" aria-label="Clear search" title="Clear search"${Q ? "" : " hidden"}>&times;</button></label>
     <button class="btn sm" id="moreF" type="button">Filters</button>
     <button class="btn sm" id="saveS" type="button" hidden>Save search</button><select class="fsel" id="mySel" aria-label="Saved searches" hidden></select>
     <button class="btn sm viewtoggle" id="vt" type="button">Map</button>
@@ -556,11 +553,9 @@ function search(params) {
   </div>`;
   sMap = makeMap($("#smap")); lastSig = ""; shown = 24;
   initSplitBar();
-  const bind = (id, key) => $(id).addEventListener("change", e => { F[key] = e.target.value; saveF(); renderResults(); });
-  bind("#f-pmin", "pmin"); bind("#f-pmax", "pmax");
-  $("#f-zone").addEventListener("click", () => { openDrawer(); $(".drawer [data-mseg=zone]")?.closest(".fgroup").scrollIntoView({ block: "start" }); });
   $("#f-sort").addEventListener("change", e => { SORT = e.target.value; ls.set("aps-sort", SORT); renderResults(); });
-  $("#fq").addEventListener("input", e => { Q = e.target.value; renderResults(); });
+  $("#fq").addEventListener("input", e => { Q = e.target.value; $("#fqx").hidden = !Q; renderResults(); });
+  $("#fqx").addEventListener("click", () => { Q = ""; $("#fq").value = ""; $("#fqx").hidden = true; renderResults(); $("#fq").focus(); });
   $("#moreF").addEventListener("click", openDrawer);
   $("#saveS").addEventListener("click", saveSearch);
   $("#mySel").addEventListener("change", e => { const v = e.target.value; e.target.value = ""; if (v.startsWith("del:")) deleteSearch(v.slice(4)); else if (v) applySearch(v); });
@@ -598,8 +593,6 @@ function renderResults(resetPaging = true) {
   const sig = JSON.stringify([F, Q, SORT]);
   if (resetPaging && sig !== lastSig) shown = 24;
   const n = activeCount(); $("#moreF").textContent = n ? `Filters (${n})` : "Filters";
-  [["#f-pmin", "pmin"], ["#f-pmax", "pmax"]].forEach(([s, key]) => { $(s).value = F[key]; $(s).classList.toggle("on", !!F[key]); });
-  $("#f-zone").textContent = !F.zone.length ? "Any zone" : F.zone.length === 1 ? F.zone[0] : `${F.zone.length} zones`; $("#f-zone").classList.toggle("on", !!F.zone.length);
   const area = F.subs.length ? (Object.entries(S.subs).find(([, list]) => list.length === F.subs.length && list.every(s => F.subs.includes(norm(s))))?.[0] || `${F.subs.length} suburbs`) : C().name;
   $("#rtitle").textContent = Q ? `Results for "${Q}"` : `${items.length.toLocaleString()} site${items.length === 1 ? "" : "s"} in ${area}`;
   $("#rsub").textContent = Q ? `${items.length} match across all ${S.sites.length} sites (other filters paused while searching)` : SORTS[SORT][0];
@@ -644,7 +637,7 @@ function openDrawer() {
   <aside class="drawer" role="dialog" aria-label="Filters"><header><h2>Filters</h2><button class="btn sm" type="button" data-close>Close</button></header>
   <div class="body">
     <div class="fgroup"><h3>Area</h3><input type="search" id="dq" placeholder="Find a suburb"><div class="dlist">${area}</div></div>
-    <div class="fgroup mob"><h3>Price</h3><div class="row2"><label class="f">From${sel("pmin", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label><label class="f">Up to${sel("pmax", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label></div></div>
+    <div class="fgroup"><h3>Price</h3><div class="row2"><label class="f">From${sel("pmin", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label><label class="f">Up to${sel("pmax", [["", "Any"], ...PRICE_STEPS.map(v => [v, k(v)])])}</label></div></div>
     <div class="fgroup"><h3>Zone <small class="muted">(pick any number)</small></h3>${zoneGroups(mseg)}</div>
     <div class="fgroup"><h3>Property type</h3>${mseg("ptype", [["House", "House"], ["Townhouse", "Townhouse"], ["Unit", "Unit"], ["Apartment", "Apartment"], ["Section", "Section"]])}</div>
     <div class="fgroup"><h3>Land size from</h3>${seg("lmin", [["", "Any"], ["300", "300 m²+"], ["400", "400 m²+"], ["500", "500 m²+"], ["600", "600 m²+"], ["800", "800 m²+"], ["1000", "1000 m²+"]])}</div>

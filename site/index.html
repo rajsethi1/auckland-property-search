@@ -121,6 +121,10 @@ h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 1.15; le
 .fbar .container { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 10px; padding-bottom: 10px }
 .fsearch { flex: 1 1 240px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 0 14px; min-width: 200px }
 .fsearch input { border: 0; outline: 0; padding: 9px 0; flex: 1; min-width: 0; background: transparent }
+.fsearch input::-webkit-search-cancel-button { display: none }
+.fclear { border: 0; background: var(--soft); color: var(--muted); width: 22px; height: 22px; border-radius: 50%; font-size: 16px; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0; flex: none }
+.fclear:hover { background: var(--line); color: var(--ink) }
+.fclear[hidden] { display: none }
 .fsel { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 12px; font-size: 13.5px; font-weight: 600; cursor: pointer; max-width: 190px }
 .fsel.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft) }
 .split { display: grid; grid-template-columns: minmax(0, var(--lw, 1fr)) minmax(0, 1fr); height: calc(100vh - 64px - 58px); position: relative }
@@ -323,6 +327,6 @@ footer.site p { margin: 6px 0; max-width: 900px }
 <div class="savemenu" id="savemenu" role="dialog" aria-label="Save to a list" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
-<script src="app.js?v=12"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>
