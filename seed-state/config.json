@@ -1,8 +1,7 @@
-{
+﻿{
     "report_url":  "https://claude.ai/artifact/MC1xpPsDEiahT4y1nzQs6V",
     "email_to":  [
-                     "rajs@virtualbuild.co.nz",
-                     "vanessa.mingming@gmail.com"
+
                  ],
     "max_price":  1100000,
     "ideal_high":  900000,
