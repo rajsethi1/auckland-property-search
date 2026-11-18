@@ -38,10 +38,6 @@ jobs:
           FTP_SITE_DIR: ${{ vars.FTP_SITE_DIR }}
           FTP_STATE_DIR: ${{ vars.FTP_STATE_DIR }}
           SITE_URL: ${{ vars.SITE_URL }}
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          EMAIL_TO: ${{ secrets.EMAIL_TO }}
           WEEKLY: ${{ github.event.inputs.weekly }}
         run: powershell -NoProfile -ExecutionPolicy Bypass -File cloud\run.ps1
       - name: Hand the files to the upload job
