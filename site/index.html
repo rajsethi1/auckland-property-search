@@ -123,7 +123,12 @@ h1, h2, h3, h4 { font-family: var(--f-display); margin: 0; line-height: 1.15; le
 .fsearch input { border: 0; outline: 0; padding: 9px 0; flex: 1; min-width: 0; background: transparent }
 .fsel { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 12px; font-size: 13.5px; font-weight: 600; cursor: pointer; max-width: 190px }
 .fsel.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft) }
-.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); height: calc(100vh - 64px - 58px) }
+.split { display: grid; grid-template-columns: minmax(0, var(--lw, 1fr)) minmax(0, 1fr); height: calc(100vh - 64px - 58px); position: relative }
+.splitbar { position: absolute; top: 0; bottom: 0; left: var(--lw, 50%); width: 12px; margin-left: -6px; z-index: 6; cursor: col-resize; touch-action: none; display: grid; place-items: center }
+.splitbar::after { content: ""; width: 4px; height: 44px; border-radius: 4px; background: var(--line); box-shadow: 0 0 0 1px #fff }
+.splitbar:hover::after, .splitbar:focus-visible::after, .split.dragging .splitbar::after { background: var(--accent) }
+.split.dragging { cursor: col-resize; user-select: none }
+.split.dragging .mapcol { pointer-events: none }
 .results { overflow-y: auto; padding: 18px 20px 40px }
 .results .rhead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px }
 .rtools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px }
@@ -144,6 +149,7 @@ body.mapfull-on :has(.mapfull) { z-index: auto !important; transform: none !impo
 .viewtoggle { display: none }
 @media (max-width: 900px) {
   .split { grid-template-columns: 1fr; height: auto }
+  .splitbar { display: none }
   .results { overflow: visible }
   .mapcol { height: calc(100vh - 64px - 110px); border-left: 0 }
   .split.show-map .results, .split:not(.show-map) .mapcol { display: none }
@@ -317,6 +323,6 @@ footer.site p { margin: 6px 0; max-width: 900px }
 <div class="savemenu" id="savemenu" role="dialog" aria-label="Save to a list" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js"></script>
-<script src="app.js?v=11"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>

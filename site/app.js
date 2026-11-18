@@ -551,9 +551,11 @@ function search(params) {
     <div class="results"><div class="rhead"><div><h1 id="rtitle"></h1><p id="rsub"></p></div>
       <div class="rtools"><label class="sortby">Sort by <select class="fsel" id="f-sort">${opts(Object.entries(SORTS).map(([key, v]) => [key, v[0]]), SORT)}</select></label><button class="btn sm" id="clearF" type="button">Clear filters</button></div></div>
       <div class="grid" id="grid"></div><button class="btn more" id="moreBtn" type="button" hidden></button></div>
+    <div class="splitbar" id="splitbar" role="separator" aria-orientation="vertical" aria-label="Drag to resize the list and map" tabindex="0" title="Drag to resize; double-click to reset"></div>
     <div class="mapcol"><div class="map" id="smap"></div></div>
   </div>`;
   sMap = makeMap($("#smap")); lastSig = ""; shown = 24;
+  initSplitBar();
   const bind = (id, key) => $(id).addEventListener("change", e => { F[key] = e.target.value; saveF(); renderResults(); });
   bind("#f-pmin", "pmin"); bind("#f-pmax", "pmax");
   $("#f-zone").addEventListener("click", () => { openDrawer(); $(".drawer [data-mseg=zone]")?.closest(".fgroup").scrollIntoView({ block: "start" }); });
@@ -569,6 +571,21 @@ function search(params) {
   $("#grid").addEventListener("mouseover", e => { const c = e.target.closest(".card"); hiMarker(c?.dataset.id); });
   $("#grid").addEventListener("mouseleave", () => hiMarker(null));
   renderResults();
+}
+// Draggable divider between the list and the map (desktop); the list width is remembered per browser.
+function initSplitBar() {
+  const split = $("#split"), bar = $("#splitbar"); if (!split || !bar) return;
+  const set = pct => { pct = Math.min(80, Math.max(20, pct)); split.style.setProperty("--lw", pct + "%"); bar.setAttribute("aria-valuenow", Math.round(pct)); return pct; };
+  let pct = set(ls.get("aps-split", 50)), raf = 0;
+  const fit = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; sMap?.invalidateSize(); }); };
+  bar.addEventListener("pointerdown", e => {
+    e.preventDefault(); bar.setPointerCapture(e.pointerId); split.classList.add("dragging");
+    const move = ev => { const r = split.getBoundingClientRect(); pct = set((ev.clientX - r.left) / r.width * 100); fit(); };
+    const up = () => { bar.removeEventListener("pointermove", move); bar.removeEventListener("pointerup", up); bar.removeEventListener("pointercancel", up); split.classList.remove("dragging"); ls.set("aps-split", pct); sMap?.invalidateSize(); };
+    bar.addEventListener("pointermove", move); bar.addEventListener("pointerup", up); bar.addEventListener("pointercancel", up);
+  });
+  bar.addEventListener("dblclick", () => { pct = set(50); ls.set("aps-split", pct); sMap?.invalidateSize(); });
+  bar.addEventListener("keydown", e => { const d = e.key === "ArrowLeft" ? -5 : e.key === "ArrowRight" ? 5 : 0; if (!d) return; e.preventDefault(); pct = set(pct + d); ls.set("aps-split", pct); sMap?.invalidateSize(); });
 }
 let hiId = null;
 function hiMarker(id) {
